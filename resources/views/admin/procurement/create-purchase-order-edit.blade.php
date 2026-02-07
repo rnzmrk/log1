@@ -214,7 +214,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
                     <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                        <span class="text-gray-900 font-medium text-lg">${{ number_format($purchaseOrder->total_amount, 2) }}</span>
+                        <span class="text-gray-900 font-medium text-lg">₱{{ number_format($purchaseOrder->total_amount, 2) }}</span>
                     </div>
                     <p class="mt-1 text-sm text-gray-500">Auto-calculated: Subtotal + Tax + Shipping</p>
                 </div>

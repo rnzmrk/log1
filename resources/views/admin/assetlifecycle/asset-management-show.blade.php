@@ -170,7 +170,7 @@
                             <p class="text-sm text-gray-600">Purchase Cost</p>
                             <p class="font-semibold text-gray-900">
                                 @if ($asset->purchase_cost)
-                                    ${{ number_format($asset->purchase_cost, 2) }}
+                                    ₱{{ number_format($asset->purchase_cost, 2) }}
                                 @else
                                     Not specified
                                 @endif

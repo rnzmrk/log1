@@ -111,12 +111,9 @@
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required>
                                     <option value="">Select Type</option>
-                                    <option value="Construction" {{ old('project_type') === 'Construction' ? 'selected' : '' }}>Construction</option>
-                                    <option value="Renovation" {{ old('project_type') === 'Renovation' ? 'selected' : '' }}>Renovation</option>
-                                    <option value="Maintenance" {{ old('project_type') === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
-                                    <option value="Installation" {{ old('project_type') === 'Installation' ? 'selected' : '' }}>Installation</option>
-                                    <option value="Inspection" {{ old('project_type') === 'Inspection' ? 'selected' : '' }}>Inspection</option>
-                                    <option value="Other" {{ old('project_type') === 'Other' ? 'selected' : '' }}>Other</option>
+                                    @foreach(config('categories.project_types') as $type)
+                                        <option value="{{ $type }}" {{ old('project_type') === $type ? 'selected' : '' }}>{{ $type }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div>
@@ -126,10 +123,9 @@
                                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         required>
                                     <option value="">Select Priority</option>
-                                    <option value="Low" {{ old('priority') === 'Low' ? 'selected' : '' }}>Low</option>
-                                    <option value="Medium" {{ old('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
-                                    <option value="High" {{ old('priority') === 'High' ? 'selected' : '' }}>High</option>
-                                    <option value="Critical" {{ old('priority') === 'Critical' ? 'selected' : '' }}>Critical</option>
+                                    @foreach(config('categories.priorities') as $priority)
+                                        <option value="{{ $priority }}" {{ old('priority') === $priority ? 'selected' : '' }}>{{ $priority }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>

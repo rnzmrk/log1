@@ -99,7 +99,7 @@
                         @if ($inventory->price)
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Unit Price</label>
-                            <p class="text-gray-900">${{ number_format($inventory->price, 2) }}</p>
+                            <p class="text-gray-900">₱{{ number_format($inventory->price, 2) }}</p>
                         </div>
                         @endif
                     </div>

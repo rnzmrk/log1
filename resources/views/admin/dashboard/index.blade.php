@@ -1,31 +1,48 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
-    {{-- Breadcrumb --}}
-    <nav class="flex items-center space-x-2 text-sm text-gray-600">
-        <a href="#" class="hover:text-blue-600 transition-colors">Home</a>
-        <i class='bx bx-chevron-right text-xs'></i>
-        <a href="#" class="hover:text-blue-600 transition-colors">Logistics Dashboard</a>
-        <i class='bx bx-chevron-right text-xs'></i>
-        <span class="text-gray-900 font-medium">Warehouse Analytics</span>
-    </nav>
+{{-- Success Messages --}}
+@if(session('success'))
+    <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center">
+        <i class='bx bx-check-circle text-green-500 text-xl mr-3'></i>
+        <div>
+            <p class="text-green-800 font-medium">Success!</p>
+            <p class="text-green-600 text-sm">{{ session('success') }}</p>
+        </div>
+    </div>
+@endif
 
-    {{-- Page Title --}}
-    <div>
-        <h1 class="text-3xl font-bold text-gray-900">Warehouse Analytics</h1>
-        <p class="text-gray-600 mt-1">Monitor your warehouse performance and metrics</p>
+<div class="space-y-6">
+    {{-- Header with User Info and Logout --}}
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p class="text-gray-600 mt-1">Welcome back, {{ $user->name }}!</p>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="text-right">
+                <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
+                <p class="text-sm text-gray-500">{{ $user->email }}</p>
+            </div>
+            <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Are you sure you want to logout?')">
+                @csrf
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+                    <i class='bx bx-log-out'></i>
+                    <span>Logout</span>
+                </button>
+            </form>
+        </div>
     </div>
 
     {{-- Stats Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {{-- Total Stock Items --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {{-- Total Inventory --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total Stock Items</p>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">141</p>
-                    <p class="text-sm text-gray-500 mt-1">+12% from last month</p>
+                    <p class="text-sm font-medium text-gray-600">Total Inventory</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['total_inventory'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Items in stock</p>
                 </div>
                 <div class="bg-blue-100 rounded-lg p-3">
                     <i class='bx bx-package text-blue-600 text-2xl'></i>
@@ -34,43 +51,102 @@
         </div>
 
         {{-- Low Stock Alerts --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Low Stock Alerts</p>
-                    <p class="text-3xl font-bold text-orange-600 mt-2">1</p>
-                    <p class="text-sm text-gray-500 mt-1">Needs attention</p>
+                    <p class="text-3xl font-bold text-red-600 mt-2">{{ $stats['low_stock_items'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Need restocking</p>
                 </div>
-                <div class="bg-orange-100 rounded-lg p-3">
-                    <i class='bx bx-error text-orange-600 text-2xl'></i>
+                <div class="bg-red-100 rounded-lg p-3">
+                    <i class='bx bx-error-circle text-red-600 text-2xl'></i>
                 </div>
             </div>
         </div>
 
-        {{-- Incoming Shipments --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {{-- Inbound Shipments --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Incoming Shipments</p>
-                    <p class="text-3xl font-bold text-green-600 mt-2">4</p>
-                    <p class="text-sm text-gray-500 mt-1">Expected today</p>
+                    <p class="text-sm font-medium text-gray-600">Inbound Shipments</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['inbound_shipments'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">{{ $stats['pending_inbound'] }} pending</p>
                 </div>
                 <div class="bg-green-100 rounded-lg p-3">
-                    <i class='bx bx-down-arrow-alt text-green-600 text-2xl'></i>
+                    <i class='bx bx-down-arrow-circle text-green-600 text-2xl'></i>
                 </div>
             </div>
         </div>
 
-        {{-- Outgoing Shipments --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        {{-- Outbound Shipments --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Outgoing Shipments</p>
-                    <p class="text-3xl font-bold text-purple-600 mt-2">34</p>
-                    <p class="text-sm text-gray-500 mt-1">In progress</p>
+                    <p class="text-sm font-medium text-gray-600">Outbound Shipments</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['outbound_shipments'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">{{ $stats['pending_outbound'] }} pending</p>
                 </div>
                 <div class="bg-purple-100 rounded-lg p-3">
-                    <i class='bx bx-up-arrow-alt text-purple-600 text-2xl'></i>
+                    <i class='bx bx-up-arrow-circle text-purple-600 text-2xl'></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Additional Stats Row --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {{-- Active Suppliers --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Active Suppliers</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['active_suppliers'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">of {{ $stats['total_suppliers'] }} total</p>
+                </div>
+                <div class="bg-indigo-100 rounded-lg p-3">
+                    <i class='bx bx-building text-indigo-600 text-2xl'></i>
+                </div>
+            </div>
+        </div>
+
+        {{-- Pending Posts --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Pending Posts</p>
+                    <p class="text-3xl font-bold text-orange-600 mt-2">{{ $stats['pending_posts'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Need review</p>
+                </div>
+                <div class="bg-orange-100 rounded-lg p-3">
+                    <i class='bx bx-file text-orange-600 text-2xl'></i>
+                </div>
+            </div>
+        </div>
+
+        {{-- Asset Requests --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Asset Requests</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['asset_requests'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">{{ $stats['pending_asset_requests'] }} pending</p>
+                </div>
+                <div class="bg-teal-100 rounded-lg p-3">
+                    <i class='bx bx-cube text-teal-600 text-2xl'></i>
+                </div>
+            </div>
+        </div>
+
+        {{-- Total Users --}}
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">Total Users</p>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['total_users'] }}</p>
+                    <p class="text-sm text-gray-500 mt-1">Registered users</p>
+                </div>
+                <div class="bg-pink-100 rounded-lg p-3">
+                    <i class='bx bx-user text-pink-600 text-2xl'></i>
                 </div>
             </div>
         </div>
@@ -104,56 +180,51 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Activities</h3>
             <div class="space-y-4">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-green-100 rounded-full p-2">
-                        <i class='bx bx-check text-green-600 text-sm'></i>
+                @forelse($recentActivities as $activity)
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-{{ $activity['color'] }}-100 rounded-full p-2">
+                            <i class='bx {{ $activity['icon'] }} text-{{ $activity['color'] }}-600 text-sm'></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-900">{{ $activity['message'] }}</p>
+                            <p class="text-xs text-gray-500">{{ $activity['time'] }}</p>
+                        </div>
                     </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-900">Shipment #1234 received</p>
-                        <p class="text-xs text-gray-500">10 minutes ago</p>
+                @empty
+                    <div class="text-center py-8">
+                        <i class='bx bx-time text-4xl text-gray-300 mb-3'></i>
+                        <p class="text-gray-500">No recent activities</p>
                     </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div class="bg-blue-100 rounded-full p-2">
-                        <i class='bx bx-package text-blue-600 text-sm'></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-900">New inventory added</p>
-                        <p class="text-xs text-gray-500">1 hour ago</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div class="bg-orange-100 rounded-full p-2">
-                        <i class='bx bx-truck text-orange-600 text-sm'></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm text-gray-900">Order #5678 shipped</p>
-                        <p class="text-xs text-gray-500">2 hours ago</p>
-                    </div>
-                </div>
+                @endforelse
             </div>
         </div>
 
-        {{-- Quick Actions --}}
+        {{-- Top Suppliers --}}
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div class="grid grid-cols-2 gap-3">
-                <button class="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class='bx bx-plus-circle text-blue-600 text-xl mb-2'></i>
-                    <p class="text-sm font-medium text-gray-900">New Shipment</p>
-                </button>
-                <button class="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class='bx bx-search text-green-600 text-xl mb-2'></i>
-                    <p class="text-sm font-medium text-gray-900">Track Order</p>
-                </button>
-                <button class="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class='bx bx-file text-orange-600 text-xl mb-2'></i>
-                    <p class="text-sm font-medium text-gray-900">Generate Report</p>
-                </button>
-                <button class="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <i class='bx bx-cog text-purple-600 text-xl mb-2'></i>
-                    <p class="text-sm font-medium text-gray-900">Settings</p>
-                </button>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Suppliers</h3>
+            <div class="space-y-3">
+                @forelse($topSuppliers as $supplier)
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-100 rounded-full p-2">
+                                <i class='bx bx-building text-indigo-600 text-sm'></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ $supplier->name }}</p>
+                                <p class="text-xs text-gray-500">{{ $supplier->posts_count }} posts</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-900">{{ $supplier->posts_count }}</p>
+                            <p class="text-xs text-gray-500">Posts</p>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-8">
+                        <i class='bx bx-building text-4xl text-gray-300 mb-3'></i>
+                        <p class="text-gray-500">No suppliers found</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>

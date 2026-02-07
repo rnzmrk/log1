@@ -453,77 +453,7 @@
                 </div>
             </div>
 
-            <!-- Available Documents -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Available Documents</h2>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-4">
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium text-gray-900 text-sm">Contracts</h4>
-                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">156 Available</span>
-                            </div>
-                            <p class="text-xs text-gray-600">Vendor and client contracts</p>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium text-gray-900 text-sm">Financial Reports</h4>
-                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">89 Available</span>
-                            </div>
-                            <p class="text-xs text-gray-600">Monthly and annual reports</p>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium text-gray-900 text-sm">Certificates</h4>
-                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">23 Available</span>
-                            </div>
-                            <p class="text-xs text-gray-600">Professional and compliance certificates</p>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <h4 class="font-medium text-gray-900 text-sm">Licenses</h4>
-                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">45 Available</span>
-                            </div>
-                            <p class="text-xs text-gray-600">Business and operational licenses</p>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            <!-- Help & Support -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Help & Support</h2>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-3">
-                        <button class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-help-circle text-blue-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-gray-900 text-sm">Request Guidelines</p>
-                                <p class="text-xs text-gray-600">View policies</p>
-                            </div>
-                        </button>
-                        <button class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-message text-green-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-gray-900 text-sm">Contact Records</p>
-                                <p class="text-xs text-gray-600">Get assistance</p>
-                            </div>
-                        </button>
-                        <a href="{{ route('admin.documenttracking.document-request') }}" class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3 block">
-                            <i class='bx bx-history text-orange-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-gray-900 text-sm">My Previous Requests</p>
-                                <p class="text-xs text-gray-600">View history</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 @endsection

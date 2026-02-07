@@ -132,20 +132,20 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Subtotal</span>
-                            <span class="text-gray-900 font-medium">${{ number_format($purchaseOrder->subtotal, 2) }}</span>
+                            <span class="text-gray-900 font-medium">₱{{ number_format($purchaseOrder->subtotal, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Tax Amount</span>
-                            <span class="text-gray-900 font-medium">${{ number_format($purchaseOrder->tax_amount, 2) }}</span>
+                            <span class="text-gray-900 font-medium">₱{{ number_format($purchaseOrder->tax_amount, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Shipping Cost</span>
-                            <span class="text-gray-900 font-medium">${{ number_format($purchaseOrder->shipping_cost, 2) }}</span>
+                            <span class="text-gray-900 font-medium">₱{{ number_format($purchaseOrder->shipping_cost, 2) }}</span>
                         </div>
                         <div class="border-t border-gray-200 pt-4">
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-semibold text-gray-900">Total Amount</span>
-                                <span class="text-2xl font-bold text-blue-600">${{ number_format($purchaseOrder->total_amount, 2) }}</span>
+                                <span class="text-2xl font-bold text-blue-600">₱{{ number_format($purchaseOrder->total_amount, 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900">${{ number_format($purchaseOrder->total_amount, 2) }}</div>
+                            <div class="text-3xl font-bold text-gray-900">₱{{ number_format($purchaseOrder->total_amount, 2) }}</div>
                             <div class="text-sm text-gray-500 mt-1">Total Value</div>
                         </div>
                         <div class="text-center">

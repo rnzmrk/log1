@@ -4,7 +4,9 @@ namespace App\Http\Controllers\AssetLifecycle;
 
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
+use App\Models\AssetRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AssetManagementController extends Controller
 {
@@ -19,8 +21,9 @@ class AssetManagementController extends Controller
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
-                $q->where('asset_tag', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('asset_name', 'like', '%' . $searchTerm . '%')
+                $q->where('item_number', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_code', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
                   ->orWhere('asset_type', 'like', '%' . $searchTerm . '%')
                   ->orWhere('category', 'like', '%' . $searchTerm . '%')
                   ->orWhere('brand', 'like', '%' . $searchTerm . '%')
@@ -50,6 +53,11 @@ class AssetManagementController extends Controller
             $query->where('department', 'like', '%' . $request->department . '%');
         }
 
+        // Filter by asset type
+        if ($request->filled('asset_type')) {
+            $query->where('asset_type', $request->asset_type);
+        }
+
         $assets = $query->orderBy('created_at', 'desc')->paginate(10);
         
         return view('admin.assetlifecycle.asset-management', compact('assets'));
@@ -68,100 +76,206 @@ class AssetManagementController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'asset_name' => 'required|string|max:255',
-            'asset_type' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'serial_number' => 'nullable|string|max:255',
-            'status' => 'required|in:Available,In Use,Under Maintenance,Retired,Lost,Damaged',
-            'condition' => 'required|in:Excellent,Good,Fair,Poor',
-            'purchase_cost' => 'nullable|numeric|min:0|max:999999999999.99',
+        $request->validate([
+            'item_number' => 'required|string|unique:assets,item_number',
+            'item_code' => 'required|string|unique:assets,item_code',
+            'item_name' => 'required|string',
+            'asset_type' => 'required|string',
+            'category' => 'required|string',
+            'brand' => 'nullable|string',
+            'model' => 'nullable|string',
+            'serial_number' => 'nullable|string',
+            'status' => 'required|string',
+            'condition' => 'required|string',
+            'date' => 'required|date',
+            'purchase_cost' => 'nullable|numeric|min:0',
             'purchase_date' => 'nullable|date',
-            'warranty_expiry' => 'nullable|date|after:purchase_date',
-            'last_maintenance_date' => 'nullable|date',
-            'next_maintenance_date' => 'nullable|date',
-            'assigned_to' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
+            'warranty_expiry' => 'nullable|date',
+            'assigned_to' => 'nullable|string',
+            'department' => 'nullable|string',
+            'location' => 'nullable|string',
             'notes' => 'nullable|string',
             'specifications' => 'nullable|string',
-            'created_by' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Auto-generate asset tag
-        $validated['asset_tag'] = 'AST-' . date('Y') . '-' . str_pad(Asset::count() + 1, 4, '0', STR_PAD_LEFT);
+        $data = $request->except('image');
+        $data['created_by'] = 'System';
 
-        Asset::create($validated);
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->storeAs('assets', $imageName, 'public');
+            $data['image'] = $imageName;
+        }
 
-        return redirect()->route('asset-management.index')
+        Asset::create($data);
+
+        return redirect()->route('admin.assetlifecycle.asset-management')
             ->with('success', 'Asset created successfully.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Asset $asset)
     {
-        $asset = Asset::findOrFail($id);
         return view('admin.assetlifecycle.asset-management-show', compact('asset'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Asset $asset)
     {
-        $asset = Asset::findOrFail($id);
         return view('admin.assetlifecycle.asset-management-edit', compact('asset'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Asset $asset)
     {
-        $asset = Asset::findOrFail($id);
-
-        $validated = $request->validate([
-            'asset_tag' => 'required|string|unique:assets,asset_tag,'.$id,
-            'asset_name' => 'required|string|max:255',
-            'asset_type' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'serial_number' => 'nullable|string|max:255',
-            'status' => 'required|in:Available,In Use,Under Maintenance,Retired,Lost,Damaged',
-            'condition' => 'required|in:Excellent,Good,Fair,Poor',
-            'purchase_cost' => 'nullable|numeric|min:0|max:999999999999.99',
+        $request->validate([
+            'item_number' => 'required|string|unique:assets,item_number,' . $asset->id,
+            'item_code' => 'required|string|unique:assets,item_code,' . $asset->id,
+            'item_name' => 'required|string',
+            'asset_type' => 'required|string',
+            'category' => 'required|string',
+            'brand' => 'nullable|string',
+            'model' => 'nullable|string',
+            'serial_number' => 'nullable|string',
+            'status' => 'required|string',
+            'condition' => 'required|string',
+            'date' => 'required|date',
+            'purchase_cost' => 'nullable|numeric|min:0',
             'purchase_date' => 'nullable|date',
-            'warranty_expiry' => 'nullable|date|after:purchase_date',
-            'last_maintenance_date' => 'nullable|date',
-            'next_maintenance_date' => 'nullable|date',
-            'assigned_to' => 'nullable|string|max:255',
-            'department' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
+            'warranty_expiry' => 'nullable|date',
+            'assigned_to' => 'nullable|string',
+            'department' => 'nullable|string',
+            'location' => 'nullable|string',
             'notes' => 'nullable|string',
             'specifications' => 'nullable|string',
-            'created_by' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $asset->update($validated);
+        $data = $request->except('image');
 
-        return redirect()->route('asset-management.index')
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($asset->image) {
+                Storage::disk('public')->delete('assets/' . $asset->image);
+            }
+
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->storeAs('assets', $imageName, 'public');
+            $data['image'] = $imageName;
+        }
+
+        $asset->update($data);
+
+        return redirect()->route('admin.assetlifecycle.asset-management')
             ->with('success', 'Asset updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $asset = Asset::findOrFail($id);
-        $asset->delete();
+    // public function destroy(Asset $asset)
+    // {
+    //     // Delete functionality removed
+    // }
 
-        return redirect()->route('asset-management.index')
-            ->with('success', 'Asset deleted successfully.');
+    /**
+     * Dispose asset
+     */
+    public function disposeAsset(Request $request, Asset $asset)
+    {
+        $request->validate([
+            'disposal_reason' => 'required|string',
+        ]);
+
+        if ($asset->status === 'Disposed') {
+            return redirect()->back()
+                ->with('error', 'Asset is already disposed.');
+        }
+
+        if (!$asset->canBeDisposed()) {
+            return redirect()->back()
+                ->with('error', 'Asset cannot be disposed. It must be in Poor/Damaged condition or have expired warranty.');
+        }
+
+        $asset->status = 'Disposed';
+        $asset->disposal_reason = $request->disposal_reason;
+        $asset->disposal_date = now();
+        $asset->disposed_by = 'System';
+        $asset->save();
+
+        return redirect()->back()
+            ->with('success', 'Asset disposed successfully.');
+    }
+
+    /**
+     * Get assets that need disposal
+     */
+    public function getAssetsForDisposal()
+    {
+        $assets = Asset::getAssetsForDisposal();
+        return response()->json($assets);
+    }
+
+    /**
+     * Request asset from warehouse
+     */
+    public function requestAsset(Request $request)
+    {
+        $request->validate([
+            'asset_id' => 'required|exists:assets,id',
+            'request_reason' => 'required|string',
+            'department' => 'required|string',
+            'urgency' => 'required|in:Low,Medium,High',
+        ]);
+
+        $asset = Asset::findOrFail($request->asset_id);
+
+        if ($asset->status !== 'Available') {
+            return redirect()->back()
+                ->with('error', 'Only available assets can be requested.');
+        }
+
+        // Create asset request
+        AssetRequest::create([
+            'asset_id' => $asset->id,
+            'asset_name' => $asset->item_name,
+            'asset_code' => $asset->item_code,
+            'request_reason' => $request->request_reason,
+            'department' => $request->department,
+            'urgency' => $request->urgency,
+            'status' => 'Pending',
+            'requested_by' => 'System',
+            'request_date' => now(),
+        ]);
+
+        // Update asset status
+        $asset->status = 'Requested';
+        $asset->save();
+
+        return redirect()->back()
+            ->with('success', 'Asset request sent to warehouse successfully.');
+    }
+
+    /**
+     * Get available assets for request
+     */
+    public function getAvailableAssets()
+    {
+        $assets = Asset::where('status', 'Available')
+            ->orderBy('item_name', 'asc')
+            ->get();
+
+        return response()->json($assets);
     }
 }

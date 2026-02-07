@@ -7,8 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Title --}}
-    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
-    <title>Admin Dashboard</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.jpg') }}">
+    <title>IMARKET - Admin Dashboard</title>
 
     {{-- styles|scripts --}}
     @stack('styles')

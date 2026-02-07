@@ -34,12 +34,46 @@
 
     <!-- Page Header -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Create Purchase Order</h1>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Create Purchase Order</h1>
+            @if($supplyRequest)
+                <p class="text-gray-600 mt-1">Creating PO from Supply Request #{{ $supplyRequest->request_id }}</p>
+            @endif
+        </div>
         <a href="{{ route('admin.procurement.create-purchase-order') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
             <i class='bx bx-arrow-back text-xl'></i>
             Back to Purchase Orders
         </a>
     </div>
+
+    @if($supplyRequest)
+    <!-- Supply Request Information -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center mb-3">
+            <i class='bx bx-info-circle text-blue-600 text-xl mr-2'></i>
+            <h3 class="text-lg font-semibold text-blue-900">Supply Request Information</h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+                <span class="text-sm text-blue-600 font-medium">Request ID:</span>
+                <p class="text-gray-900">{{ $supplyRequest->request_id }}</p>
+            </div>
+            <div>
+                <span class="text-sm text-blue-600 font-medium">Item:</span>
+                <p class="text-gray-900">{{ $supplyRequest->item_name }}</p>
+            </div>
+            <div>
+                <span class="text-sm text-blue-600 font-medium">Quantity:</span>
+                <p class="text-gray-900">{{ $supplyRequest->quantity_approved ?? $supplyRequest->quantity_requested }}</p>
+            </div>
+            <div>
+                <span class="text-sm text-blue-600 font-medium">Total Cost:</span>
+                <p class="text-gray-900">₱{{ number_format($supplyRequest->total_cost, 2) }}</p>
+            </div>
+        </div>
+        <input type="hidden" name="supply_request_id" value="{{ $supplyRequest->id }}">
+    </div>
+    @endif
 
     <!-- Form Container -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -191,7 +225,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
                     <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                        <span class="text-gray-900 font-medium text-lg">$0.00</span>
+                        <span class="text-gray-900 font-medium text-lg">₱0.00</span>
                     </div>
                     <p class="mt-1 text-sm text-gray-500">Auto-calculated: Subtotal + Tax + Shipping</p>
                 </div>

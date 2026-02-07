@@ -180,9 +180,9 @@
                     <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
                         <span class="text-gray-900 font-medium">
                             @if ($supplyRequest->total_cost)
-                                ${{ number_format($supplyRequest->total_cost, 2) }}
+                                ₱{{ number_format($supplyRequest->total_cost, 2) }}
                             @else
-                                $0.00
+                                ₱0.00
                             @endif
                         </span>
                     </div>

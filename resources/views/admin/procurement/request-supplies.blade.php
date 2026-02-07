@@ -88,10 +88,9 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
                     <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">All Categories</option>
-                        <option value="Office Supplies" {{ request('category') === 'Office Supplies' ? 'selected' : '' }}>Office Supplies</option>
-                        <option value="IT Equipment" {{ request('category') === 'IT Equipment' ? 'selected' : '' }}>IT Equipment</option>
-                        <option value="Furniture" {{ request('category') === 'Furniture' ? 'selected' : '' }}>Furniture</option>
-                        <option value="Safety Equipment" {{ request('category') === 'Safety Equipment' ? 'selected' : '' }}>Safety Equipment</option>
+                        @foreach(config('categories.supply_categories') as $category)
+                            <option value="{{ $category }}" {{ request('category') === $category ? 'selected' : '' }}>{{ $category }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -162,7 +161,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                 @if ($request->total_cost)
-                                    ${{ number_format($request->total_cost, 2) }}
+                                    ₱{{ number_format($request->total_cost, 2) }}
                                 @else
                                     -
                                 @endif
@@ -218,6 +217,13 @@
                                     <a href="{{ route('supply-requests.edit', $request->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
                                         <i class='bx bx-edit text-lg'></i>
                                     </a>
+                                    
+                                    @if($request->status === 'Approved')
+                                        <a href="{{ route('admin.procurement.create-purchase-order') }}?request_id={{ $request->id }}" class="text-purple-600 hover:text-purple-900" title="Create Purchase Order">
+                                            <i class='bx bx-shopping-bag text-lg'></i>
+                                        </a>
+                                    @endif
+                                    
                                     <form action="{{ route('supply-requests.destroy', $request->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this request?')" class="inline">
                                         @csrf
                                         @method('DELETE')

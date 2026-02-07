@@ -140,7 +140,7 @@
                                     {{ $return->return_reason }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${{ number_format($return->refund_amount, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">₱{{ number_format($return->refund_amount, 2) }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if ($return->status === 'Pending')
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
@@ -172,13 +172,6 @@
                                     <a href="{{ route('returns-management.edit', $return->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
                                         <i class='bx bx-edit text-lg'></i>
                                     </a>
-                                    <form action="{{ route('returns-management.destroy', $return->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this return?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>

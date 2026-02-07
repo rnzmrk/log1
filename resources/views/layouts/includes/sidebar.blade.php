@@ -172,23 +172,43 @@
     </ul>
 
     <div class="p-4 border-t border-gray-200 flex items-center gap-2">
-        <!-- Initials Circle with link -->
-        <a href="/admin/logistictracking/reports" class="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg hover:opacity-80 transition">
-            JD
-        </a>
+        <!-- User Profile with dynamic data -->
+        @auth
+            @php
+                $user = Auth::user();
+                $initials = strtoupper(substr($user->name, 0, 2));
+                $fullName = $user->name;
+                $role = 'Administrator'; // You can make this dynamic if you have roles
+            @endphp
+            
+            <!-- Initials Circle with link -->
+            <a href="{{ route('admin.dashboard') }}" class="h-12 w-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-lg hover:opacity-80 transition">
+                {{ $initials }}
+            </a>
 
-        <div class="hidden md:flex flex-col">
-            <span class="font-semibold text-lg text-white">
-                John Doe
-            </span>
-            <span class="text-sm text-gray-300">
-                Administrator
-            </span>
-        </div>
+            <div class="hidden md:flex flex-col">
+                <span class="font-semibold text-lg text-white">
+                    {{ $fullName }}
+                </span>
+                <span class="text-sm text-gray-300">
+                    {{ $role }}
+                </span>
+            </div>
+        @else
+            <!-- Fallback for non-authenticated users -->
+            <div class="h-12 w-12 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold text-lg">
+                GU
+            </div>
 
-        <button id="log_out" class="ml-auto text-gray-200 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-white hover:bg-opacity-10">
-            <i class='bx bx-log-out text-2xl'></i>
-        </button>
+            <div class="hidden md:flex flex-col">
+                <span class="font-semibold text-lg text-white">
+                    Guest User
+                </span>
+                <span class="text-sm text-gray-300">
+                    Not Logged In
+                </span>
+            </div>
+        @endauth
     </div>
 </div>
 
@@ -305,14 +325,6 @@ window.addEventListener('resize', () => {
         overlay.style.display = 'none';
     }
 });
-
-// Logout
-function logoutUser() {
-    if (confirm('Are you sure you want to logout?')) {
-        window.location.href = '/login';
-    }
-}
-document.getElementById('log_out')?.addEventListener('click', logoutUser);
 </script>
 @endpush
 @endonce

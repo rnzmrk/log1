@@ -211,7 +211,7 @@
                            placeholder="0.00"
                            step="0.01"
                            min="0">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Estimated cost in USD</p>
+                    <p class="mt-1 text-sm text-gray-500">Optional: Estimated cost in PHP</p>
                 </div>
 
                 <!-- Request Date -->

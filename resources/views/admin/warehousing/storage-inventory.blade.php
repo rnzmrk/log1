@@ -164,13 +164,6 @@
                                             <i class='bx bx-transfer text-lg'></i>
                                         </button>
                                     @endif
-                                    <form action="{{ route('inventory.destroy', $inventory->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SmartWarehousing;
 
 use App\Http\Controllers\Controller;
 use App\Models\InboundLogistic;
+use App\Models\Inventory;
 use Illuminate\Http\Request;
 
 class InboundLogisticController extends Controller
@@ -56,77 +57,125 @@ class InboundLogisticController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id',
-            'po_number' => 'required|string',
             'supplier' => 'required|string',
-            'expected_units' => 'required|integer|min:1',
+            'item_name' => 'required|string',
+            'quantity' => 'required|integer|min:1',
             'expected_date' => 'required|date',
-            'notes' => 'nullable|string',
+            'description' => 'nullable|string',
         ]);
 
-        $validated['status'] = 'In Progress';
-        $validated['quality'] = 'Pending';
+        InboundLogistic::create($request->all());
 
-        InboundLogistic::create($validated);
-
-        return redirect()->route('inbound-logistics.index')
-            ->with('success', 'Inbound logistic created successfully.');
+        return redirect()->route('admin.warehousing.inbound-logistics')
+            ->with('success', 'Inbound shipment created successfully.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(InboundLogistic $inboundLogistic)
     {
-        $inboundLogistic = InboundLogistic::findOrFail($id);
         return view('admin.warehousing.inbound-logistics-show', compact('inboundLogistic'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(InboundLogistic $inboundLogistic)
     {
-        $inboundLogistic = InboundLogistic::findOrFail($id);
         return view('admin.warehousing.inbound-logistics-edit', compact('inboundLogistic'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, InboundLogistic $inboundLogistic)
     {
-        $inboundLogistic = InboundLogistic::findOrFail($id);
-
-        $validated = $request->validate([
-            'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id,'.$id,
-            'po_number' => 'required|string',
+        $request->validate([
+            'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id,' . $inboundLogistic->id,
             'supplier' => 'required|string',
-            'expected_units' => 'required|integer|min:1',
-            'received_units' => 'nullable|integer|min:0',
-            'quality' => 'required|in:Good,Pending',
-            'status' => 'required|in:In Progress,Verified,Putaway Complete',
+            'item_name' => 'required|string',
+            'quantity' => 'required|integer|min:1',
             'expected_date' => 'required|date',
-            'received_date' => 'nullable|date',
-            'notes' => 'nullable|string',
+            'description' => 'nullable|string',
         ]);
 
-        $inboundLogistic->update($validated);
+        $inboundLogistic->update($request->all());
 
-        return redirect()->route('inbound-logistics.index')
-            ->with('success', 'Inbound logistic updated successfully.');
+        return redirect()->route('admin.warehousing.inbound-logistics')
+            ->with('success', 'Inbound shipment updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $inboundLogistic = InboundLogistic::findOrFail($id);
-        $inboundLogistic->delete();
+    // public function destroy(InboundLogistic $inboundLogistic)
+    // {
+    //     // Delete functionality removed
+    // }
 
-        return redirect()->route('inbound-logistics.index')
-            ->with('success', 'Inbound logistic deleted successfully.');
+    /**
+     * Accept inbound shipment and move to storage inventory
+     */
+    public function acceptShipment(InboundLogistic $inboundLogistic)
+    {
+        if ($inboundLogistic->status !== 'Pending') {
+            return redirect()->back()
+                ->with('error', 'Only pending shipments can be accepted.');
+        }
+
+        // Check if item already exists in inventory
+        $existingInventory = Inventory::where('sku', $inboundLogistic->shipment_id)->first();
+
+        if ($existingInventory) {
+            // Update existing inventory
+            $existingInventory->stock += $inboundLogistic->quantity;
+            $existingInventory->save();
+        } else {
+            // Create new inventory entry
+            Inventory::create([
+                'sku' => $inboundLogistic->shipment_id,
+                'item_name' => $inboundLogistic->item_name,
+                'category' => 'General',
+                'location' => 'Main Warehouse',
+                'stock' => $inboundLogistic->quantity,
+                'description' => $inboundLogistic->description,
+                'price' => 0.00,
+                'supplier' => $inboundLogistic->supplier,
+            ]);
+        }
+
+        // Update inbound shipment status
+        $inboundLogistic->status = 'Accepted';
+        $inboundLogistic->accepted_date = now();
+        $inboundLogistic->save();
+
+        return redirect()->route('admin.warehousing.storage-inventory')
+            ->with('success', 'Shipment accepted and items moved to storage inventory.');
+    }
+
+    /**
+     * Reject inbound shipment
+     */
+    public function rejectShipment(Request $request, InboundLogistic $inboundLogistic)
+    {
+        $request->validate([
+            'rejection_reason' => 'required|string',
+        ]);
+
+        if ($inboundLogistic->status !== 'Pending') {
+            return redirect()->back()
+                ->with('error', 'Only pending shipments can be rejected.');
+        }
+
+        $inboundLogistic->status = 'Rejected';
+        $inboundLogistic->rejection_reason = $request->rejection_reason;
+        $inboundLogistic->rejected_date = now();
+        $inboundLogistic->save();
+
+        return redirect()->back()
+            ->with('success', 'Shipment rejected successfully.');
     }
 }

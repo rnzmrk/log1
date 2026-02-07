@@ -129,7 +129,7 @@
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900">${{ number_format($returnRefund->refund_amount, 2) }}</div>
+                            <div class="text-3xl font-bold text-gray-900">₱{{ number_format($returnRefund->refund_amount, 2) }}</div>
                             <div class="text-sm text-gray-500 mt-1">Refund Amount</div>
                         </div>
                         <div class="text-center">

@@ -1,409 +1,187 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - LAARAVLE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .input-focus {
-            transition: all 0.3s ease;
-        }
-        .input-focus:focus {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.2);
-        }
-        .btn-hover {
-            transition: all 0.3s ease;
-        }
-        .btn-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
-        }
-        .floating {
-            animation: float 6s ease-in-out infinite;
-        }
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-        }
-        .slide-in {
-            animation: slideIn 0.5s ease-out;
-        }
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .strength-bar {
-            transition: width 0.3s ease, background-color 0.3s ease;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-4">
-    <!-- Background Decorations -->
-    <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute top-20 left-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 floating"></div>
-        <div class="absolute top-40 right-20 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 floating" style="animation-delay: 2s;"></div>
-        <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 floating" style="animation-delay: 4s;"></div>
-    </div>
+@extends('layouts.auth')
 
-    <!-- Register Container -->
-    <div class="relative z-10 w-full max-w-md">
-        <!-- Logo Section -->
-        <div class="text-center mb-8 slide-in">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-xl mb-4">
-                <i class='bx bx-user-plus text-4xl text-indigo-600'></i>
+@section('content')
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full">
+        <!-- Logo and Brand -->
+        <div class="text-center mb-8">
+            <div class="mx-auto h-16 w-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg mb-4">
+                <i class='bx bx-store text-white text-3xl'></i>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Create Account!</h1>
-            <p class="text-white/80">Join LAARAVLE Logistics Tracking System</p>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                iMarket
+            </h1>
+            <p class="text-gray-600 mt-1">Supply Chain Management System</p>
         </div>
 
-        <!-- Register Form -->
-        <div class="glass-effect rounded-2xl shadow-2xl p-8 slide-in" style="animation-delay: 0.1s;">
-            <!-- Logo in Form -->
+        <!-- Registration Card -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
             <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-xl mb-3">
-                    <i class='bx bx-user-plus text-3xl text-indigo-600'></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-800">LAARAVLE</h2>
-                <p class="text-gray-600 text-sm mt-1">Create your account</p>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Join iMarket</h2>
+                <p class="text-gray-600">Create your account to get started</p>
             </div>
-
-            <form method="POST" action="{{ route('register') }}" class="space-y-4">
-                @csrf
-                
-                <!-- Name Field -->
-                <div class="space-y-2">
-                    <label for="name" class="block text-sm font-medium text-gray-700">
-                        <i class='bx bx-user mr-1'></i>
-                        Full Name
-                    </label>
-                    <input 
-                        id="name" 
-                        name="name" 
-                        type="text" 
-                        autocomplete="name" 
-                        required
-                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                        placeholder="Enter your full name"
-                        value="{{ old('name') }}"
-                    >
-                    @error('name')
-                        <p class="text-red-500 text-xs mt-1 flex items-center">
-                            <i class='bx bx-error-circle mr-1'></i>
-                            {{ $message }}
-                        </p>
-                    @enderror
-                </div>
-
-                <!-- Email Field -->
-                <div class="space-y-2">
-                    <label for="email" class="block text-sm font-medium text-gray-700">
-                        <i class='bx bx-envelope mr-1'></i>
-                        Email Address
-                    </label>
-                    <input 
-                        id="email" 
-                        name="email" 
-                        type="email" 
-                        autocomplete="email" 
-                        required
-                        class="input-focus w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                        placeholder="Enter your email"
-                        value="{{ old('email') }}"
-                    >
-                    @error('email')
-                        <p class="text-red-500 text-xs mt-1 flex items-center">
-                            <i class='bx bx-error-circle mr-1'></i>
-                            {{ $message }}
-                        </p>
-                    @enderror
-                </div>
-
-                <!-- Password Field -->
-                <div class="space-y-2">
-                    <label for="password" class="block text-sm font-medium text-gray-700">
-                        <i class='bx bx-lock-alt mr-1'></i>
-                        Password
-                    </label>
-                    <div class="relative">
-                        <input 
-                            id="password" 
-                            name="password" 
-                            type="password" 
-                            autocomplete="new-password" 
-                            required
-                            class="input-focus w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                            placeholder="Create a strong password"
-                        >
-                        <button 
-                            type="button" 
-                            id="togglePassword"
-                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                        >
-                            <i class='bx bx-show' id="eyeIcon"></i>
-                        </button>
+        
+        <form class="space-y-6" method="POST" action="{{ route('register.submit') }}">
+            @csrf
+            
+            <!-- Error Messages -->
+            @if ($errors->any())
+                <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                    <div class="flex items-center mb-2">
+                        <i class='bx bx-error-circle text-xl mr-2'></i>
+                        <span class="font-medium">Please fix the following errors:</span>
                     </div>
-                    <!-- Password Strength Indicator -->
-                    <div class="mt-2">
-                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div id="strengthBar" class="strength-bar h-full w-0 rounded-full"></div>
+                    <ul class="list-disc list-inside space-y-1">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+                    <div class="flex items-center">
+                        <i class='bx bx-error-circle text-xl mr-2'></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('success'))
+                <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+                    <div class="flex items-center">
+                        <i class='bx bx-check-circle text-xl mr-2'></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            <div class="space-y-5">
+                <!-- Name -->
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class='bx bx-user text-gray-400 text-xl'></i>
                         </div>
-                        <p id="strengthText" class="text-xs mt-1 text-gray-500">Password strength: Weak</p>
+                        <input id="name" name="name" type="text" autocomplete="name" required
+                               value="{{ old('name') }}"
+                               placeholder="Enter your full name"
+                               class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                    </div>
+                    @error('name')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class='bx bx-envelope text-gray-400 text-xl'></i>
+                        </div>
+                        <input id="email" name="email" type="email" autocomplete="email" required
+                               value="{{ old('email') }}"
+                               placeholder="Enter your email"
+                               class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                    </div>
+                    @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class='bx bx-lock text-gray-400 text-xl'></i>
+                        </div>
+                        <input id="password" name="password" type="password" autocomplete="new-password" required
+                               placeholder="Create a strong password"
+                               class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
                     </div>
                     @error('password')
-                        <p class="text-red-500 text-xs mt-1 flex items-center">
-                            <i class='bx bx-error-circle mr-1'></i>
-                            {{ $message }}
-                        </p>
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Confirm Password Field -->
-                <div class="space-y-2">
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700">
-                        <i class='bx bx-lock-alt mr-1'></i>
-                        Confirm Password
-                    </label>
+                <!-- Confirm Password -->
+                <div>
+                    <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 mb-2">Confirm Password</label>
                     <div class="relative">
-                        <input 
-                            id="password_confirmation" 
-                            name="password_confirmation" 
-                            type="password" 
-                            autocomplete="new-password" 
-                            required
-                            class="input-focus w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                            placeholder="Confirm your password"
-                        >
-                        <button 
-                            type="button" 
-                            id="toggleConfirmPassword"
-                            class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                        >
-                            <i class='bx bx-show' id="eyeIconConfirm"></i>
-                        </button>
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class='bx bx-lock-alt text-gray-400 text-xl'></i>
+                        </div>
+                        <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" required
+                               placeholder="Confirm your password"
+                               class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
                     </div>
                     @error('password_confirmation')
-                        <p class="text-red-500 text-xs mt-1 flex items-center">
-                            <i class='bx bx-error-circle mr-1'></i>
-                            {{ $message }}
-                        </p>
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Terms and Conditions -->
-                <div class="flex items-start">
-                    <input 
-                        id="terms" 
-                        name="terms" 
-                        type="checkbox" 
-                        required
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-1"
-                    >
-                    <label for="terms" class="ml-2 block text-sm text-gray-700">
-                        I agree to the <a href="#" class="text-indigo-600 hover:text-indigo-500 font-medium">Terms of Service</a> and <a href="#" class="text-indigo-600 hover:text-indigo-500 font-medium">Privacy Policy</a>
-                    </label>
+                <!-- Role Selection -->
+                <div>
+                    <label for="role" class="block text-sm font-semibold text-gray-700 mb-2">Account Type</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class='bx bx-briefcase text-gray-400 text-xl'></i>
+                        </div>
+                        <select id="role" name="role" required
+                                class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all">
+                            <option value="">Select account type</option>
+                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Administrator</option>
+                            <option value="manager" {{ old('role') === 'manager' ? 'selected' : '' }}>Manager</option>
+                            <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>User</option>
+                        </select>
+                    </div>
+                    @error('role')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
-                @error('terms')
-                    <p class="text-red-500 text-xs mt-1 flex items-center">
-                        <i class='bx bx-error-circle mr-1'></i>
-                        {{ $message }}
-                    </p>
-                @enderror
+            </div>
 
-                <!-- Submit Button -->
-                <button 
-                    type="submit" 
-                    class="btn-hover w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center"
-                >
+            <!-- Terms and Privacy -->
+            <div class="flex items-start">
+                <input id="agree_terms" name="agree_terms" type="checkbox" required
+                       class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded mt-1">
+                <label for="agree_terms" class="ml-3 block text-sm text-gray-700">
+                    I agree to the 
+                    <a href="#" class="text-purple-600 hover:text-purple-500 font-medium transition-colors">Terms of Service</a> 
+                    and 
+                    <a href="#" class="text-purple-600 hover:text-purple-500 font-medium transition-colors">Privacy Policy</a>
+                </label>
+            </div>
+            @error('agree_terms')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+
+            <div class="space-y-3">
+                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-[1.02] transition-all duration-200 shadow-lg">
                     <i class='bx bx-user-plus mr-2'></i>
                     Create Account
                 </button>
-            </form>
 
-            <!-- Divider -->
-            <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300"></div>
+                <div class="text-center">
+                    <p class="text-sm text-gray-600">
+                        Already have an account?
+                        <a href="/" class="font-semibold text-purple-600 hover:text-purple-500 transition-colors">
+                            Sign in here
+                        </a>
+                    </p>
                 </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white text-gray-500">Or register with</span>
-                </div>
             </div>
-
-            <!-- Social Register Buttons -->
-            <div class="grid grid-cols-2 gap-3">
-                <button class="btn-hover flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <i class='bx bxl-google text-red-500 mr-2'></i>
-                    Google
-                </button>
-                <button class="btn-hover flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <i class='bx bxl-microsoft text-blue-600 mr-2'></i>
-                    Microsoft
-                </button>
-            </div>
-
-            <!-- Login Link -->
-            <div class="text-center mt-6 pt-6 border-t border-gray-200">
-                <p class="text-sm text-gray-600">
-                    Already have an account? 
-                    <a href="{{ route('login') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
-                        Sign in here
-                    </a>
-                </p>
-            </div>
+        </form>
         </div>
 
         <!-- Footer -->
-        <div class="text-center mt-8 text-white/80 text-sm slide-in" style="animation-delay: 0.2s;">
-            <p>&copy; 2024 LAARAVLE. All rights reserved.</p>
-            <div class="flex justify-center space-x-4 mt-2">
-                <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
-                <span>•</span>
-                <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
-            </div>
+        <div class="text-center mt-8 text-sm text-gray-500">
+            <p>&copy; 2024 iMarket. All rights reserved.</p>
         </div>
     </div>
-
-    <!-- Success/Error Messages -->
-    @if (session('status'))
-        <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50 slide-in">
-            <i class='bx bx-check-circle mr-2'></i>
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50 slide-in">
-            <i class='bx bx-error-circle mr-2'></i>
-            {{ $errors->first() }}
-        </div>
-    @endif
-
-    <script>
-        // Toggle password visibility
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-        const eyeIcon = document.getElementById('eyeIcon');
-
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            if (type === 'text') {
-                eyeIcon.classList.remove('bx-show');
-                eyeIcon.classList.add('bx-hide');
-            } else {
-                eyeIcon.classList.remove('bx-hide');
-                eyeIcon.classList.add('bx-show');
-            }
-        });
-
-        // Toggle confirm password visibility
-        const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        const confirmPasswordInput = document.getElementById('password_confirmation');
-        const eyeIconConfirm = document.getElementById('eyeIconConfirm');
-
-        toggleConfirmPassword.addEventListener('click', function() {
-            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPasswordInput.setAttribute('type', type);
-            
-            if (type === 'text') {
-                eyeIconConfirm.classList.remove('bx-show');
-                eyeIconConfirm.classList.add('bx-hide');
-            } else {
-                eyeIconConfirm.classList.remove('bx-hide');
-                eyeIconConfirm.classList.add('bx-show');
-            }
-        });
-
-        // Password strength checker
-        function checkPasswordStrength(password) {
-            let strength = 0;
-            const strengthBar = document.getElementById('strengthBar');
-            const strengthText = document.getElementById('strengthText');
-
-            if (password.length >= 8) strength++;
-            if (password.match(/[a-z]+/)) strength++;
-            if (password.match(/[A-Z]+/)) strength++;
-            if (password.match(/[0-9]+/)) strength++;
-            if (password.match(/[$@#&!]+/)) strength++;
-
-            switch (strength) {
-                case 0:
-                case 1:
-                    strengthBar.style.width = '20%';
-                    strengthBar.style.backgroundColor = '#ef4444';
-                    strengthText.textContent = 'Password strength: Weak';
-                    strengthText.className = 'text-xs mt-1 text-red-500';
-                    break;
-                case 2:
-                    strengthBar.style.width = '40%';
-                    strengthBar.style.backgroundColor = '#f59e0b';
-                    strengthText.textContent = 'Password strength: Fair';
-                    strengthText.className = 'text-xs mt-1 text-yellow-500';
-                    break;
-                case 3:
-                    strengthBar.style.width = '60%';
-                    strengthBar.style.backgroundColor = '#3b82f6';
-                    strengthText.textContent = 'Password strength: Good';
-                    strengthText.className = 'text-xs mt-1 text-blue-500';
-                    break;
-                case 4:
-                    strengthBar.style.width = '80%';
-                    strengthBar.style.backgroundColor = '#8b5cf6';
-                    strengthText.textContent = 'Password strength: Strong';
-                    strengthText.className = 'text-xs mt-1 text-purple-500';
-                    break;
-                case 5:
-                    strengthBar.style.width = '100%';
-                    strengthBar.style.backgroundColor = '#10b981';
-                    strengthText.textContent = 'Password strength: Very Strong';
-                    strengthText.className = 'text-xs mt-1 text-green-500';
-                    break;
-            }
-        }
-
-        passwordInput.addEventListener('input', function() {
-            checkPasswordStrength(this.value);
-        });
-
-        // Auto-hide messages after 5 seconds
-        setTimeout(function() {
-            const messages = document.querySelectorAll('.fixed.top-4.right-4');
-            messages.forEach(function(message) {
-                message.style.opacity = '0';
-                message.style.transform = 'translateX(100%)';
-                setTimeout(function() {
-                    message.remove();
-                }, 300);
-            });
-        }, 5000);
-
-        // Add loading state to submit button
-        const form = document.querySelector('form');
-        const submitButton = form.querySelector('button[type="submit"]');
-        
-        form.addEventListener('submit', function() {
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="bx bx-loader-alt bx-spin mr-2"></i>Creating Account...';
-        });
-    </script>
-</body>
-</html>
+</div>
+@endsection

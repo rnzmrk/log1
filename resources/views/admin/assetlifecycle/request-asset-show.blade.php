@@ -147,7 +147,7 @@
                             <p class="text-sm text-gray-600">Estimated Cost</p>
                             <p class="font-semibold text-gray-900">
                                 @if ($assetRequest->estimated_cost)
-                                    ${{ number_format($assetRequest->estimated_cost, 2) }}
+                                    ₱{{ number_format($assetRequest->estimated_cost, 2) }}
                                 @else
                                     Not specified
                                 @endif

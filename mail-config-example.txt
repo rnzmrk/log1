@@ -1,0 +1,40 @@
+# Mail Configuration for OTP
+# Copy these settings to your .env file and update with your email provider details
+
+# Mail Configuration
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=your-email@gmail.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+# Alternative Mail Providers:
+
+# For Outlook/Hotmail:
+# MAIL_HOST=smtp-mail.outlook.com
+# MAIL_PORT=587
+
+# For Yahoo:
+# MAIL_HOST=smtp.mail.yahoo.com
+# MAIL_PORT=587
+
+# For SendGrid (recommended for development):
+# MAIL_HOST=smtp.sendgrid.net
+# MAIL_PORT=587
+# MAIL_USERNAME=apikey
+# MAIL_PASSWORD=YOUR_SENDGRID_API_KEY
+
+# For Mailtrap (testing only):
+# MAIL_HOST=smtp.mailtrap.io
+# MAIL_PORT=2525
+# MAIL_USERNAME=your-mailtrap-username
+# MAIL_PASSWORD=your-mailtrap-password
+
+# For Mailgun:
+# MAIL_HOST=smtp.mailgun.org
+# MAIL_PORT=587
+# MAIL_USERNAME=postmaster@your-domain.com
+# MAIL_PASSWORD=your-mailgun-password

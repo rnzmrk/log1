@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Procurement;
 
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseOrder;
+use App\Models\SupplyRequest;
 use Illuminate\Http\Request;
 
 class PurchaseOrderController extends Controller
@@ -49,9 +50,16 @@ class PurchaseOrderController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('admin.procurement.create-purchase-order-create');
+        $supplyRequest = null;
+        
+        // Check if creating from supply request
+        if ($request->filled('request_id')) {
+            $supplyRequest = SupplyRequest::find($request->request_id);
+        }
+        
+        return view('admin.procurement.create-purchase-order-create', compact('supplyRequest'));
     }
 
     /**
@@ -77,12 +85,23 @@ class PurchaseOrderController extends Controller
             'notes' => 'nullable|string',
             'created_by' => 'required|string|max:255',
             'approved_by' => 'nullable|string|max:255',
+            'supply_request_id' => 'nullable|integer|exists:supply_requests,id',
         ]);
 
         // Auto-generate PO number
         $validated['po_number'] = 'PO-' . date('Y') . '-' . str_pad(PurchaseOrder::count() + 1, 4, '0', STR_PAD_LEFT);
 
-        PurchaseOrder::create($validated);
+        $purchaseOrder = PurchaseOrder::create($validated);
+
+        // Update supply request status if linked
+        if (!empty($validated['supply_request_id'])) {
+            $supplyRequest = SupplyRequest::find($validated['supply_request_id']);
+            if ($supplyRequest) {
+                $supplyRequest->status = 'Ordered';
+                $supplyRequest->order_date = now();
+                $supplyRequest->save();
+            }
+        }
 
         return redirect()->route('purchase-orders.index')
             ->with('success', 'Purchase order created successfully.');

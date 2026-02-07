@@ -19,71 +19,74 @@ use App\Http\Controllers\DocumentTracking\DocumentReportController;
 use App\Http\Controllers\AdminSettings\UserController;
 use App\Http\Controllers\AdminSettings\AuditLogController;
 use App\Http\Controllers\Procurement\VendorController;
+use App\Http\Controllers\Auth\AuthController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 // Authentication Routes
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+Route::get('/', [AuthController::class, 'showAuthForm'])->name('auth');
+Route::get('/login', [AuthController::class, 'showAuthForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/resend-otp', [AuthController::class, 'resendOTP'])->name('resend.otp');
 
-Route::post('/login', function () {
-    // Login logic will be handled by Laravel's authentication
-    return redirect('/admin/dashboard');
-});
+// Protected Routes - Require Authentication
+Route::middleware(['auth'])->group(function () {
+    // Admin Dashboard
+    Route::get('/admin/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
 
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
+    Route::get('/admin/warehousing/inbound-logistics', [InboundLogisticController::class, 'index'])->name('admin.warehousing.inbound-logistics');
+Route::resource('inbound-logistics', InboundLogisticController::class)->except(['destroy'])->names([
+    'index' => 'inbound-logistics.index',
+    'create' => 'inbound-logistics.create',
+    'store' => 'inbound-logistics.store',
+    'show' => 'inbound-logistics.show',
+    'edit' => 'inbound-logistics.edit',
+    'update' => 'inbound-logistics.update',
+]);
 
-Route::post('/register', function () {
-    // Registration logic will be handled by Laravel's authentication
-    return redirect('/admin/dashboard');
-});
-
-Route::post('/logout', function () {
-    // Logout logic will be handled by Laravel's authentication
-    return redirect('/login');
-})->name('logout');
-
-Route::resource('inbound-logistics', InboundLogisticController::class);
-
-// Admin Dashboard Routes - No Security
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard.index');
-})->name('admin.dashboard');
-
-Route::get('/admin/warehousing/inbound-logistics', [InboundLogisticController::class, 'index'])->name('admin.warehousing.inbound-logistics');
+// Inbound Logistics Actions
+Route::post('/inbound-logistics/{inboundLogistic}/accept', [InboundLogisticController::class, 'acceptShipment'])->name('inbound-logistics.accept');
+Route::post('/inbound-logistics/{inboundLogistic}/reject', [InboundLogisticController::class, 'rejectShipment'])->name('inbound-logistics.reject');
 
 Route::get('/admin/warehousing/storage-inventory', [InventoryController::class, 'index'])->name('admin.warehousing.storage-inventory');
 
-Route::resource('inventory', InventoryController::class);
+Route::resource('inventory', InventoryController::class)->except(['destroy']);
 Route::post('/inventory/{id}/move', [InventoryController::class, 'move'])->name('inventory.move');
+
+// Storage and Inventory Actions
+Route::post('/inventory/{inventory}/request-supply', [InventoryController::class, 'requestSupply'])->name('inventory.request-supply');
+Route::post('/inventory/{inventory}/return-item', [InventoryController::class, 'returnItem'])->name('inventory.return-item');
+Route::post('/inventory/{inventory}/move-to-outbound', [InventoryController::class, 'moveToOutbound'])->name('inventory.move-to-outbound');
+Route::get('/inventory/low-stock', [InventoryController::class, 'getLowStockItems'])->name('inventory.low-stock');
 
 Route::get('/admin/warehousing/outbound-logistics', [OutboundLogisticController::class, 'index'])->name('admin.warehousing.outbound-logistics');
 
-Route::resource('outbound-logistics', OutboundLogisticController::class)->names([
+Route::resource('outbound-logistics', OutboundLogisticController::class)->except(['destroy'])->names([
     'index' => 'outbound-logistics.index',
     'create' => 'outbound-logistics.create',
     'store' => 'outbound-logistics.store',
     'show' => 'outbound-logistics.show',
     'edit' => 'outbound-logistics.edit',
     'update' => 'outbound-logistics.update',
-    'destroy' => 'outbound-logistics.destroy',
 ]);
+
+// Outbound Logistics Actions
+Route::post('/outbound-logistics/{outboundLogistic}/ship', [OutboundLogisticController::class, 'shipItem'])->name('outbound-logistics.ship');
+Route::post('/outbound-logistics/{outboundLogistic}/deliver', [OutboundLogisticController::class, 'deliverItem'])->name('outbound-logistics.deliver');
+Route::post('/outbound-logistics/{outboundLogistic}/cancel', [OutboundLogisticController::class, 'cancelShipment'])->name('outbound-logistics.cancel');
+Route::post('/outbound-logistics/{outboundLogistic}/process-supply', [OutboundLogisticController::class, 'processSupplyRequest'])->name('outbound-logistics.process-supply');
+Route::get('/outbound-logistics/pending-supply', [OutboundLogisticController::class, 'getPendingSupplyRequests'])->name('outbound-logistics.pending-supply');
 
 Route::get('/admin/warehousing/returns-management', [ReturnRefundController::class, 'index'])->name('admin.warehousing.returns-management');
 
-Route::resource('returns-management', ReturnRefundController::class)->names([
+Route::resource('returns-management', ReturnRefundController::class)->except(['destroy'])->names([
     'index' => 'returns-management.index',
     'create' => 'returns-management.create',
     'store' => 'returns-management.store',
     'show' => 'returns-management.show',
     'edit' => 'returns-management.edit',
     'update' => 'returns-management.update',
-    'destroy' => 'returns-management.destroy',
 ]);
 
 // Procurement Routes
@@ -127,7 +130,57 @@ Route::get('/admin/procurement/vendors', [VendorController::class, 'index'])->na
 
 // Vendor Management Routes
 Route::resource('vendors', VendorController::class)->except(['index']);
+Route::post('vendors/{vendor}/approve', [VendorController::class, 'approve'])->name('vendors.approve');
 Route::get('vendors/export', [VendorController::class, 'export'])->name('vendors.export');
+
+// Supplier Validation Routes
+Route::prefix('vendors/{vendor}/validations')->name('vendors.validations.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Procurement\SupplierValidationController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Procurement\SupplierValidationController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Procurement\SupplierValidationController::class, 'store'])->name('store');
+    Route::get('/{validation}/edit', [App\Http\Controllers\Procurement\SupplierValidationController::class, 'edit'])->name('edit');
+    Route::put('/{validation}', [App\Http\Controllers\Procurement\SupplierValidationController::class, 'update'])->name('update');
+    Route::delete('/{validation}', [App\Http\Controllers\Procurement\SupplierValidationController::class, 'destroy'])->name('destroy');
+    Route::post('/{validation}/validate', [App\Http\Controllers\Procurement\SupplierValidationController::class, 'validateDocument'])->name('validate');
+});
+
+// Supplier Verification Routes
+Route::prefix('vendors/{vendor}/verifications')->name('vendors.verifications.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'store'])->name('store');
+    Route::get('/{verification}/edit', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'edit'])->name('edit');
+    Route::put('/{verification}', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'update'])->name('update');
+    Route::delete('/{verification}', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'destroy'])->name('destroy');
+    Route::post('/{verification}/complete', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'complete'])->name('complete');
+    Route::post('/{verification}/schedule', [App\Http\Controllers\Procurement\SupplierVerificationController::class, 'schedule'])->name('schedule');
+});
+
+// Procurement Requirements Routes
+Route::prefix('procurement/requirements')->name('procurement.requirements.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'store'])->name('store');
+    Route::get('/{requirement}', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'show'])->name('show');
+    Route::get('/{requirement}/edit', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'edit'])->name('edit');
+    Route::put('/{requirement}', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'update'])->name('update');
+    Route::delete('/{requirement}', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'destroy'])->name('destroy');
+    Route::post('/{requirement}/approve', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'approve'])->name('approve');
+    Route::post('/{requirement}/reject', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'reject'])->name('reject');
+    Route::post('/{requirement}/assign', [App\Http\Controllers\Procurement\ProcurementRequirementController::class, 'assign'])->name('assign');
+});
+
+// Supplier Post Management Routes
+Route::prefix('admin/supplier-posts')->name('admin.supplier.posts.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Admin\SupplierPostController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Admin\SupplierPostController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Admin\SupplierPostController::class, 'store'])->name('store');
+    Route::get('/{post}/edit', [App\Http\Controllers\Admin\SupplierPostController::class, 'edit'])->name('edit');
+    Route::put('/{post}', [App\Http\Controllers\Admin\SupplierPostController::class, 'update'])->name('update');
+    Route::delete('/{post}', [App\Http\Controllers\Admin\SupplierPostController::class, 'destroy'])->name('destroy');
+    Route::post('/{post}/toggle-featured', [App\Http\Controllers\Admin\SupplierPostController::class, 'toggleFeatured'])->name('toggle-featured');
+    Route::post('/{post}/toggle-status', [App\Http\Controllers\Admin\SupplierPostController::class, 'toggleStatus'])->name('toggle-status');
+});
 
 // Asset Lifecycle & Maintenance Routes
 Route::get('/admin/assetlifecycle/request-asset', [AssetRequestController::class, 'index'])->name('admin.assetlifecycle.request-asset');
@@ -144,15 +197,20 @@ Route::resource('asset-requests', AssetRequestController::class)->names([
 
 Route::get('/admin/assetlifecycle/asset-management', [AssetManagementController::class, 'index'])->name('admin.assetlifecycle.asset-management');
 
-Route::resource('asset-management', AssetManagementController::class)->names([
+Route::resource('asset-management', AssetManagementController::class)->except(['destroy'])->names([
     'index' => 'asset-management.index',
     'create' => 'asset-management.create',
     'store' => 'asset-management.store',
     'show' => 'asset-management.show',
     'edit' => 'asset-management.edit',
     'update' => 'asset-management.update',
-    'destroy' => 'asset-management.destroy',
 ]);
+
+// Asset Management Actions
+Route::post('/asset-management/{asset}/dispose', [AssetManagementController::class, 'disposeAsset'])->name('asset-management.dispose');
+Route::post('/asset-management/request-asset', [AssetManagementController::class, 'requestAsset'])->name('asset-management.request-asset');
+Route::get('/asset-management/available', [AssetManagementController::class, 'getAvailableAssets'])->name('asset-management.available');
+Route::get('/asset-management/disposal-candidates', [AssetManagementController::class, 'getAssetsForDisposal'])->name('asset-management.disposal-candidates');
 
 Route::get('/admin/assetlifecycle/asset-maintenance', [AssetMaintenanceController::class, 'index'])->name('admin.assetlifecycle.asset-maintenance');
 
@@ -269,3 +327,27 @@ Route::get('/admin/adminsettings/audit-logs', [AuditLogController::class, 'index
 Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
 Route::get('audit-logs/export', [AuditLogController::class, 'export'])->name('audit-logs.export');
 Route::delete('audit-logs/clear', [AuditLogController::class, 'clearOldLogs'])->name('audit-logs.clear');
+
+});
+
+// Website Supplier Routes
+Route::prefix('suppliers')->name('website.suppliers.')->group(function () {
+    // Supplier directory page
+    Route::get('/', [App\Http\Controllers\Website\SupplierController::class, 'index'])->name('index');
+    
+    // Supplier registration page
+    Route::get('/register', [App\Http\Controllers\Website\SupplierController::class, 'register'])->name('register');
+    
+    // Handle supplier registration submission
+    Route::post('/register', [App\Http\Controllers\Website\SupplierController::class, 'store'])->name('register.submit');
+    
+    // Supplier detail page
+    Route::get('/{supplier:slug}', [App\Http\Controllers\Website\SupplierController::class, 'show'])->name('show');
+    
+    // Supplier posts
+    Route::get('/posts/{post:slug}', [App\Http\Controllers\Website\SupplierController::class, 'post'])->name('post');
+});
+
+// Website home route (can be customized)
+Route::get('/vendor', [App\Http\Controllers\Website\SupplierController::class, 'home'])->name('website.home');
+

@@ -131,12 +131,8 @@ class ReturnRefundController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $returnRefund = ReturnRefund::findOrFail($id);
-        $returnRefund->delete();
-
-        return redirect()->route('returns-management.index')
-            ->with('success', 'Return/refund deleted successfully.');
-    }
+    // public function destroy(string $id)
+    // {
+    //     // Delete functionality removed
+    // }
 }

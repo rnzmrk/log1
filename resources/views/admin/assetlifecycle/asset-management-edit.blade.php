@@ -2,52 +2,40 @@
 
 @section('content')
 <div class="container-fluid px-6 py-8">
-    <!-- Breadcrumbs -->
-    <nav class="flex mb-6" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-3">
-            <li class="inline-flex items-center">
-                <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-blue-600 inline-flex items-center">
-                    <i class='bx bx-home text-xl mr-2'></i>
-                    Home
+    <!-- Enhanced Header -->
+    <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900 mb-2">Edit Asset</h1>
+                <p class="text-gray-600 text-lg">Update asset information</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="{{ route('asset-management.show', $asset->id) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-sm">
+                    <i class='bx bx-show text-xl'></i>
+                    View Asset
                 </a>
-            </li>
-            <li>
-                <div class="flex items-center">
-                    <i class='bx bx-chevron-right text-gray-400'></i>
-                    <a href="#" class="text-gray-700 hover:text-blue-600 ml-1 md:ml-2">Asset Lifecycle & Maintenance</a>
-                </div>
-            </li>
-            <li>
-                <div class="flex items-center">
-                    <i class='bx bx-chevron-right text-gray-400'></i>
-                    <a href="{{ route('admin.assetlifecycle.asset-management') }}" class="text-gray-700 hover:text-blue-600 ml-1 md:ml-2">Asset Management</a>
-                </div>
-            </li>
-            <li aria-current="page">
-                <div class="flex items-center">
-                    <i class='bx bx-chevron-right text-gray-400'></i>
-                    <span class="ml-1 text-gray-500 md:ml-2">Edit Asset</span>
-                </div>
-            </li>
-        </ol>
-    </nav>
-
-    <!-- Page Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Edit Asset</h1>
-        <div class="flex gap-3">
-            <a href="{{ route('asset-management.show', $asset->id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-show text-xl'></i>
-                View Asset
-            </a>
-            <a href="{{ route('admin.assetlifecycle.asset-management') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-arrow-back text-xl'></i>
-                Back to Assets
-            </a>
+                <a href="{{ route('admin.assetlifecycle.asset-management') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-sm">
+                    <i class='bx bx-arrow-back text-xl'></i>
+                    Back to Assets
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Asset Summary -->
+    <!-- Enhanced Form Container -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
+            <h2 class="text-xl font-semibold flex items-center gap-3">
+                <div class="bg-blue-400 bg-opacity-30 rounded-lg p-2">
+                    <i class='bx bx-edit text-xl'></i>
+                </div>
+                Edit Asset Information
+            </h2>
+        </div>
+        
+        <form method="POST" action="{{ route('asset-management.update', $asset->id) }}" enctype="multipart/form-data" class="p-6">
+            @csrf
+            @method('PUT')
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <div class="flex items-center">
             <i class='bx bx-package text-blue-600 text-xl mr-3'></i>
@@ -90,96 +78,54 @@
             @endif
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Asset Tag (Readonly) -->
+                <!-- Item Code -->
                 <div>
-                    <label for="asset_tag" class="block text-sm font-medium text-gray-700 mb-2">Asset Tag</label>
+                    <label for="item_code" class="block text-sm font-medium text-gray-700 mb-2">Item Code *</label>
                     <input type="text" 
-                           id="asset_tag" 
-                           name="asset_tag" 
-                           value="{{ $asset->asset_tag }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
-                           readonly>
-                    <p class="mt-1 text-sm text-gray-500">Auto-generated asset tag</p>
+                           id="item_code" 
+                           name="item_code" 
+                           value="{{ old('item_code', $asset->item_code) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., LAP-DELL-001"
+                           required>
+                    <p class="mt-1 text-sm text-gray-500">Asset code for tracking</p>
                 </div>
 
-                <!-- Asset Name -->
+                <!-- Item Name -->
                 <div>
-                    <label for="asset_name" class="block text-sm font-medium text-gray-700 mb-2">Asset Name *</label>
+                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
                     <input type="text" 
-                           id="asset_name" 
-                           name="asset_name" 
-                           value="{{ old('asset_name', $asset->asset_name) }}"
+                           id="item_name" 
+                           name="item_name" 
+                           value="{{ old('item_name', $asset->item_name) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="e.g., Dell XPS 15 Laptop"
                            required>
+                    <p class="mt-1 text-sm text-gray-500">Descriptive name of the asset</p>
                 </div>
 
                 <!-- Asset Type -->
                 <div>
                     <label for="asset_type" class="block text-sm font-medium text-gray-700 mb-2">Asset Type *</label>
-                    <input type="text" 
-                           id="asset_type" 
-                           name="asset_type" 
-                           value="{{ old('asset_type', $asset->asset_type) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Laptop, Desktop, Monitor"
-                           required>
-                </div>
-
-                <!-- Category -->
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                    <select id="category" 
-                            name="category" 
+                    <select id="asset_type" 
+                            name="asset_type" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
-                        <option value="">Select category</option>
-                        <option value="Laptop" {{ old('category', $asset->category) === 'Laptop' ? 'selected' : '' }}>Laptop</option>
-                        <option value="Desktop" {{ old('category', $asset->category) === 'Desktop' ? 'selected' : '' }}>Desktop</option>
-                        <option value="Monitor" {{ old('category', $asset->category) === 'Monitor' ? 'selected' : '' }}>Monitor</option>
-                        <option value="Phone" {{ old('category', $asset->category) === 'Phone' ? 'selected' : '' }}>Phone</option>
-                        <option value="Tablet" {{ old('category', $asset->category) === 'Tablet' ? 'selected' : '' }}>Tablet</option>
-                        <option value="Printer" {{ old('category', $asset->category) === 'Printer' ? 'selected' : '' }}>Printer</option>
-                        <option value="Server" {{ old('category', $asset->category) === 'Server' ? 'selected' : '' }}>Server</option>
-                        <option value="Network Equipment" {{ old('category', $asset->category) === 'Network Equipment' ? 'selected' : '' }}>Network Equipment</option>
-                        <option value="Other" {{ old('category', $asset->category) === 'Other' ? 'selected' : '' }}>Other</option>
+                        <option value="">Select type</option>
+                        <option value="Computer" {{ old('asset_type', $asset->asset_type) === 'Computer' ? 'selected' : '' }}>Computer</option>
+                        <option value="Laptop" {{ old('asset_type', $asset->asset_type) === 'Laptop' ? 'selected' : '' }}>Laptop</option>
+                        <option value="Desktop" {{ old('asset_type', $asset->asset_type) === 'Desktop' ? 'selected' : '' }}>Desktop</option>
+                        <option value="Monitor" {{ old('asset_type', $asset->asset_type) === 'Monitor' ? 'selected' : '' }}>Monitor</option>
+                        <option value="Phone" {{ old('asset_type', $asset->asset_type) === 'Phone' ? 'selected' : '' }}>Phone</option>
+                        <option value="Tablet" {{ old('asset_type', $asset->asset_type) === 'Tablet' ? 'selected' : '' }}>Tablet</option>
+                        <option value="Printer" {{ old('asset_type', $asset->asset_type) === 'Printer' ? 'selected' : '' }}>Printer</option>
+                        <option value="Server" {{ old('asset_type', $asset->asset_type) === 'Server' ? 'selected' : '' }}>Server</option>
+                        <option value="Vehicle" {{ old('asset_type', $asset->asset_type) === 'Vehicle' ? 'selected' : '' }}>Vehicle</option>
+                        <option value="Equipment" {{ old('asset_type', $asset->asset_type) === 'Equipment' ? 'selected' : '' }}>Equipment</option>
+                        <option value="Furniture" {{ old('asset_type', $asset->asset_type) === 'Furniture' ? 'selected' : '' }}>Furniture</option>
+                        <option value="Other" {{ old('asset_type', $asset->asset_type) === 'Other' ? 'selected' : '' }}>Other</option>
                     </select>
-                </div>
-
-                <!-- Brand -->
-                <div>
-                    <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
-                    <input type="text" 
-                           id="brand" 
-                           name="brand" 
-                           value="{{ old('brand', $asset->brand) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Dell, HP, Apple">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Asset brand</p>
-                </div>
-
-                <!-- Model -->
-                <div>
-                    <label for="model" class="block text-sm font-medium text-gray-700 mb-2">Model</label>
-                    <input type="text" 
-                           id="model" 
-                           name="model" 
-                           value="{{ old('model', $asset->model) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., XPS 15, EliteDesk">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Asset model</p>
-                </div>
-
-                <!-- Serial Number -->
-                <div>
-                    <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-2">Serial Number</label>
-                    <input type="text" 
-                           id="serial_number" 
-                           name="serial_number" 
-                           value="{{ old('serial_number', $asset->serial_number) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., SN123456789">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Asset serial number</p>
+                    <p class="mt-1 text-sm text-gray-500">Category of the asset</p>
                 </div>
 
                 <!-- Status -->
@@ -193,164 +139,54 @@
                         <option value="Available" {{ old('status', $asset->status) === 'Available' ? 'selected' : '' }}>Available</option>
                         <option value="In Use" {{ old('status', $asset->status) === 'In Use' ? 'selected' : '' }}>In Use</option>
                         <option value="Under Maintenance" {{ old('status', $asset->status) === 'Under Maintenance' ? 'selected' : '' }}>Under Maintenance</option>
-                        <option value="Retired" {{ old('status', $asset->status) === 'Retired' ? 'selected' : '' }}>Retired</option>
-                        <option value="Lost" {{ old('status', $asset->status) === 'Lost' ? 'selected' : '' }}>Lost</option>
-                        <option value="Damaged" {{ old('status', $asset->status) === 'Damaged' ? 'selected' : '' }}>Damaged</option>
+                        <option value="Disposed" {{ old('status', $asset->status) === 'Disposed' ? 'selected' : '' }}>Disposed</option>
+                        <option value="Requested" {{ old('status', $asset->status) === 'Requested' ? 'selected' : '' }}>Requested</option>
                     </select>
+                    <p class="mt-1 text-sm text-gray-500">Current status of the asset</p>
                 </div>
 
-                <!-- Condition -->
+                <!-- Date -->
                 <div>
-                    <label for="condition" class="block text-sm font-medium text-gray-700 mb-2">Condition *</label>
-                    <select id="condition" 
-                            name="condition" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select condition</option>
-                        <option value="Excellent" {{ old('condition', $asset->condition) === 'Excellent' ? 'selected' : '' }}>Excellent</option>
-                        <option value="Good" {{ old('condition', $asset->condition) === 'Good' ? 'selected' : '' }}>Good</option>
-                        <option value="Fair" {{ old('condition', $asset->condition) === 'Fair' ? 'selected' : '' }}>Fair</option>
-                        <option value="Poor" {{ old('condition', $asset->condition) === 'Poor' ? 'selected' : '' }}>Poor</option>
-                    </select>
-                </div>
-
-                <!-- Purchase Cost -->
-                <div>
-                    <label for="purchase_cost" class="block text-sm font-medium text-gray-700 mb-2">Purchase Cost</label>
-                    <input type="number" 
-                           id="purchase_cost" 
-                           name="purchase_cost" 
-                           value="{{ old('purchase_cost', $asset->purchase_cost) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Purchase cost in USD</p>
-                </div>
-
-                <!-- Purchase Date -->
-                <div>
-                    <label for="purchase_date" class="block text-sm font-medium text-gray-700 mb-2">Purchase Date</label>
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-2">Date *</label>
                     <input type="date" 
-                           id="purchase_date" 
-                           name="purchase_date" 
-                           value="{{ old('purchase_date', $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: When the asset was purchased</p>
-                </div>
-
-                <!-- Warranty Expiry -->
-                <div>
-                    <label for="warranty_expiry" class="block text-sm font-medium text-gray-700 mb-2">Warranty Expiry</label>
-                    <input type="date" 
-                           id="warranty_expiry" 
-                           name="warranty_expiry" 
-                           value="{{ old('warranty_expiry', $asset->warranty_expiry ? $asset->warranty_expiry->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Warranty expiration date</p>
-                </div>
-
-                <!-- Last Maintenance Date -->
-                <div>
-                    <label for="last_maintenance_date" class="block text-sm font-medium text-gray-700 mb-2">Last Maintenance Date</label>
-                    <input type="date" 
-                           id="last_maintenance_date" 
-                           name="last_maintenance_date" 
-                           value="{{ old('last_maintenance_date', $asset->last_maintenance_date ? $asset->last_maintenance_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Last maintenance date</p>
-                </div>
-
-                <!-- Next Maintenance Date -->
-                <div>
-                    <label for="next_maintenance_date" class="block text-sm font-medium text-gray-700 mb-2">Next Maintenance Date</label>
-                    <input type="date" 
-                           id="next_maintenance_date" 
-                           name="next_maintenance_date" 
-                           value="{{ old('next_maintenance_date', $asset->next_maintenance_date ? $asset->next_maintenance_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Next scheduled maintenance</p>
-                </div>
-
-                <!-- Assigned To -->
-                <div>
-                    <label for="assigned_to" class="block text-sm font-medium text-gray-700 mb-2">Assigned To</label>
-                    <input type="text" 
-                           id="assigned_to" 
-                           name="assigned_to" 
-                           value="{{ old('assigned_to', $asset->assigned_to) }}"
+                           id="date" 
+                           name="date" 
+                           value="{{ old('date', $asset->date?->format('Y-m-d')) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., John Smith">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Person assigned to this asset</p>
-                </div>
-
-                <!-- Department -->
-                <div>
-                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                    <input type="text" 
-                           id="department" 
-                           name="department" 
-                           value="{{ old('department', $asset->department) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., IT Department">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Department location</p>
-                </div>
-
-                <!-- Location -->
-                <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
-                    <input type="text" 
-                           id="location" 
-                           name="location" 
-                           value="{{ old('location', $asset->location) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Office 101, Storage Room">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Physical location</p>
-                </div>
-
-                <!-- Created By -->
-                <div>
-                    <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">Created By *</label>
-                    <input type="text" 
-                           id="created_by" 
-                           name="created_by" 
-                           value="{{ old('created_by', $asset->created_by) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Admin User"
                            required>
+                    <p class="mt-1 text-sm text-gray-500">Asset acquisition or creation date</p>
                 </div>
-            </div>
 
-            <!-- Specifications -->
-            <div class="mt-6">
-                <label for="specifications" class="block text-sm font-medium text-gray-700 mb-2">Asset Specifications</label>
-                <textarea id="specifications" 
-                          name="specifications" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter detailed specifications...">{{ old('specifications', $asset->specifications) }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Technical specifications, configuration details, etc.</p>
-            </div>
-
-            <!-- Notes -->
-            <div class="mt-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                <textarea id="notes" 
-                          name="notes" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter additional notes...">{{ old('notes', $asset->notes) }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Any additional information or special requirements</p>
-            </div>
+                <!-- Image Upload -->
+                <div class="md:col-span-2">
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Asset Image</label>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            @if($asset->image)
+                                <img id="imagePreview" src="{{ asset('storage/assets/' . $asset->image) }}" alt="Asset preview" class="h-20 w-20 object-cover rounded-lg border border-gray-300">
+                            @else
+                                <img id="imagePreview" src="{{ asset('images/no-image.png') }}" alt="Asset preview" class="h-20 w-20 object-cover rounded-lg border border-gray-300">
+                            @endif
+                        </div>
+                        <div class="flex-1">
+                            <input type="file" 
+                                   id="image" 
+                                   name="image" 
+                                   accept="image/*"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   onchange="previewImage(event)">
+                            <p class="mt-1 text-sm text-gray-500">Optional: Upload new asset image (JPG, PNG, GIF - Max 2MB)</p>
+                        </div>
+                    </div>
+                </div>
 
             <!-- Form Actions -->
-            <div class="flex justify-end gap-3 mt-8">
-                <a href="{{ route('admin.assetlifecycle.asset-management') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
-                    Cancel
+            <div class="flex justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                <a href="{{ route('admin.assetlifecycle.asset-management') }}" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium">
+                    <i class='bx bx-x mr-2'></i>Cancel
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    <i class='bx bx-save mr-2'></i>
-                    Update Asset
+                <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-medium shadow-lg">
+                    <i class='bx bx-save mr-2'></i>Update Asset
                 </button>
             </div>
         </form>
@@ -358,23 +194,20 @@
 </div>
 
 <script>
-// Validate warranty expiry is after purchase date
-document.addEventListener('DOMContentLoaded', function() {
-    const purchaseDate = document.getElementById('purchase_date');
-    const warrantyExpiry = document.getElementById('warranty_expiry');
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('imagePreview');
     
-    function validateWarranty() {
-        if (purchaseDate.value && warrantyExpiry.value) {
-            if (new Date(warrantyExpiry.value) <= new Date(purchaseDate.value)) {
-                warrantyExpiry.setCustomValidity('Warranty expiry must be after purchase date');
-            } else {
-                warrantyExpiry.setCustomValidity('');
-            }
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
         }
+        reader.readAsDataURL(file);
     }
-    
-    purchaseDate.addEventListener('change', validateWarranty);
-    warrantyExpiry.addEventListener('change', validateWarranty);
-});
+    // Don't reset to default if no file selected, keep existing image
+}
 </script>
+
 @endsection
+                                           

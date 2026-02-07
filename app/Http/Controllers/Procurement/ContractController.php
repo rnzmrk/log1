@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Procurement;
 
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class ContractController extends Controller
@@ -47,7 +48,7 @@ class ContractController extends Controller
             $query->where('vendor', 'like', '%' . $request->vendor . '%');
         }
 
-        $contracts = $query->orderBy('created_at', 'desc')->paginate(10);
+        $contracts = $query->with('supplier')->orderBy('created_at', 'desc')->paginate(10);
         
         return view('admin.procurement.create-contract-reports', compact('contracts'));
     }
@@ -57,7 +58,8 @@ class ContractController extends Controller
      */
     public function create()
     {
-        return view('admin.procurement.create-contract-reports-create');
+        $approvedSuppliers = Supplier::where('status', 'Active')->orderBy('name')->get();
+        return view('admin.procurement.create-contract-reports-create', compact('approvedSuppliers'));
     }
 
     /**
@@ -71,6 +73,7 @@ class ContractController extends Controller
             'vendor_contact' => 'nullable|string|max:255',
             'vendor_email' => 'nullable|email|max:255',
             'vendor_phone' => 'nullable|string|max:255',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
             'contract_type' => 'required|in:Service,Supply,Maintenance,Consulting,Software License,Hardware Lease,Other',
             'contract_value' => 'required|numeric|min:0|max:999999999999.99',
             'status' => 'required|in:Draft,Under Review,Active,Expired,Terminated,Renewed',

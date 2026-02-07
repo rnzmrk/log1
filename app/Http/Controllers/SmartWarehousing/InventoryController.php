@@ -4,6 +4,8 @@ namespace App\Http\Controllers\SmartWarehousing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
+use App\Models\OutboundLogistic;
+use App\Models\ReturnRefund;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -53,109 +55,166 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'item_name' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
+        $request->validate([
+            'sku' => 'required|string|unique:inventories,sku',
+            'item_name' => 'required|string',
+            'category' => 'required|string',
+            'location' => 'required|string',
             'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'supplier' => 'nullable|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'supplier' => 'required|string',
         ]);
 
-        // Auto-generate SKU
-        $validated['sku'] = 'SKU-' . date('Y') . '-' . str_pad(Inventory::count() + 1, 4, '0', STR_PAD_LEFT);
+        Inventory::create($request->all());
 
-        Inventory::create($validated);
-
-        return redirect()->route('inventory.index')
-            ->with('success', 'Inventory item created successfully.');
+        return redirect()->route('admin.warehousing.storage-inventory')
+            ->with('success', 'Item added successfully to inventory.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Inventory $inventory)
     {
-        $inventory = Inventory::findOrFail($id);
         return view('admin.warehousing.storage-inventory-show', compact('inventory'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Inventory $inventory)
     {
-        $inventory = Inventory::findOrFail($id);
         return view('admin.warehousing.storage-inventory-edit', compact('inventory'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Inventory $inventory)
     {
-        $inventory = Inventory::findOrFail($id);
-
-        $validated = $request->validate([
-            'sku' => 'required|string|unique:inventories,sku,'.$id,
-            'item_name' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'location' => 'required|string|max:255',
+        $request->validate([
+            'sku' => 'required|string|unique:inventories,sku,' . $inventory->id,
+            'item_name' => 'required|string',
+            'category' => 'required|string',
+            'location' => 'required|string',
             'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'supplier' => 'nullable|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'supplier' => 'required|string',
         ]);
 
-        $inventory->update($validated);
+        $inventory->update($request->all());
 
-        return redirect()->route('inventory.index')
-            ->with('success', 'Inventory item updated successfully.');
+        return redirect()->route('admin.warehousing.storage-inventory')
+            ->with('success', 'Item updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $inventory = Inventory::findOrFail($id);
-        $inventory->delete();
+    // public function destroy(Inventory $inventory)
+    // {
+    //     // Delete functionality removed
+    // }
 
-        return redirect()->route('inventory.index')
-            ->with('success', 'Inventory item deleted successfully.');
+    /**
+     * Request supply for low stock items
+     */
+    public function requestSupply(Inventory $inventory)
+    {
+        if ($inventory->status !== 'Low Stock') {
+            return redirect()->back()
+                ->with('error', 'Supply request can only be made for low stock items.');
+        }
+
+        // Create outbound logistic entry for supply request
+        OutboundLogistic::create([
+            'inventory_id' => $inventory->id,
+            'item_name' => $inventory->item_name,
+            'sku' => $inventory->sku,
+            'quantity' => 50, // Default supply quantity
+            'department' => 'Warehouse',
+            'status' => 'Pending Supply',
+            'request_type' => 'Supply Request',
+            'requested_by' => 'System',
+            'request_date' => now(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Supply request created successfully for ' . $inventory->item_name);
     }
 
     /**
-     * Move inventory item to new location
+     * Return item to returns management
      */
-    public function move(Request $request, string $id)
+    public function returnItem(Request $request, Inventory $inventory)
     {
-        $inventory = Inventory::findOrFail($id);
-
-        $validated = $request->validate([
-            'new_location' => 'required|string|max:255',
-            'move_quantity' => 'required|integer|min:1|max:' . $inventory->stock,
+        $request->validate([
+            'return_reason' => 'required|string',
+            'return_quantity' => 'required|integer|min:1|max:' . $inventory->stock,
         ]);
 
-        // Update the location and reduce stock
-        $inventory->location = $validated['new_location'];
-        $inventory->stock -= $validated['move_quantity'];
+        // Create return entry
+        ReturnRefund::create([
+            'inventory_id' => $inventory->id,
+            'item_name' => $inventory->item_name,
+            'sku' => $inventory->sku,
+            'quantity' => $request->return_quantity,
+            'reason' => $request->return_reason,
+            'status' => 'Return Pending',
+            'return_date' => now(),
+            'returned_by' => 'Warehouse Staff',
+        ]);
+
+        // Update inventory stock
+        $inventory->stock -= $request->return_quantity;
         $inventory->save();
 
-        // Create a new inventory record for the moved quantity
-        Inventory::create([
-            'sku' => $inventory->sku . '-MOVED-' . time(),
-            'item_name' => $inventory->item_name,
-            'category' => $inventory->category,
-            'location' => $validated['new_location'],
-            'stock' => $validated['move_quantity'],
-            'description' => $inventory->description,
-            'price' => $inventory->price,
-            'supplier' => $inventory->supplier,
+        return redirect()->back()
+            ->with('success', 'Item return processed successfully.');
+    }
+
+    /**
+     * Get low stock items for supply requests
+     */
+    public function getLowStockItems()
+    {
+        $lowStockItems = Inventory::where('status', 'Low Stock')
+            ->orderBy('stock', 'asc')
+            ->get();
+
+        return response()->json($lowStockItems);
+    }
+
+    /**
+     * Move item to outbound logistics for department supply
+     */
+    public function moveToOutbound(Request $request, Inventory $inventory)
+    {
+        $request->validate([
+            'department' => 'required|string',
+            'quantity' => 'required|integer|min:1|max:' . $inventory->stock,
         ]);
 
-        return redirect()->route('inventory.index')
-            ->with('success', 'Inventory item moved successfully.');
+        // Create outbound logistic entry
+        OutboundLogistic::create([
+            'inventory_id' => $inventory->id,
+            'item_name' => $inventory->item_name,
+            'sku' => $inventory->sku,
+            'quantity' => $request->quantity,
+            'department' => $request->department,
+            'status' => 'Ready to Ship',
+            'request_type' => 'Department Supply',
+            'requested_by' => 'Warehouse Staff',
+            'request_date' => now(),
+        ]);
+
+        // Update inventory stock
+        $inventory->stock -= $request->quantity;
+        $inventory->save();
+
+        return redirect()->route('admin.warehousing.outbound-logistics')
+            ->with('success', 'Item moved to outbound logistics for ' . $request->department);
     }
 }

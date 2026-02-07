@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Procurement;
 
 use App\Http\Controllers\Controller;
-use App\Models\Vendor;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -20,25 +20,25 @@ class VendorController extends Controller
             'rating' => $request->rating,
         ];
 
-        // Apply filters and paginate
-        $query = Vendor::query();
+        // Apply filters and paginate - show all suppliers (including website registrations)
+        $query = Supplier::query();
         $query->filter($filters);
-        $vendors = $query->orderBy('created_at', 'desc')->paginate(15);
+        $suppliers = $query->orderBy('created_at', 'desc')->paginate(15);
 
         // Get statistics
         $stats = [
-            'total_vendors' => Vendor::count(),
-            'active_vendors' => Vendor::where('status', 'Active')->count(),
-            'pending_vendors' => Vendor::where('status', 'Pending')->count(),
-            'high_rated_vendors' => Vendor::where('rating', '>=', 4.0)->count(),
+            'total_suppliers' => Supplier::count(),
+            'active_suppliers' => Supplier::where('status', 'Active')->count(),
+            'pending_suppliers' => Supplier::where('status', 'Pending')->count(),
+            'high_rated_suppliers' => Supplier::where('rating', '>=', 4.0)->count(),
         ];
 
         // Get filter options
         $filterOptions = [
-            'categories' => Vendor::distinct('category')->pluck('category')->filter()->sort()->values(),
+            'categories' => Supplier::distinct('category')->pluck('category')->filter()->sort()->values(),
         ];
 
-        return view('admin.procurement.vendors', compact('vendors', 'stats', 'filterOptions'));
+        return view('admin.procurement.vendors', compact('suppliers', 'stats', 'filterOptions'));
     }
 
     public function create()
@@ -71,24 +71,27 @@ class VendorController extends Controller
 
         $validated['created_by'] = auth()->id();
 
-        Vendor::create($validated);
+        Supplier::create($validated);
 
         return redirect()->route('procurement.vendors')
-            ->with('success', 'Vendor created successfully.');
+            ->with('success', 'Supplier created successfully.');
     }
 
-    public function show(Vendor $vendor)
+    public function show($vendor)
     {
-        return view('admin.procurement.vendors-show', compact('vendor'));
+        $supplier = Supplier::findOrFail($vendor);
+        return view('admin.procurement.vendors-show', compact('supplier'));
     }
 
-    public function edit(Vendor $vendor)
+    public function edit($vendor)
     {
-        return view('admin.procurement.vendors-edit', compact('vendor'));
+        $supplier = Supplier::findOrFail($vendor);
+        return view('admin.procurement.vendors-edit', compact('supplier'));
     }
 
-    public function update(Request $request, Vendor $vendor)
+    public function update(Request $request, $vendor)
     {
+        $supplier = Supplier::findOrFail($vendor);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'contact_person' => 'nullable|string|max:255',
@@ -110,18 +113,29 @@ class VendorController extends Controller
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        $vendor->update($validated);
+        $supplier->update($validated);
 
         return redirect()->route('procurement.vendors')
-            ->with('success', 'Vendor updated successfully.');
+            ->with('success', 'Supplier updated successfully.');
     }
 
-    public function destroy(Vendor $vendor)
+    public function approve($vendor)
     {
-        $vendor->delete();
+        $supplier = Supplier::findOrFail($vendor);
+        $supplier->status = 'Active';
+        $supplier->save();
 
         return redirect()->route('procurement.vendors')
-            ->with('success', 'Vendor deleted successfully.');
+            ->with('success', 'Supplier approved successfully.');
+    }
+
+    public function destroy($vendor)
+    {
+        $supplier = Supplier::findOrFail($vendor);
+        $supplier->delete();
+
+        return redirect()->route('procurement.vendors')
+            ->with('success', 'Supplier deleted successfully.');
     }
 
     public function export(Request $request)
@@ -135,18 +149,18 @@ class VendorController extends Controller
         ];
 
         // Apply filters and get data
-        $query = Vendor::query();
+        $query = Supplier::query();
         $query->filter($filters);
-        $vendors = $query->orderBy('name')->get();
+        $suppliers = $query->orderBy('name')->get();
 
         // Generate CSV
-        $filename = 'vendors-' . now()->format('Y-m-d-H-i-s') . '.csv';
+        $filename = 'suppliers-' . now()->format('Y-m-d-H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ];
 
-        $callback = function() use ($vendors) {
+        $callback = function() use ($suppliers) {
             $file = fopen('php://output', 'w');
             
             // CSV Header
@@ -174,28 +188,28 @@ class VendorController extends Controller
             ]);
 
             // CSV Data
-            foreach ($vendors as $vendor) {
+            foreach ($suppliers as $supplier) {
                 fputcsv($file, [
-                    $vendor->vendor_code,
-                    $vendor->name,
-                    $vendor->contact_person,
-                    $vendor->email,
-                    $vendor->phone,
-                    $vendor->address,
-                    $vendor->city,
-                    $vendor->state,
-                    $vendor->postal_code,
-                    $vendor->country,
-                    $vendor->category,
-                    is_array($vendor->services) ? implode(', ', $vendor->services) : $vendor->services,
-                    $vendor->tax_id,
-                    $vendor->payment_terms,
-                    $vendor->bank_name,
-                    $vendor->bank_account,
-                    $vendor->status,
-                    $vendor->rating,
-                    $vendor->notes,
-                    $vendor->created_at->format('Y-m-d H:i:s'),
+                    $supplier->vendor_code,
+                    $supplier->name,
+                    $supplier->contact_person,
+                    $supplier->email,
+                    $supplier->phone,
+                    $supplier->address,
+                    $supplier->city,
+                    $supplier->state,
+                    $supplier->postal_code,
+                    $supplier->country,
+                    $supplier->category,
+                    is_array($supplier->services) ? implode(', ', $supplier->services) : $supplier->services,
+                    $supplier->tax_id,
+                    $supplier->payment_terms,
+                    $supplier->bank_name,
+                    $supplier->bank_account,
+                    $supplier->status,
+                    $supplier->rating,
+                    $supplier->notes,
+                    $supplier->created_at->format('Y-m-d H:i:s'),
                 ]);
             }
 

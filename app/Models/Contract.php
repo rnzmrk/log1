@@ -13,6 +13,7 @@ class Contract extends Model
         'vendor_contact',
         'vendor_email',
         'vendor_phone',
+        'supplier_id',
         'contract_type',
         'contract_value',
         'status',
@@ -33,6 +34,14 @@ class Contract extends Model
         'end_date' => 'date',
         'renewal_date' => 'date',
     ];
+
+    /**
+     * Get the supplier associated with the contract.
+     */
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 
     protected static function boot()
     {

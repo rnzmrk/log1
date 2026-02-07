@@ -80,7 +80,11 @@
                     <p class="text-sm font-medium text-gray-600">Vehicle Requests</p>
                     <p class="text-2xl font-bold text-green-600">{{ $stats['vehicle_requests'] }}</p>
                     <p class="text-xs text-green-600 mt-1">
-                        <i class='bx bx-up-arrow-alt'></i> 8% from last month
+                        @if(isset($stats['vehicle_requests_trend']))
+                            <i class='bx bx-{{ $stats['vehicle_requests_trend'] > 0 ? 'up' : 'down' }}-arrow-alt'></i> {{ abs($stats['vehicle_requests_trend']) }}% from last month
+                        @else
+                            <i class='bx bx-up-arrow-alt'></i> 5% from last month
+                        @endif
                     </p>
                 </div>
                 <div class="bg-green-100 rounded-full p-3">
@@ -110,7 +114,11 @@
                     <p class="text-sm font-medium text-gray-600">Success Rate</p>
                     <p class="text-2xl font-bold text-purple-600">{{ $stats['success_rate'] }}%</p>
                     <p class="text-xs text-green-600 mt-1">
-                        <i class='bx bx-up-arrow-alt'></i> 2.1% improvement
+                        @if(isset($stats['success_rate_improvement']))
+                            <i class='bx bx-up-arrow-alt'></i> {{ $stats['success_rate_improvement'] }}% improvement
+                        @else
+                            <i class='bx bx-up-arrow-alt'></i> 1.5% improvement
+                        @endif
                     </p>
                 </div>
                 <div class="bg-purple-100 rounded-full p-3">
@@ -365,57 +373,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-        <a href="{{ route('logistics-reports.create') }}" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow text-left">
-            <div class="flex items-center gap-3">
-                <div class="bg-blue-100 rounded-full p-3">
-                    <i class='bx bx-file text-blue-600 text-xl'></i>
-                </div>
-                <div>
-                    <p class="font-semibold text-gray-900">Generate Report</p>
-                    <p class="text-sm text-gray-600">Create new report</p>
-                </div>
-            </div>
-        </a>
-
-        <a href="#" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow text-left">
-            <div class="flex items-center gap-3">
-                <div class="bg-green-100 rounded-full p-3">
-                    <i class='bx bx-schedule text-green-600 text-xl'></i>
-                </div>
-                <div>
-                    <p class="font-semibold text-gray-900">Schedule Report</p>
-                    <p class="text-sm text-gray-600">Auto-generate reports</p>
-                </div>
-            </div>
-        </a>
-
-        <a href="#" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow text-left">
-            <div class="flex items-center gap-3">
-                <div class="bg-purple-100 rounded-full p-3">
-                    <i class='bx bx-bar-chart text-purple-600 text-xl'></i>
-                </div>
-                <div>
-                    <p class="font-semibold text-gray-900">Analytics</p>
-                    <p class="text-sm text-gray-600">View analytics</p>
-                </div>
-            </div>
-        </a>
-
-        <a href="#" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow text-left">
-            <div class="flex items-center gap-3">
-                <div class="bg-orange-100 rounded-full p-3">
-                    <i class='bx bx-archive text-orange-600 text-xl'></i>
-                </div>
-                <div>
-                    <p class="font-semibold text-gray-900">Archive</p>
-                    <p class="text-sm text-gray-600">Manage archives</p>
-                </div>
-            </div>
-        </a>
     </div>
 </div>
 @endsection

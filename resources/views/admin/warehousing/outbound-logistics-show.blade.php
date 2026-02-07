@@ -105,7 +105,7 @@
                         @if ($outboundLogistic->total_value)
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Total Value</label>
-                            <p class="text-gray-900">${{ number_format($outboundLogistic->total_value, 2) }}</p>
+                            <p class="text-gray-900">₱{{ number_format($outboundLogistic->total_value, 2) }}</p>
                         </div>
                         @endif
                     </div>

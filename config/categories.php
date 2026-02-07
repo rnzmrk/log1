@@ -1,0 +1,113 @@
+<?php
+
+return [
+    'supply_categories' => [
+        'Office Supplies',
+        'IT Equipment',
+        'Furniture',
+        'Safety Equipment',
+        'Computer Supplies',
+        'Cellphone & Accessories',
+        'Printing Materials',
+        'Cleaning Supplies',
+        'Electrical Equipment',
+        'Tools & Hardware',
+    ],
+    
+    'project_types' => [
+        'Construction',
+        'Renovation',
+        'Maintenance',
+        'Installation',
+        'Inspection',
+        'Repair',
+        'Upgrades',
+        'Other',
+    ],
+    
+    'priorities' => [
+        'Low',
+        'Medium',
+        'High',
+        'Critical',
+        'Urgent',
+    ],
+    
+    'supplier_categories' => [
+        'Computer Supplier',
+        'Office Supplies',
+        'Cellphone Supplier',
+        'Furniture Supplier',
+        'Equipment Supplier',
+        'Software Supplier',
+        'Printing Services',
+        'IT Services',
+        'General',
+    ],
+
+    'validation_types' => [
+        'business_license' => 'Business License',
+        'tax_clearance' => 'Tax Clearance Certificate',
+        'insurance' => 'Insurance Certificate',
+        'professional_license' => 'Professional License',
+        'environmental_compliance' => 'Environmental Compliance',
+        'safety_compliance' => 'Safety Compliance',
+        'financial_statements' => 'Financial Statements',
+        'quality_certification' => 'Quality Certification (ISO)',
+        'trade_license' => 'Trade License',
+        'other' => 'Other',
+    ],
+
+    'verification_types' => [
+        'site_visit' => 'Site Visit',
+        'background_check' => 'Background Check',
+        'financial_audit' => 'Financial Audit',
+        'technical_evaluation' => 'Technical Evaluation',
+        'reference_check' => 'Reference Check',
+        'legal_compliance' => 'Legal Compliance Check',
+        'capacity_assessment' => 'Capacity Assessment',
+        'quality_assessment' => 'Quality Assessment',
+        'environmental_assessment' => 'Environmental Assessment',
+        'other' => 'Other',
+    ],
+
+    'procurement_types' => [
+        'goods' => 'Goods',
+        'services' => 'Services',
+        'works' => 'Works',
+        'consultancy' => 'Consultancy',
+    ],
+
+    'procurement_categories' => [
+        'IT Equipment',
+        'Office Supplies',
+        'Furniture',
+        'Vehicle',
+        'Machinery',
+        'Raw Materials',
+        'Professional Services',
+        'Maintenance Services',
+        'Construction Works',
+        'Training Services',
+        'Software Licenses',
+        'Insurance',
+        'Utilities',
+        'Marketing Services',
+        'Other',
+    ],
+
+    'departments' => [
+        'IT Department',
+        'Human Resources',
+        'Finance',
+        'Operations',
+        'Marketing',
+        'Administration',
+        'Procurement',
+        'Legal',
+        'Quality Assurance',
+        'Research & Development',
+        'Customer Service',
+        'Other',
+    ],
+];

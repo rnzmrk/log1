@@ -173,13 +173,6 @@
                                     <a href="{{ route('inbound-logistics.edit', $logistic->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
                                         <i class='bx bx-edit text-lg'></i>
                                     </a>
-                                    <form action="{{ route('inbound-logistics.destroy', $logistic->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this shipment?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>

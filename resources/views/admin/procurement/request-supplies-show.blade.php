@@ -105,13 +105,13 @@
                         @if ($supplyRequest->unit_price)
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Unit Price</label>
-                            <p class="text-gray-900">${{ number_format($supplyRequest->unit_price, 2) }}</p>
+                            <p class="text-gray-900">₱{{ number_format($supplyRequest->unit_price, 2) }}</p>
                         </div>
                         @endif
                         @if ($supplyRequest->total_cost)
                         <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Total Cost</label>
-                            <p class="text-gray-900 font-medium text-lg">${{ number_format($supplyRequest->total_cost, 2) }}</p>
+                            <p class="text-gray-900 font-medium text-lg">₱{{ number_format($supplyRequest->total_cost, 2) }}</p>
                         </div>
                         @endif
                     </div>

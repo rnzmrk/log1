@@ -162,7 +162,7 @@
                            step="0.01"
                            min="0"
                            required>
-                    <p class="mt-1 text-sm text-gray-500">Total contract value in USD</p>
+                    <p class="mt-1 text-sm text-gray-500">Total contract value in PHP</p>
                 </div>
 
                 <!-- Status -->

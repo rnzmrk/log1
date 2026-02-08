@@ -20,6 +20,9 @@ use App\Http\Controllers\AdminSettings\UserController;
 use App\Http\Controllers\AdminSettings\AuditLogController;
 use App\Http\Controllers\Procurement\VendorController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\InventoryController as NewInventoryController;
+use App\Http\Controllers\ProcurementController;
+use App\Http\Controllers\LogisticsController;
 
 
 // Authentication Routes
@@ -356,10 +359,46 @@ Route::put('users/{user}/toggle-status', [UserController::class, 'toggleStatus']
 
 Route::get('/admin/adminsettings/audit-logs', [AuditLogController::class, 'index'])->name('admin.adminsettings.audit-logs');
 
+// Vehicle Request Routes
+Route::resource('vehicle-requests', VehicleRequestController::class)->names([
+    'index' => 'vehicle-requests.index',
+    'create' => 'vehicle-requests.create',
+    'store' => 'vehicle-requests.store',
+    'show' => 'vehicle-requests.show',
+]);
+
+Route::get('/vehicle-requests/search-reservation', [VehicleRequestController::class, 'searchReservation'])->name('vehicle-requests.search-reservation');
+Route::post('/vehicle-requests/update-status', [VehicleRequestController::class, 'updateStatus'])->name('vehicle-requests.update-status');
+
 // Audit Log Management Routes
 Route::get('audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
 Route::get('audit-logs/export', [AuditLogController::class, 'export'])->name('audit-logs.export');
 Route::delete('audit-logs/clear', [AuditLogController::class, 'clearOldLogs'])->name('audit-logs.clear');
+
+    // New Inventory Management Routes
+    Route::get('/inventory/dashboard', [NewInventoryController::class, 'dashboard'])->name('inventory.dashboard');
+    Route::get('/inventory/low-stock', [NewInventoryController::class, 'lowStock'])->name('inventory.low-stock');
+    Route::get('/inventory/out-of-stock', [NewInventoryController::class, 'outOfStock'])->name('inventory.out-of-stock');
+    Route::get('/inventory/{inventory}/procurement-request', [NewInventoryController::class, 'createProcurementRequest'])->name('inventory.procurement-request');
+    Route::post('/inventory/{inventory}/procurement-request', [NewInventoryController::class, 'storeProcurementRequest'])->name('inventory.procurement-request.store');
+
+    // New Procurement Routes
+    Route::get('/procurement', [ProcurementController::class, 'index'])->name('procurement.index');
+    Route::get('/procurement/create', [ProcurementController::class, 'create'])->name('procurement.create');
+    Route::post('/procurement', [ProcurementController::class, 'store'])->name('procurement.store');
+    Route::get('/procurement/{supplyRequest}', [ProcurementController::class, 'show'])->name('procurement.show');
+    Route::post('/procurement/{supplyRequest}/approve', [ProcurementController::class, 'approve'])->name('procurement.approve');
+    Route::post('/procurement/{supplyRequest}/mark-ordered', [ProcurementController::class, 'markAsOrdered'])->name('procurement.mark-ordered');
+    Route::delete('/procurement/{supplyRequest}', [ProcurementController::class, 'destroy'])->name('procurement.destroy');
+
+    // New Logistics Routes
+    Route::get('/logistics', [LogisticsController::class, 'dashboard'])->name('logistics.dashboard');
+    Route::get('/logistics/outbound/create', [LogisticsController::class, 'outboundCreate'])->name('logistics.outbound.create');
+    Route::post('/logistics/outbound', [LogisticsController::class, 'outboundStore'])->name('logistics.outbound.store');
+    Route::get('/logistics/inbound/create', [LogisticsController::class, 'inboundCreate'])->name('logistics.inbound.create');
+    Route::post('/logistics/inbound', [LogisticsController::class, 'inboundStore'])->name('logistics.inbound.store');
+    Route::get('/logistics/history', [LogisticsController::class, 'history'])->name('logistics.history');
+    Route::get('/logistics/pending', [LogisticsController::class, 'pendingDeliveries'])->name('logistics.pending');
 
 });
 

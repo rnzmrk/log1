@@ -23,6 +23,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\InventoryController as NewInventoryController;
 use App\Http\Controllers\ProcurementController;
 use App\Http\Controllers\LogisticsController;
+use App\Http\Controllers\VehicleRequestController;
 
 
 // Authentication Routes

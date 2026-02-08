@@ -9,6 +9,9 @@ class InboundLogistic extends Model
     protected $fillable = [
         'shipment_id',
         'po_number',
+        'sku',
+        'item_name',
+        'category',
         'supplier',
         'expected_units',
         'received_units',

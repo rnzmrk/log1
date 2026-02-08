@@ -43,6 +43,13 @@ class SupplyRequest extends Model
     {
         parent::boot();
 
+        static::creating(function ($request) {
+            // Auto-generate request ID if not provided
+            if (!$request->request_id) {
+                $request->request_id = self::generateRequestID();
+            }
+        });
+
         static::saving(function ($request) {
             // Auto-calculate total cost when unit price and quantity are set
             if ($request->unit_price && $request->quantity_approved) {
@@ -59,5 +66,31 @@ class SupplyRequest extends Model
                 $request->order_date = now();
             }
         });
+    }
+
+    /**
+     * Generate automatic request ID
+     */
+    public static function generateRequestID()
+    {
+        $prefix = 'SR';
+        $year = date('Y');
+        $month = date('m');
+        
+        // Get the last request ID for this month
+        $lastRequest = self::where('request_id', 'like', "{$prefix}{$year}{$month}%")
+            ->orderBy('request_id', 'desc')
+            ->first();
+        
+        if ($lastRequest) {
+            // Extract the sequence number from the last request
+            $lastSequence = intval(substr($lastRequest->request_id, -4));
+            $newSequence = $lastSequence + 1;
+        } else {
+            $newSequence = 1;
+        }
+        
+        // Format: SR2026020001 (SR + Year + Month + 4-digit sequence)
+        return $prefix . $year . $month . str_pad($newSequence, 4, '0', STR_PAD_LEFT);
     }
 }

@@ -62,11 +62,11 @@
             @endif
 
             <!-- Inventory Selection -->
-            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Quick Fill from Inventory</h3>
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Search by SKU or Item Name</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="inventory_search" class="block text-sm font-medium text-gray-700 mb-2">Select Inventory Item (SKU or Name)</label>
+                        <label for="inventory_search" class="block text-sm font-medium text-gray-700 mb-2">Search SKU or Item Name</label>
                         <div class="relative">
                             <input type="text" 
                                    id="inventory_search" 
@@ -75,7 +75,7 @@
                                    autocomplete="off">
                             <div id="inventory_search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
                         </div>
-                        <p class="mt-1 text-sm text-gray-500">Start typing to search existing inventory items</p>
+                        <p class="mt-1 text-sm text-gray-500">Search existing inventory items to auto-fill all details</p>
                     </div>
                     <div class="flex items-end">
                         <button type="button" id="clear_inventory_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
@@ -105,9 +105,23 @@
                            id="po_number" 
                            name="po_number" 
                            value="{{ old('po_number') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., PO-2024-001"
-                           required>
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Select from PO search above"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO search</p>
+                </div>
+
+                <!-- SKU -->
+                <div>
+                    <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">SKU</label>
+                    <input type="text" 
+                           id="sku" 
+                           name="sku" 
+                           value="{{ old('sku') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Auto-filled from PO or inventory"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO or inventory selection</p>
                 </div>
 
                 <!-- Supplier -->
@@ -129,14 +143,15 @@
 
                 <!-- Item Name -->
                 <div>
-                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
+                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
                     <input type="text" 
                            id="item_name" 
                            name="item_name" 
                            value="{{ old('item_name') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Laptop, Office Chair"
-                           required>
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Auto-filled from SKU search"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from SKU selection</p>
                 </div>
 
                 <!-- Expected Units -->
@@ -217,10 +232,11 @@ document.getElementById('inventory_search').addEventListener('input', function(e
                 } else {
                     data.forEach(item => {
                         const div = document.createElement('div');
-                        div.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                        div.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0';
                         div.innerHTML = `
                             <div class="font-medium text-sm">${item.item_name}</div>
                             <div class="text-xs text-gray-500">SKU: ${item.sku} | Stock: ${item.stock} | Location: ${item.location}</div>
+                            <div class="text-xs text-blue-600">Category: ${item.category} | Supplier: ${item.supplier || 'N/A'}</div>
                         `;
                         div.addEventListener('click', () => selectInventory(item));
                         resultsDiv.appendChild(div);
@@ -242,13 +258,15 @@ function selectInventory(item) {
     document.getElementById('inventory_search').value = `${item.sku} - ${item.item_name}`;
     document.getElementById('inventory_search_results').classList.add('hidden');
     
-    // Auto-fill form fields
+    // Auto-fill all form fields
     document.getElementById('shipment_id').value = `IN-${item.sku}`;
+    document.getElementById('po_number').value = `PO-${item.sku}`;
+    document.getElementById('sku').value = item.sku;
     document.getElementById('item_name').value = item.item_name;
     document.getElementById('expected_units').value = 1;
 
+    // Auto-select supplier if available
     if (item.supplier && document.getElementById('supplier')) {
-        // Try to find and select the supplier in the dropdown
         const supplierSelect = document.getElementById('supplier');
         const options = supplierSelect.options;
         for (let i = 0; i < options.length; i++) {
@@ -263,9 +281,6 @@ function selectInventory(item) {
     const expectedDate = new Date();
     expectedDate.setDate(expectedDate.getDate() + 3);
     document.getElementById('expected_date').value = expectedDate.toISOString().split('T')[0];
-    
-    // Optional: fill supplier with a default or existing value if available
-    // Note: This field may not exist in inbound form; adjust if needed
 }
 
 // Clear selection
@@ -275,9 +290,12 @@ document.getElementById('clear_inventory_selection').addEventListener('click', f
     document.getElementById('inventory_search_results').classList.add('hidden');
     // Clear auto-filled fields
     document.getElementById('shipment_id').value = '';
+    document.getElementById('po_number').value = '';
+    document.getElementById('sku').value = '';
     document.getElementById('item_name').value = '';
     document.getElementById('expected_units').value = '';
     document.getElementById('expected_date').value = '';
+    // Reset supplier dropdown
     if (document.getElementById('supplier')) {
         document.getElementById('supplier').selectedIndex = 0;
     }

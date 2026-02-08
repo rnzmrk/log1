@@ -111,6 +111,10 @@ Route::resource('supply-requests', SupplyRequestController::class)->names([
     'destroy' => 'supply-requests.destroy',
 ]);
 
+// Supply Request Approval Routes
+Route::post('/supply-requests/{supplyRequest}/approve', [SupplyRequestController::class, 'approve'])->name('supply-requests.approve');
+Route::post('/supply-requests/{supplyRequest}/reject', [SupplyRequestController::class, 'reject'])->name('supply-requests.reject');
+
 Route::get('/admin/procurement/create-purchase-order', [PurchaseOrderController::class, 'index'])->name('admin.procurement.create-purchase-order');
 
 Route::resource('purchase-orders', PurchaseOrderController::class)->names([
@@ -122,6 +126,10 @@ Route::resource('purchase-orders', PurchaseOrderController::class)->names([
     'update' => 'purchase-orders.update',
     'destroy' => 'purchase-orders.destroy',
 ]);
+
+// Purchase Order Approval Routes
+Route::post('/purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
+Route::post('/purchase-orders/{purchaseOrder}/reject', [PurchaseOrderController::class, 'reject'])->name('purchase-orders.reject');
 
 Route::get('/admin/procurement/create-contract-reports', [ContractController::class, 'index'])->name('admin.procurement.create-contract-reports');
 

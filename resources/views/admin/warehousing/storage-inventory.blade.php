@@ -63,11 +63,9 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
                     <select name="category" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">All Categories</option>
-                        <option value="Electronics" {{ request('category') === 'Electronics' ? 'selected' : '' }}>Electronics</option>
-                        <option value="Furniture" {{ request('category') === 'Furniture' ? 'selected' : '' }}>Furniture</option>
-                        <option value="Raw Materials" {{ request('category') === 'Raw Materials' ? 'selected' : '' }}>Raw Materials</option>
-                        <option value="Medical" {{ request('category') === 'Medical' ? 'selected' : '' }}>Medical</option>
-                        <option value="Finished Goods" {{ request('category') === 'Finished Goods' ? 'selected' : '' }}>Finished Goods</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category }}" {{ request('category') === $category ? 'selected' : '' }}>{{ $category }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -108,7 +106,7 @@
             </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table id="inventoryTable" class="w-full" data-export="excel">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
@@ -164,6 +162,12 @@
                                             <i class='bx bx-transfer text-lg'></i>
                                         </button>
                                     @endif
+                                    <button class="delete-btn text-red-600 hover:text-red-900" 
+                                            data-item="{{ $inventory->item_name }}" 
+                                            data-url="{{ route('inventory.destroy', $inventory->id) }}" 
+                                            title="Delete">
+                                        <i class='bx bx-trash text-lg'></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -304,4 +308,6 @@ document.getElementById('moveForm').addEventListener('submit', function(e) {
     });
 });
 </script>
+
+<script src="{{ asset('js/excel-export.js') }}"></script>
 @endsection

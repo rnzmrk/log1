@@ -63,8 +63,17 @@ class InboundLogisticController extends Controller
         $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
             ->orderBy('name')
             ->get();
+            
+        // Get approved purchase orders for connection
+        $purchaseOrders = \App\Models\PurchaseOrder::whereIn('status', ['Approved', 'Sent'])
+            ->orderBy('po_number')
+            ->get();
+            
+        // Get inventory items for auto-fill
+        $inventoryItems = \App\Models\Inventory::orderBy('item_name')
+            ->get();
         
-        return view('admin.warehousing.inbound-logistics-create', compact('suppliers'));
+        return view('admin.warehousing.inbound-logistics-create', compact('suppliers', 'purchaseOrders', 'inventoryItems'));
     }
 
     /**

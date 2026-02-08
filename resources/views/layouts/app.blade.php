@@ -47,5 +47,10 @@
     {{-- Scripts --}}
     @stack('scripts')
     
+    {{-- Admin Notifications System --}}
+    @if(request()->is('admin/*'))
+        @include('includes.admin-notifications')
+    @endif
+    
 </body>
 </html>

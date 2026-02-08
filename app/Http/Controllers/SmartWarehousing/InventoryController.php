@@ -59,7 +59,11 @@ class InventoryController extends Controller
      */
     public function create()
     {
-        return view('admin.warehousing.storage-inventory-create');
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.warehousing.storage-inventory-create', compact('suppliers'));
     }
 
     /**
@@ -121,7 +125,11 @@ class InventoryController extends Controller
      */
     public function edit(Inventory $inventory)
     {
-        return view('admin.warehousing.storage-inventory-edit', compact('inventory'));
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.warehousing.storage-inventory-edit', compact('inventory', 'suppliers'));
     }
 
     /**

@@ -120,7 +120,7 @@
             </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table id="supplyRequestsTable" class="w-full" data-export="excel">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
@@ -214,9 +214,17 @@
                                     <a href="{{ route('supply-requests.show', $request->id) }}" class="text-blue-600 hover:text-blue-900" title="View">
                                         <i class='bx bx-show text-lg'></i>
                                     </a>
-                                    <a href="{{ route('supply-requests.edit', $request->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
-                                        <i class='bx bx-edit text-lg'></i>
-                                    </a>
+                                    @if ($request->status === 'Pending')
+                                        <a href="{{ route('supply-requests.edit', $request->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
+                                            <i class='bx bx-edit text-lg'></i>
+                                        </a>
+                                        <button class="approve-btn text-green-600 hover:text-green-900" 
+                                                data-item="Supply Request #{{ $request->id }}" 
+                                                data-url="{{ route('supply-requests.approve', $request->id) }}" 
+                                                title="Approve">
+                                            <i class='bx bx-check-circle text-lg'></i>
+                                        </button>
+                                    @endif
                                     
                                     @if($request->status === 'Approved')
                                         <a href="{{ route('admin.procurement.create-purchase-order') }}?request_id={{ $request->id }}" class="text-purple-600 hover:text-purple-900" title="Create Purchase Order">
@@ -224,13 +232,12 @@
                                         </a>
                                     @endif
                                     
-                                    <form action="{{ route('supply-requests.destroy', $request->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this request?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
+                                    <button class="delete-btn text-red-600 hover:text-red-900" 
+                                            data-item="Supply Request #{{ $request->id }}" 
+                                            data-url="{{ route('supply-requests.destroy', $request->id) }}" 
+                                            title="Delete">
+                                        <i class='bx bx-trash text-lg'></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -272,4 +279,6 @@
         </div>
     </div>
 </div>
+
+<script src="{{ asset('js/excel-export.js') }}"></script>
 @endsection

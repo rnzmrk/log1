@@ -163,13 +163,18 @@
                 <!-- Supplier -->
                 <div>
                     <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
-                    <input type="text" 
-                           id="supplier" 
-                           name="supplier" 
-                           value="{{ old('supplier', $inventory->supplier) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Dell Technologies">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Supplier name</p>
+                    <select id="supplier" 
+                            name="supplier" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select a supplier...</option>
+                        @foreach($suppliers as $supplier)
+                            <option value="{{ $supplier->name }}" 
+                                    {{ old('supplier', $inventory->supplier) == $supplier->name ? 'selected' : '' }}>
+                                {{ $supplier->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Optional: Select from approved suppliers</p>
                 </div>
             </div>
 

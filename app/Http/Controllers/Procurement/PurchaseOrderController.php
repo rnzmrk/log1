@@ -93,8 +93,12 @@ class PurchaseOrderController extends Controller
             'supply_request_id' => 'nullable|integer|exists:supply_requests,id',
         ]);
 
-        // Auto-generate PO number
-        $validated['po_number'] = 'PO-' . date('Y') . '-' . str_pad(PurchaseOrder::count() + 1, 4, '0', STR_PAD_LEFT);
+        // Auto-generate PO number based on supply request connection
+        if (!empty($validated['supply_request_id'])) {
+            $validated['po_number'] = PurchaseOrder::generateFromSupplyRequest($validated['supply_request_id']);
+        } else {
+            $validated['po_number'] = PurchaseOrder::generatePONumber();
+        }
 
         $purchaseOrder = PurchaseOrder::create($validated);
 
@@ -178,5 +182,40 @@ class PurchaseOrderController extends Controller
 
         return redirect()->route('purchase-orders.index')
             ->with('success', 'Purchase order deleted successfully.');
+    }
+
+    /**
+     * Approve the purchase order.
+     */
+    public function approve(string $id)
+    {
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->status = 'Approved';
+        $purchaseOrder->approved_by = auth()->user()->name;
+        $purchaseOrder->approved_at = now();
+        $purchaseOrder->save();
+
+        return redirect()->route('purchase-orders.index')
+            ->with('success', 'Purchase order approved successfully.');
+    }
+
+    /**
+     * Reject the purchase order.
+     */
+    public function reject(Request $request, string $id)
+    {
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->status = 'Rejected';
+        $purchaseOrder->rejected_by = auth()->user()->name;
+        $purchaseOrder->rejected_at = now();
+        
+        if ($request->has('rejection_reason')) {
+            $purchaseOrder->rejection_reason = $request->rejection_reason;
+        }
+        
+        $purchaseOrder->save();
+
+        return redirect()->route('purchase-orders.index')
+            ->with('success', 'Purchase order rejected successfully.');
     }
 }

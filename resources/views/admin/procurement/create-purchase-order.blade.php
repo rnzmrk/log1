@@ -121,7 +121,7 @@
             </div>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table id="purchaseOrdersTable" class="w-full" data-export="excel">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PO Number</th>
@@ -208,16 +208,23 @@
                                     <a href="{{ route('purchase-orders.show', $po->id) }}" class="text-blue-600 hover:text-blue-900" title="View">
                                         <i class='bx bx-show text-lg'></i>
                                     </a>
-                                    <a href="{{ route('purchase-orders.edit', $po->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
-                                        <i class='bx bx-edit text-lg'></i>
-                                    </a>
-                                    <form action="{{ route('purchase-orders.destroy', $po->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this purchase order?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class='bx bx-trash text-lg'></i>
+                                    @if ($po->status === 'Draft' || $po->status === 'Sent')
+                                        <a href="{{ route('purchase-orders.edit', $po->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
+                                            <i class='bx bx-edit text-lg'></i>
+                                        </a>
+                                        <button class="approve-btn text-green-600 hover:text-green-900" 
+                                                data-item="{{ $po->po_number }}" 
+                                                data-url="{{ route('purchase-orders.approve', $po->id) }}" 
+                                                title="Approve">
+                                            <i class='bx bx-check-circle text-lg'></i>
                                         </button>
-                                    </form>
+                                    @endif
+                                    <button class="delete-btn text-red-600 hover:text-red-900" 
+                                            data-item="{{ $po->po_number }}" 
+                                            data-url="{{ route('purchase-orders.destroy', $po->id) }}" 
+                                            title="Delete">
+                                        <i class='bx bx-trash text-lg'></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -259,4 +266,6 @@
         </div>
     </div>
 </div>
+
+<script src="{{ asset('js/excel-export.js') }}"></script>
 @endsection

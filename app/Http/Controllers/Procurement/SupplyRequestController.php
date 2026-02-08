@@ -82,9 +82,6 @@ class SupplyRequestController extends Controller
             'approved_by' => 'nullable|string|max:255',
         ]);
 
-        // Auto-generate request ID
-        $validated['request_id'] = 'REQ-' . date('Y') . '-' . str_pad(SupplyRequest::count() + 1, 4, '0', STR_PAD_LEFT);
-
         SupplyRequest::create($validated);
 
         return redirect()->route('supply-requests.index')
@@ -156,5 +153,40 @@ class SupplyRequestController extends Controller
 
         return redirect()->route('supply-requests.index')
             ->with('success', 'Supply request deleted successfully.');
+    }
+
+    /**
+     * Approve the supply request.
+     */
+    public function approve(string $id)
+    {
+        $supplyRequest = SupplyRequest::findOrFail($id);
+        $supplyRequest->status = 'Approved';
+        $supplyRequest->approved_by = auth()->user()->name;
+        $supplyRequest->approved_at = now();
+        $supplyRequest->save();
+
+        return redirect()->route('supply-requests.index')
+            ->with('success', 'Supply request approved successfully.');
+    }
+
+    /**
+     * Reject the supply request.
+     */
+    public function reject(Request $request, string $id)
+    {
+        $supplyRequest = SupplyRequest::findOrFail($id);
+        $supplyRequest->status = 'Rejected';
+        $supplyRequest->rejected_by = auth()->user()->name;
+        $supplyRequest->rejected_at = now();
+        
+        if ($request->has('rejection_reason')) {
+            $supplyRequest->rejection_reason = $request->rejection_reason;
+        }
+        
+        $supplyRequest->save();
+
+        return redirect()->route('supply-requests.index')
+            ->with('success', 'Supply request rejected successfully.');
     }
 }

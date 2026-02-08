@@ -104,10 +104,6 @@
                 <i class='bx bx-chevron-down ml-auto text-xl transition-transform transform duration-300'></i>
             </button>
             <div class="dropdown hidden flex-col pl-12 space-y-2 mt-2">
-                <a href="{{ route('vehicle-requests.index') }}" class="flex items-center gap-3 p-2 rounded-lg text-gray-200 hover:bg-[#4353a2] transition-colors">
-                    <i class='bx bx-right-arrow-alt text-[12px]'></i>
-                    <span class="text-sm">Vehicle Requests</span>
-                </a>
                 <a href="{{ route('admin.logistictracking.request-vehicle') }}" class="flex items-center gap-3 p-2 rounded-lg text-gray-200 hover:bg-[#4353a2] transition-colors">
                     <i class='bx bx-right-arrow-alt text-[12px]'></i>
                     <span class="text-sm">Request Vehicle</span>

@@ -84,7 +84,7 @@ class InboundLogisticController extends Controller
         $request->validate([
             'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id',
             'supplier' => 'required|string',
-            'item_name' => 'required|string',
+            'item_name' => 'nullable|string',
             'expected_units' => 'required|integer|min:1',
             'expected_date' => 'required|date',
             'description' => 'nullable|string',

@@ -26,8 +26,20 @@
                     <p class="text-gray-600">Enter your credentials to access your account</p>
                 </div>
 
-                <form class="space-y-6" method="POST" action="{{ route('login.submit') }}">
+                @if(session('status'))
+                    <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
+                        <div class="flex items-center">
+                            <i class='bx bx-info-circle text-xl mr-2'></i>
+                            <span>{{ session('status') }}</span>
+                        </div>
+                    </div>
+                @endif
+
+                <form class="space-y-6" method="POST" action="{{ route('login.submit') }}" onsubmit="console.log('Form submitting...'); return true;">
                     @csrf
+                    
+                    <!-- Debug info -->
+                    <input type="hidden" name="debug" value="1">
                     
                     <!-- Error Messages -->
                     @if ($errors->any())
@@ -44,16 +56,8 @@
                         </div>
                     @endif
 
-                    @if(session('error'))
-                        <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-                            <div class="flex items-center">
-                                <i class='bx bx-error-circle text-xl mr-2'></i>
-                                <span>{{ session('error') }}</span>
-                            </div>
-                        </div>
-                    @endif
-
                     <div class="space-y-5">
+                        <div id="credentialsFields">
                         <!-- Email -->
                         <div>
                             <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
@@ -86,9 +90,26 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                        </div>
+
+                        <!-- OTP Field (hidden by default, shown after credentials are validated) -->
+                        <div id="otpField" class="hidden">
+                            <label for="otp" class="block text-sm font-semibold text-gray-700 mb-2">Verification Code</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class='bx bx-shield-check text-gray-400 text-lg'></i>
+                                </div>
+                                <input id="otp" name="otp" type="text" maxlength="6" autocomplete="one-time-code"
+                                       placeholder="Enter 6-digit code"
+                                       class="appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-center text-xl font-mono">
+                            </div>
+                            @error('otp')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
 
-                    <div class="flex items-center justify-between mt-5">
+                    <div id="rememberRow" class="flex items-center justify-between mt-5">
                         <div class="flex items-center">
                             <input id="remember-me" name="remember" type="checkbox" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
                             <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
@@ -100,9 +121,9 @@
                     </div>
 
                     <div class="mt-6">
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-purple-800 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-[1.02] transition-all duration-200 shadow-lg">
-                            <i class='bx bx-log-in mr-2'></i>
-                            Sign In
+                        <button type="submit" id="loginButton" class="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-purple-800 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-[1.02] transition-all duration-200 shadow-lg" onclick="console.log('Button clicked!');">
+                            <i class='bx bx-log-in mr-2' id="buttonIcon"></i>
+                            <span id="buttonText">Sign In</span>
                         </button>
                     </div>
                 </form>
@@ -298,6 +319,83 @@ function switchTab(tab) {
         registerForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
     }
+}
+
+// Check if OTP was sent and show verification UI
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, setting up form...');
+    
+    // Show OTP field if there's a status message (OTP sent)
+    const statusMessage = '{{ session('status') }}';
+    if (statusMessage && statusMessage.includes('verification code')) {
+        showOTPVerification();
+    }
+    
+    // Focus on OTP field if it's visible
+    const otpField = document.getElementById('otp');
+    if (otpField && !document.getElementById('otpField').classList.contains('hidden')) {
+        otpField.focus();
+    }
+    
+    // Ensure form submission works
+    const loginForm = document.querySelector('form[action*="login"]');
+    if (loginForm) {
+        console.log('Login form found');
+        loginForm.addEventListener('submit', function(e) {
+            console.log('Form submit event triggered');
+        });
+    }
+});
+
+function showOTPVerification() {
+    // Show OTP field
+    const otpField = document.getElementById('otpField');
+    if (otpField) {
+        otpField.classList.remove('hidden');
+    }
+
+    const credentialsFields = document.getElementById('credentialsFields');
+    if (credentialsFields) {
+        credentialsFields.classList.add('hidden');
+    }
+
+    const rememberRow = document.getElementById('rememberRow');
+    if (rememberRow) {
+        rememberRow.classList.add('hidden');
+    }
+
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.removeAttribute('required');
+        emailInput.setAttribute('disabled', 'disabled');
+    }
+
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+        passwordInput.removeAttribute('required');
+        passwordInput.setAttribute('disabled', 'disabled');
+    }
+
+    const otpInput = document.getElementById('otp');
+    if (otpInput) {
+        otpInput.setAttribute('required', 'required');
+    }
+    
+    // Update button
+    const buttonIcon = document.getElementById('buttonIcon');
+    const buttonText = document.getElementById('buttonText');
+    if (buttonIcon && buttonText) {
+        buttonIcon.className = 'bx bx-check-shield mr-2';
+        buttonText.textContent = 'Verify & Login';
+    }
+    
+    // Focus on OTP input
+    setTimeout(() => {
+        const otpInput = document.getElementById('otp');
+        if (otpInput) {
+            otpInput.focus();
+        }
+    }, 100);
 }
 </script>
 

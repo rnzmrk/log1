@@ -41,7 +41,18 @@ class InboundLogisticController extends Controller
 
         $inboundLogistics = $query->orderBy('created_at', 'desc')->paginate(10);
         
-        return view('admin.warehousing.inbound-logistics', compact('inboundLogistics'));
+        // Get statistics
+        $stats = [
+            'total' => InboundLogistic::count(),
+            'pending' => InboundLogistic::where('status', 'Pending')->count(),
+            'accepted' => InboundLogistic::where('status', 'Accepted')->count(),
+            'rejected' => InboundLogistic::where('status', 'Rejected')->count(),
+            'overdue' => InboundLogistic::where('status', 'Pending')
+                ->where('expected_date', '<', now())
+                ->count(),
+        ];
+        
+        return view('admin.warehousing.inbound-logistics', compact('inboundLogistics', 'stats'));
     }
 
     /**
@@ -177,5 +188,148 @@ class InboundLogisticController extends Controller
 
         return redirect()->back()
             ->with('success', 'Shipment rejected successfully.');
+    }
+
+    /**
+     * Export inbound logistics to CSV
+     */
+    public function export(Request $request)
+    {
+        $query = InboundLogistic::query();
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('shipment_id', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('supplier', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('expected_date', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('expected_date', '<=', $request->to_date);
+        }
+
+        $inboundLogistics = $query->orderBy('created_at', 'desc')->get();
+
+        // Create CSV export
+        $filename = 'inbound-logistics-' . date('Y-m-d') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($inboundLogistics) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV Header
+            fputcsv($file, [
+                'Shipment ID',
+                'Supplier',
+                'Item Name',
+                'Quantity',
+                'Expected Date',
+                'Status',
+                'Description',
+                'Created At',
+                'Accepted Date',
+                'Rejected Date',
+                'Rejection Reason'
+            ]);
+
+            // CSV Data
+            foreach ($inboundLogistics as $logistic) {
+                fputcsv($file, [
+                    $logistic->shipment_id,
+                    $logistic->supplier,
+                    $logistic->item_name,
+                    $logistic->quantity,
+                    $logistic->expected_date->format('Y-m-d'),
+                    $logistic->status,
+                    $logistic->description,
+                    $logistic->created_at->format('Y-m-d H:i:s'),
+                    $logistic->accepted_date ? $logistic->accepted_date->format('Y-m-d H:i:s') : '',
+                    $logistic->rejected_date ? $logistic->rejected_date->format('Y-m-d H:i:s') : '',
+                    $logistic->rejection_reason ?? ''
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Bulk actions on inbound logistics
+     */
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => 'required|in:accept,reject,delete',
+            'inbound_ids' => 'required|array',
+            'inbound_ids.*' => 'exists:inbound_logistics,id',
+            'rejection_reason' => 'required_if:action,reject|string',
+        ]);
+
+        $inboundIds = $request->inbound_ids;
+
+        if ($request->action === 'accept') {
+            $count = 0;
+            foreach ($inboundIds as $id) {
+                $inbound = InboundLogistic::find($id);
+                if ($inbound && $inbound->status === 'Pending') {
+                    // Move to inventory logic here
+                    $existingInventory = Inventory::where('sku', $inbound->shipment_id)->first();
+                    
+                    if ($existingInventory) {
+                        $existingInventory->stock += $inbound->quantity;
+                        $existingInventory->save();
+                    } else {
+                        Inventory::create([
+                            'sku' => $inbound->shipment_id,
+                            'item_name' => $inbound->item_name,
+                            'category' => 'General',
+                            'location' => 'Main Warehouse',
+                            'stock' => $inbound->quantity,
+                            'description' => $inbound->description,
+                            'price' => 0.00,
+                            'supplier' => $inbound->supplier,
+                        ]);
+                    }
+                    
+                    $inbound->status = 'Accepted';
+                    $inbound->accepted_date = now();
+                    $inbound->save();
+                    $count++;
+                }
+            }
+            return redirect()->back()->with('success', $count . ' shipments accepted successfully.');
+        }
+
+        if ($request->action === 'reject') {
+            $count = 0;
+            foreach ($inboundIds as $id) {
+                $inbound = InboundLogistic::find($id);
+                if ($inbound && $inbound->status === 'Pending') {
+                    $inbound->status = 'Rejected';
+                    $inbound->rejection_reason = $request->rejection_reason;
+                    $inbound->rejected_date = now();
+                    $inbound->save();
+                    $count++;
+                }
+            }
+            return redirect()->back()->with('success', $count . ' shipments rejected successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid action.');
     }
 }

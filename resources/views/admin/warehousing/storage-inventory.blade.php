@@ -214,6 +214,7 @@
             <form id="moveForm" method="POST">
                 @csrf
                 <input type="hidden" id="moveItemId" name="item_id">
+                <input type="hidden" name="_method" value="POST">
                 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Item</label>

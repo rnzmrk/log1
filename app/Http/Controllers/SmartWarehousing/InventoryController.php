@@ -39,7 +39,19 @@ class InventoryController extends Controller
 
         $inventories = $query->orderBy('created_at', 'desc')->paginate(10);
         
-        return view('admin.warehousing.storage-inventory', compact('inventories'));
+        // Get statistics
+        $stats = [
+            'total_items' => Inventory::count(),
+            'total_stock' => Inventory::sum('stock'),
+            'low_stock' => Inventory::where('status', 'Low Stock')->count(),
+            'out_of_stock' => Inventory::where('stock', 0)->count(),
+            'total_value' => Inventory::selectRaw('SUM(stock * price) as total_value')->value('total_value'),
+        ];
+        
+        // Get categories for filter
+        $categories = Inventory::distinct()->pluck('category');
+        
+        return view('admin.warehousing.storage-inventory', compact('inventories', 'stats', 'categories'));
     }
 
     /**
@@ -56,20 +68,44 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'sku' => 'required|string|unique:inventories,sku',
             'item_name' => 'required|string',
             'category' => 'required|string',
             'location' => 'required|string',
             'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'supplier' => 'required|string',
+            'sku' => 'nullable|string|unique:inventories,sku',
+            'price' => 'nullable|numeric|min:0',
+            'supplier' => 'nullable|string',
         ]);
 
-        Inventory::create($request->all());
+        $data = $request->only([
+            'sku',
+            'item_name',
+            'category',
+            'location',
+            'stock',
+            'description',
+            'price',
+            'supplier',
+        ]);
+
+        if (empty($data['sku'])) {
+            $data['sku'] = $this->generateSku();
+        }
+
+        Inventory::create($data);
 
         return redirect()->route('admin.warehousing.storage-inventory')
             ->with('success', 'Item added successfully to inventory.');
+    }
+
+    private function generateSku(): string
+    {
+        do {
+            $sku = 'SKU-' . strtoupper(bin2hex(random_bytes(4)));
+        } while (Inventory::where('sku', $sku)->exists());
+
+        return $sku;
     }
 
     /**
@@ -176,6 +212,25 @@ class InventoryController extends Controller
     }
 
     /**
+     * Search inventory items for autocomplete
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $items = Inventory::where('sku', 'like', '%' . $query . '%')
+            ->orWhere('item_name', 'like', '%' . $query . '%')
+            ->select(['id', 'sku', 'item_name', 'stock', 'location'])
+            ->limit(10)
+            ->get();
+
+        return response()->json($items);
+    }
+
+    /**
      * Get low stock items for supply requests
      */
     public function getLowStockItems()
@@ -185,6 +240,48 @@ class InventoryController extends Controller
             ->get();
 
         return response()->json($lowStockItems);
+    }
+
+    /**
+     * Move inventory item to a new location (with partial quantity support)
+     */
+    public function move(Request $request, $id)
+    {
+        $inventory = Inventory::findOrFail($id);
+
+        $request->validate([
+            'new_location' => 'required|string',
+            'move_quantity' => 'required|integer|min:1|max:' . $inventory->stock,
+        ]);
+
+        $moveQuantity = $request->integer('move_quantity');
+
+        // If moving the full stock, just update location
+        if ($moveQuantity >= $inventory->stock) {
+            $inventory->location = $request->input('new_location');
+            $inventory->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Moved all {$moveQuantity} units to {$request->input('new_location')}",
+            ]);
+        }
+
+        // Partial move: create a new inventory record for the moved quantity
+        $newInventory = $inventory->replicate();
+        $newInventory->stock = $moveQuantity;
+        $newInventory->location = $request->input('new_location');
+        $newInventory->sku = $this->generateSku(); // ensure unique SKU for the split item
+        $newInventory->save();
+
+        // Reduce original stock
+        $inventory->stock -= $moveQuantity;
+        $inventory->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Moved {$moveQuantity} units to {$request->input('new_location')}",
+        ]);
     }
 
     /**
@@ -216,5 +313,145 @@ class InventoryController extends Controller
 
         return redirect()->route('admin.warehousing.outbound-logistics')
             ->with('success', 'Item moved to outbound logistics for ' . $request->department);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Inventory $inventory)
+    {
+        $itemName = $inventory->item_name;
+        $inventory->delete();
+
+        return redirect()->route('admin.warehousing.storage-inventory')
+            ->with('success', "Item '{$itemName}' has been deleted successfully.");
+    }
+
+    /**
+     * Export inventory to CSV
+     */
+    public function export(Request $request)
+    {
+        $query = Inventory::query();
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('sku', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('category', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        $inventories = $query->orderBy('created_at', 'desc')->get();
+
+        // Create CSV export
+        $filename = 'inventory-' . date('Y-m-d') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($inventories) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV Header
+            fputcsv($file, [
+                'SKU',
+                'Item Name',
+                'Category',
+                'Location',
+                'Stock',
+                'Status',
+                'Price',
+                'Total Value',
+                'Supplier',
+                'Description',
+                'Last Updated'
+            ]);
+
+            // CSV Data
+            foreach ($inventories as $inventory) {
+                fputcsv($file, [
+                    $inventory->sku,
+                    $inventory->item_name,
+                    $inventory->category,
+                    $inventory->location,
+                    $inventory->stock,
+                    $inventory->status,
+                    $inventory->price,
+                    $inventory->stock * $inventory->price,
+                    $inventory->supplier,
+                    $inventory->description,
+                    $inventory->updated_at->format('Y-m-d H:i:s')
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Bulk actions on inventory
+     */
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => 'required|in:update_status,update_category,delete',
+            'inventory_ids' => 'required|array',
+            'inventory_ids.*' => 'exists:inventories,id',
+            'status' => 'required_if:action,update_status|in:Available,Low Stock,Out of Stock',
+            'category' => 'required_if:action,update_category|string',
+        ]);
+
+        $inventoryIds = $request->inventory_ids;
+
+        if ($request->action === 'update_status') {
+            Inventory::whereIn('id', $inventoryIds)->update(['status' => $request->status]);
+            return redirect()->back()->with('success', 'Inventory status updated successfully.');
+        }
+
+        if ($request->action === 'update_category') {
+            Inventory::whereIn('id', $inventoryIds)->update(['category' => $request->category]);
+            return redirect()->back()->with('success', 'Inventory category updated successfully.');
+        }
+
+        if ($request->action === 'delete') {
+            Inventory::whereIn('id', $inventoryIds)->delete();
+            return redirect()->back()->with('success', 'Inventory items deleted successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid action.');
+    }
+
+    /**
+     * Get inventory statistics for dashboard
+     */
+    public function getStats()
+    {
+        $stats = [
+            'total_items' => Inventory::count(),
+            'total_stock' => Inventory::sum('stock'),
+            'low_stock' => Inventory::where('status', 'Low Stock')->count(),
+            'out_of_stock' => Inventory::where('stock', 0)->count(),
+            'total_value' => Inventory::selectRaw('SUM(stock * price) as total_value')->value('total_value'),
+            'categories' => Inventory::selectRaw('category, COUNT(*) as count')
+                ->groupBy('category')
+                ->orderBy('count', 'desc')
+                ->get(),
+        ];
+
+        return response()->json($stats);
     }
 }

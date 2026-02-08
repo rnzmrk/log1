@@ -61,6 +61,30 @@
                 </div>
             @endif
 
+            <!-- Inventory Selection -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Quick Fill from Inventory</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="inventory_search" class="block text-sm font-medium text-gray-700 mb-2">Select Inventory Item (SKU or Name)</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="inventory_search" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Type SKU or item name..."
+                                   autocomplete="off">
+                            <div id="inventory_search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Start typing to search existing inventory items</p>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" id="clear_inventory_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
+                            Clear Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Shipment ID -->
                 <div>
@@ -149,4 +173,89 @@
         </form>
     </div>
 </div>
+
+<script>
+let inventorySearchTimeout;
+let selectedInventory = null;
+
+// Inventory search autocomplete
+document.getElementById('inventory_search').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    const resultsDiv = document.getElementById('inventory_search_results');
+    
+    clearTimeout(inventorySearchTimeout);
+    
+    if (query.length < 2) {
+        resultsDiv.classList.add('hidden');
+        return;
+    }
+    
+    inventorySearchTimeout = setTimeout(() => {
+        fetch(`/inventory/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="p-3 text-gray-500 text-sm">No items found</div>';
+                } else {
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                        div.innerHTML = `
+                            <div class="font-medium text-sm">${item.item_name}</div>
+                            <div class="text-xs text-gray-500">SKU: ${item.sku} | Stock: ${item.stock} | Location: ${item.location}</div>
+                        `;
+                        div.addEventListener('click', () => selectInventory(item));
+                        resultsDiv.appendChild(div);
+                    });
+                }
+                resultsDiv.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                resultsDiv.innerHTML = '<div class="p-3 text-red-500 text-sm">Search failed</div>';
+                resultsDiv.classList.remove('hidden');
+            });
+    }, 300);
+});
+
+// Select inventory and populate form
+function selectInventory(item) {
+    selectedInventory = item;
+    document.getElementById('inventory_search').value = `${item.sku} - ${item.item_name}`;
+    document.getElementById('inventory_search_results').classList.add('hidden');
+    
+    // Auto-fill form fields
+    document.getElementById('shipment_id').value = `IN-${item.sku}`;
+    document.getElementById('item_name').value = item.item_name;
+    document.getElementById('quantity').value = item.stock;
+    
+    // Set default expected date to today + 3 days
+    const expectedDate = new Date();
+    expectedDate.setDate(expectedDate.getDate() + 3);
+    document.getElementById('expected_date').value = expectedDate.toISOString().split('T')[0];
+    
+    // Optional: fill supplier with a default or existing value if available
+    // Note: This field may not exist in inbound form; adjust if needed
+}
+
+// Clear selection
+document.getElementById('clear_inventory_selection').addEventListener('click', function() {
+    selectedInventory = null;
+    document.getElementById('inventory_search').value = '';
+    document.getElementById('inventory_search_results').classList.add('hidden');
+    // Clear auto-filled fields
+    document.getElementById('shipment_id').value = '';
+    document.getElementById('item_name').value = '';
+    document.getElementById('quantity').value = '';
+    document.getElementById('expected_date').value = '';
+});
+
+// Hide results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#inventory_search') && !e.target.closest('#inventory_search_results')) {
+        document.getElementById('inventory_search_results').classList.add('hidden');
+    }
+});
+</script>
 @endsection

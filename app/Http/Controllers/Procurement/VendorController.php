@@ -28,7 +28,7 @@ class VendorController extends Controller
         // Get statistics
         $stats = [
             'total_suppliers' => Supplier::count(),
-            'active_suppliers' => Supplier::where('status', 'Active')->count(),
+            'active_suppliers' => Supplier::whereIn('status', ['Accepted', 'Active'])->count(),
             'pending_suppliers' => Supplier::where('status', 'Pending')->count(),
             'high_rated_suppliers' => Supplier::where('rating', '>=', 4.0)->count(),
         ];
@@ -64,7 +64,7 @@ class VendorController extends Controller
             'payment_terms' => 'nullable|string|max:255',
             'bank_name' => 'nullable|string|max:255',
             'bank_account' => 'nullable|string|max:255',
-            'status' => 'required|in:Active,Inactive,Pending,Suspended,Under Review',
+            'status' => 'required|in:Accepted,Active,Inactive,Pending,Suspended,Under Review',
             'rating' => 'nullable|decimal:2|min:0|max:5',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -108,7 +108,7 @@ class VendorController extends Controller
             'payment_terms' => 'nullable|string|max:255',
             'bank_name' => 'nullable|string|max:255',
             'bank_account' => 'nullable|string|max:255',
-            'status' => 'required|in:Active,Inactive,Pending,Suspended,Under Review',
+            'status' => 'required|in:Accepted,Active,Inactive,Pending,Suspended,Under Review',
             'rating' => 'nullable|decimal:2|min:0|max:5',
             'notes' => 'nullable|string|max:1000',
         ]);
@@ -122,11 +122,11 @@ class VendorController extends Controller
     public function approve($vendor)
     {
         $supplier = Supplier::findOrFail($vendor);
-        $supplier->status = 'Active';
+        $supplier->status = 'Accepted';
         $supplier->save();
 
         return redirect()->route('procurement.vendors')
-            ->with('success', 'Supplier approved successfully.');
+            ->with('success', 'Supplier accepted successfully.');
     }
 
     public function destroy($vendor)

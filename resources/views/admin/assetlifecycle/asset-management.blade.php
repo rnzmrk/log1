@@ -18,6 +18,10 @@ use App\Models\Asset;
                     <i class='bx bx-refresh text-xl'></i>
                     Refresh
                 </button>
+                <a href="{{ route('asset-management.export') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-sm">
+                    <i class='bx bx-download text-xl'></i>
+                    Export
+                </a>
                 <a href="{{ route('asset-management.create') }}" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-2 px-6 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     <i class='bx bx-plus text-xl'></i>
                     Add New Asset

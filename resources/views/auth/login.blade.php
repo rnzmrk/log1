@@ -180,7 +180,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw response;
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success && data.step === 'otp') {
                     showOTPStep();
@@ -191,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-                // Fallback to normal form submission
+                // Fallback to normal form submission so Laravel can render validation errors
                 form.submit();
             });
         } else {

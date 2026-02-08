@@ -49,6 +49,7 @@ class Supplier extends Model
     public function getStatusColorAttribute()
     {
         return match($this->status) {
+            'Accepted' => 'green',
             'Active' => 'green',
             'Inactive' => 'gray',
             'Pending' => 'orange',

@@ -39,7 +39,18 @@ class OutboundLogisticController extends Controller
 
         $outboundLogistics = $query->orderBy('created_at', 'desc')->paginate(10);
         
-        return view('admin.warehousing.outbound-logistics', compact('outboundLogistics'));
+        // Get statistics
+        $stats = [
+            'total' => OutboundLogistic::count(),
+            'pending' => OutboundLogistic::where('status', 'Pending')->count(),
+            'ready_to_ship' => OutboundLogistic::where('status', 'Ready to Ship')->count(),
+            'shipped' => OutboundLogistic::where('status', 'Shipped')->count(),
+            'delivered' => OutboundLogistic::where('status', 'Delivered')->count(),
+            'cancelled' => OutboundLogistic::where('status', 'Cancelled')->count(),
+            'supply_requests' => OutboundLogistic::where('request_type', 'Supply Request')->count(),
+        ];
+        
+        return view('admin.warehousing.outbound-logistics', compact('outboundLogistics', 'stats'));
     }
 
     /**
@@ -183,13 +194,31 @@ class OutboundLogisticController extends Controller
     }
 
     /**
+     * Search outbound logistics by order number for autocomplete
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $orders = OutboundLogistic::where('order_number', 'like', '%' . $query . '%')
+            ->select(['id', 'order_number', 'customer_name', 'item_name', 'sku', 'total_units'])
+            ->limit(10)
+            ->get();
+
+        return response()->json($orders);
+    }
+
+    /**
      * Get pending supply requests
      */
     public function getPendingSupplyRequests()
     {
         $pendingRequests = OutboundLogistic::where('request_type', 'Supply Request')
             ->where('status', 'Pending Supply')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->get();
 
         return response()->json($pendingRequests);
@@ -212,5 +241,174 @@ class OutboundLogisticController extends Controller
 
         return redirect()->back()
             ->with('success', 'Supply request processed and approved.');
+    }
+
+    /**
+     * Export outbound logistics to CSV
+     */
+    public function export(Request $request)
+    {
+        $query = OutboundLogistic::query();
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('shipment_id', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('order_number', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('customer_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('destination', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('request_type')) {
+            $query->where('request_type', $request->request_type);
+        }
+
+        $outboundLogistics = $query->orderBy('created_at', 'desc')->get();
+
+        // Create CSV export
+        $filename = 'outbound-logistics-' . date('Y-m-d') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($outboundLogistics) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV Header
+            fputcsv($file, [
+                'Shipment ID',
+                'Order Number',
+                'Customer Name',
+                'Item Name',
+                'SKU',
+                'Quantity',
+                'Destination',
+                'Priority',
+                'Expected Date',
+                'Status',
+                'Request Type',
+                'Department',
+                'Requested By',
+                'Created At',
+                'Shipped Date',
+                'Delivered Date',
+                'Cancellation Reason'
+            ]);
+
+            // CSV Data
+            foreach ($outboundLogistics as $logistic) {
+                fputcsv($file, [
+                    $logistic->shipment_id,
+                    $logistic->order_number,
+                    $logistic->customer_name,
+                    $logistic->item_name,
+                    $logistic->sku,
+                    $logistic->quantity,
+                    $logistic->destination,
+                    $logistic->priority,
+                    $logistic->expected_date->format('Y-m-d'),
+                    $logistic->status,
+                    $logistic->request_type,
+                    $logistic->department,
+                    $logistic->requested_by,
+                    $logistic->created_at->format('Y-m-d H:i:s'),
+                    $logistic->shipped_date ? $logistic->shipped_date->format('Y-m-d H:i:s') : '',
+                    $logistic->delivered_date ? $logistic->delivered_date->format('Y-m-d H:i:s') : '',
+                    $logistic->cancellation_reason ?? ''
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Bulk actions on outbound logistics
+     */
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'action' => 'required|in:ship,deliver,cancel,delete',
+            'outbound_ids' => 'required|array',
+            'outbound_ids.*' => 'exists:outbound_logistics,id',
+            'cancellation_reason' => 'required_if:action,cancel|string',
+        ]);
+
+        $outboundIds = $request->outbound_ids;
+
+        if ($request->action === 'ship') {
+            $count = 0;
+            foreach ($outboundIds as $id) {
+                $outbound = OutboundLogistic::find($id);
+                if ($outbound && !in_array($outbound->status, ['Shipped', 'Delivered', 'Cancelled'])) {
+                    $outbound->status = 'Shipped';
+                    $outbound->shipped_date = now();
+                    $outbound->save();
+                    $count++;
+                }
+            }
+            return redirect()->back()->with('success', $count . ' shipments marked as shipped.');
+        }
+
+        if ($request->action === 'deliver') {
+            $count = 0;
+            foreach ($outboundIds as $id) {
+                $outbound = OutboundLogistic::find($id);
+                if ($outbound && $outbound->status === 'Shipped') {
+                    $outbound->status = 'Delivered';
+                    $outbound->delivered_date = now();
+                    $outbound->save();
+                    $count++;
+                }
+            }
+            return redirect()->back()->with('success', $count . ' shipments marked as delivered.');
+        }
+
+        if ($request->action === 'cancel') {
+            $count = 0;
+            foreach ($outboundIds as $id) {
+                $outbound = OutboundLogistic::find($id);
+                if ($outbound && !in_array($outbound->status, ['Shipped', 'Delivered'])) {
+                    $outbound->status = 'Cancelled';
+                    $outbound->cancellation_reason = $request->cancellation_reason;
+                    $outbound->cancelled_date = now();
+                    $outbound->save();
+                    $count++;
+                }
+            }
+            return redirect()->back()->with('success', $count . ' shipments cancelled.');
+        }
+
+        return redirect()->back()->with('error', 'Invalid action.');
+    }
+
+    /**
+     * Get outbound logistics statistics for dashboard
+     */
+    public function getStats()
+    {
+        $stats = [
+            'total' => OutboundLogistic::count(),
+            'pending' => OutboundLogistic::where('status', 'Pending')->count(),
+            'ready_to_ship' => OutboundLogistic::where('status', 'Ready to Ship')->count(),
+            'shipped' => OutboundLogistic::where('status', 'Shipped')->count(),
+            'delivered' => OutboundLogistic::where('status', 'Delivered')->count(),
+            'cancelled' => OutboundLogistic::where('status', 'Cancelled')->count(),
+            'overdue' => OutboundLogistic::where('status', 'Pending')
+                ->where('expected_date', '<', now())
+                ->count(),
+        ];
+
+        return response()->json($stats);
     }
 }

@@ -71,6 +71,30 @@
                 </div>
             @endif
 
+            <!-- Order Search -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Quick Fill from Order</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="order_search" class="block text-sm font-medium text-gray-700 mb-2">Search Order Number</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="order_search" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Type order number..."
+                                   autocomplete="off">
+                            <div id="order_search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Start typing to search existing orders</p>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" id="clear_order_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
+                            Clear Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Order Number -->
                 <div>
@@ -253,4 +277,93 @@
         </form>
     </div>
 </div>
+
+<script>
+let orderSearchTimeout;
+let selectedOrder = null;
+
+// Order search autocomplete
+document.getElementById('order_search').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    const resultsDiv = document.getElementById('order_search_results');
+    
+    clearTimeout(orderSearchTimeout);
+    
+    if (query.length < 2) {
+        resultsDiv.classList.add('hidden');
+        return;
+    }
+    
+    orderSearchTimeout = setTimeout(() => {
+        // For demo: search outbound logistics by order_number
+        fetch(`/outbound-logistics/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="p-3 text-gray-500 text-sm">No orders found</div>';
+                } else {
+                    data.forEach(order => {
+                        const div = document.createElement('div');
+                        div.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                        div.innerHTML = `
+                            <div class="font-medium text-sm">${order.order_number}</div>
+                            <div class="text-xs text-gray-500">Customer: ${order.customer_name} | Item: ${order.item_name} | Qty: ${order.total_units}</div>
+                        `;
+                        div.addEventListener('click', () => selectOrder(order));
+                        resultsDiv.appendChild(div);
+                    });
+                }
+                resultsDiv.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                resultsDiv.innerHTML = '<div class="p-3 text-red-500 text-sm">Search failed</div>';
+                resultsDiv.classList.remove('hidden');
+            });
+    }, 300);
+});
+
+// Select order and populate form
+function selectOrder(order) {
+    selectedOrder = order;
+    document.getElementById('order_search').value = order.order_number;
+    document.getElementById('order_search_results').classList.add('hidden');
+    
+    // Auto-fill form fields
+    document.getElementById('order_number').value = order.order_number;
+    document.getElementById('customer_name').value = order.customer_name;
+    document.getElementById('product_name').value = order.item_name || '';
+    document.getElementById('sku').value = order.sku || '';
+    document.getElementById('quantity').value = order.total_units || 1;
+    
+    // Set default return date to today
+    document.getElementById('return_date').value = new Date().toISOString().split('T')[0];
+    
+    // Set default status to Pending
+    document.getElementById('status').value = 'Pending';
+}
+
+// Clear selection
+document.getElementById('clear_order_selection').addEventListener('click', function() {
+    selectedOrder = null;
+    document.getElementById('order_search').value = '';
+    document.getElementById('order_search_results').classList.add('hidden');
+    // Clear auto-filled fields
+    document.getElementById('order_number').value = '';
+    document.getElementById('customer_name').value = '';
+    document.getElementById('product_name').value = '';
+    document.getElementById('sku').value = '';
+    document.getElementById('quantity').value = '';
+    document.getElementById('return_date').value = '';
+    document.getElementById('status').value = '';
+});
+
+// Hide results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#order_search') && !e.target.closest('#order_search_results')) {
+        document.getElementById('order_search_results').classList.add('hidden');
+    }
+});
+</script>
 @endsection

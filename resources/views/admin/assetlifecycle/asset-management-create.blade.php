@@ -51,6 +51,30 @@
                 </div>
             @endif
 
+            <!-- Asset Search -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Quick Fill from Existing Asset</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="asset_search" class="block text-sm font-medium text-gray-700 mb-2">Search Asset (Name or SKU)</label>
+                        <div class="relative">
+                            <input type="text" 
+                                   id="asset_search" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   placeholder="Type asset name or SKU..."
+                                   autocomplete="off">
+                            <div id="asset_search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Start typing to search existing assets</p>
+                    </div>
+                    <div class="flex items-end">
+                        <button type="button" id="clear_asset_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
+                            Clear Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Item Code -->
                 <div>
@@ -165,6 +189,109 @@
 </div>
 
 <script>
+let assetSearchTimeout;
+let selectedAsset = null;
+
+// Asset search autocomplete
+document.getElementById('asset_search').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    const resultsDiv = document.getElementById('asset_search_results');
+    
+    clearTimeout(assetSearchTimeout);
+    
+    if (query.length < 2) {
+        resultsDiv.classList.add('hidden');
+        return;
+    }
+    
+    assetSearchTimeout = setTimeout(() => {
+        fetch(`/asset-management/search?q=${encodeURIComponent(query)}`, {
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Search results:', data);
+                resultsDiv.innerHTML = '';
+                
+                if (data.status === 'error') {
+                    resultsDiv.innerHTML = `<div class="p-3 text-gray-500 text-sm">${data.message}</div>`;
+                } else if (data.data && data.data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="p-3 text-gray-500 text-sm">No assets found</div>';
+                } else if (data.data) {
+                    data.data.forEach(asset => {
+                        const div = document.createElement('div');
+                        div.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
+                        div.innerHTML = `
+                            <div class="font-medium text-sm">${asset.item_name}</div>
+                            <div class="text-xs text-gray-500">SKU: ${asset.asset_tag} | Category: ${asset.category} | Status: ${asset.status}</div>
+                        `;
+                        div.addEventListener('click', () => selectAsset(asset));
+                        resultsDiv.appendChild(div);
+                    });
+                }
+                resultsDiv.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                resultsDiv.innerHTML = `<div class="p-3 text-red-500 text-sm">Search failed: ${error.message}</div>`;
+                resultsDiv.classList.remove('hidden');
+            });
+    }, 300);
+});
+
+// Select asset and populate form
+function selectAsset(asset) {
+    selectedAsset = asset;
+    document.getElementById('asset_search').value = `${asset.asset_tag} - ${asset.item_name}`;
+    document.getElementById('asset_search_results').classList.add('hidden');
+    
+    // Auto-fill form fields
+    document.getElementById('item_code').value = asset.item_code || asset.asset_tag || '';
+    document.getElementById('item_name').value = asset.item_name || '';
+    document.getElementById('category').value = asset.category || '';
+    document.getElementById('status').value = asset.status || 'Available';
+    document.getElementById('location').value = asset.location || '';
+    document.getElementById('assigned_to').value = asset.assigned_to || '';
+    document.getElementById('purchase_date').value = asset.purchase_date || '';
+    document.getElementById('warranty_expiry').value = asset.warranty_expiry || '';
+    document.getElementById('specifications').value = asset.specifications || '';
+    document.getElementById('notes').value = asset.notes || '';
+}
+
+// Clear selection
+document.getElementById('clear_asset_selection').addEventListener('click', function() {
+    selectedAsset = null;
+    document.getElementById('asset_search').value = '';
+    document.getElementById('asset_search_results').classList.add('hidden');
+    // Clear auto-filled fields
+    document.getElementById('item_code').value = '';
+    document.getElementById('item_name').value = '';
+    document.getElementById('category').value = '';
+    document.getElementById('status').value = '';
+    document.getElementById('location').value = '';
+    document.getElementById('assigned_to').value = '';
+    document.getElementById('purchase_date').value = '';
+    document.getElementById('warranty_expiry').value = '';
+    document.getElementById('specifications').value = '';
+    document.getElementById('notes').value = '';
+});
+
+// Hide results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#asset_search') && !e.target.closest('#asset_search_results')) {
+        document.getElementById('asset_search_results').classList.add('hidden');
+    }
+});
+
 function previewImage(event) {
     const file = event.target.files[0];
     const preview = document.getElementById('imagePreview');

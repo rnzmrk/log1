@@ -41,6 +41,29 @@
         </a>
     </div>
 
+    <!-- Assets Needing Maintenance Alert -->
+    @if($assetsNeedingMaintenance->count() > 0)
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start">
+                <i class='bx bx-error text-yellow-600 text-xl mr-3 mt-0.5'></i>
+                <div class="flex-1">
+                    <h3 class="text-sm font-medium text-yellow-800">Assets Needing Maintenance</h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>{{ $assetsNeedingMaintenance->count() }} asset(s) are due for maintenance. Consider selecting one of these assets.</p>
+                        <div class="mt-2 space-y-1">
+                            @foreach($assetsNeedingMaintenance->take(3) as $asset)
+                                <p class="font-medium">{{ $asset->asset_tag }} - {{ $asset->item_name }}</p>
+                            @endforeach
+                            @if($assetsNeedingMaintenance->count() > 3)
+                                <p class="text-xs">... and {{ $assetsNeedingMaintenance->count() - 3 }} more</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Form Container -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -78,14 +101,30 @@
                     <select id="asset_id" 
                             name="asset_id" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
+                            required onchange="loadAssetDetails(this.value)">
                         <option value="">Select an asset</option>
                         @foreach ($assets as $asset)
                             <option value="{{ $asset->id }}" {{ old('asset_id') == $asset->id ? 'selected' : '' }}>
-                                {{ $asset->asset_tag }} - {{ $asset->asset_name }}
+                                {{ $asset->asset_tag ?? $asset->item_code }} - {{ $asset->item_name }}
                             </option>
                         @endforeach
                     </select>
+                    <p class="mt-1 text-sm text-gray-500">Select the asset requiring maintenance</p>
+                </div>
+
+                <!-- Asset Details (shown after selection) -->
+                <div id="assetDetails" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Asset Details</label>
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                        <div class="space-y-1 text-sm">
+                            <p><strong>Tag:</strong> <span id="detailAssetTag">-</span></p>
+                            <p><strong>Name:</strong> <span id="detailAssetName">-</span></p>
+                            <p><strong>Condition:</strong> <span id="detailCondition">-</span></p>
+                            <p><strong>Location:</strong> <span id="detailLocation">-</span></p>
+                            <p><strong>Last Maintenance:</strong> <span id="detailLastMaintenance">-</span></p>
+                            <p><strong>Next Maintenance:</strong> <span id="detailNextMaintenance">-</span></p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Maintenance Type -->
@@ -342,6 +381,33 @@
 </div>
 
 <script>
+// Load asset details via AJAX
+function loadAssetDetails(assetId) {
+    const assetDetails = document.getElementById('assetDetails');
+    
+    if (!assetId) {
+        assetDetails.classList.add('hidden');
+        return;
+    }
+    
+    fetch(`/asset-maintenance/get-asset-details/${assetId}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('detailAssetTag').textContent = data.asset_tag || '-';
+            document.getElementById('detailAssetName').textContent = data.asset_name || '-';
+            document.getElementById('detailCondition').textContent = data.condition || '-';
+            document.getElementById('detailLocation').textContent = data.location || '-';
+            document.getElementById('detailLastMaintenance').textContent = data.last_maintenance_date || 'Never';
+            document.getElementById('detailNextMaintenance').textContent = data.next_maintenance_date || 'Not scheduled';
+            
+            assetDetails.classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error loading asset details:', error);
+            assetDetails.classList.add('hidden');
+        });
+}
+
 // Calculate total cost
 document.addEventListener('DOMContentLoaded', function() {
     const partsCost = document.getElementById('parts_cost');
@@ -355,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const parts = parseFloat(partsCost.value) || 0;
         const labor = parseFloat(laborCost.value) || 0;
         const total = parts + labor;
-        totalCost.textContent = '$' + total.toFixed(2);
+        totalCost.textContent = '₱' + total.toFixed(2);
     }
 
     partsCost.addEventListener('input', calculateTotal);
@@ -381,6 +447,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial calculation
     calculateTotal();
+    
+    // Load asset details if already selected
+    const assetSelect = document.getElementById('asset_id');
+    if (assetSelect.value) {
+        loadAssetDetails(assetSelect.value);
+    }
 });
 </script>
 @endsection

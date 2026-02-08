@@ -278,4 +278,122 @@ class AssetManagementController extends Controller
 
         return response()->json($assets);
     }
+
+    /**
+     * Search assets for autocomplete
+     */
+    public function search(Request $request)
+    {
+        try {
+            $query = $request->get('q', '');
+            
+            // Always return JSON, even for empty queries
+            if (strlen($query) < 2) {
+                return response()->json(['status' => 'error', 'message' => 'Query too short']);
+            }
+
+            // Simple query first to test
+            $assets = Asset::limit(5)->get(['id', 'item_name', 'asset_tag', 'category', 'status']);
+            
+            return response()->json([
+                'status' => 'success', 
+                'query' => $query,
+                'count' => $assets->count(),
+                'data' => $assets
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Asset search error: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error', 
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Export assets to CSV
+     */
+    public function export(Request $request)
+    {
+        $query = Asset::query();
+
+        // Apply filters if present
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('asset_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('asset_tag', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('serial_number', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $assets = $query->orderBy('asset_name')->get();
+
+        $filename = 'assets_export_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($assets) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV header
+            fputcsv($file, [
+                'Asset Name',
+                'Asset Tag',
+                'Serial Number',
+                'Category',
+                'Status',
+                'Location',
+                'Assigned To',
+                'Purchase Date',
+                'Warranty Expiry',
+                'Condition',
+                'Notes'
+            ]);
+
+            // CSV rows
+            foreach ($assets as $asset) {
+                fputcsv($file, [
+                    $asset->asset_name,
+                    $asset->asset_tag,
+                    $asset->serial_number,
+                    $asset->category,
+                    $asset->status,
+                    $asset->location ?? '',
+                    $asset->assigned_to ?? '',
+                    $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : '',
+                    $asset->warranty_expiry ? $asset->warranty_expiry->format('Y-m-d') : '',
+                    $asset->condition,
+                    $asset->notes ?? ''
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Get available assets for assignment
+     */
+    public function getAvailableAssetsForAssignment()
+    {
+        $availableAssets = Asset::where('status', 'Available')
+            ->orderBy('asset_name')
+            ->get();
+
+        return response()->json($availableAssets);
+    }
 }

@@ -186,10 +186,18 @@
                 {{ $initials }}
             </a>
 
-            <div class="hidden md:flex flex-col">
-                <span class="font-semibold text-lg text-white">
-                    {{ $fullName }}
-                </span>
+            <div class="hidden md:flex flex-col flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="font-semibold text-lg text-white truncate">
+                        {{ $fullName }}
+                    </span>
+                    <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Are you sure you want to logout?')" class="inline">
+                        @csrf
+                        <button type="submit" class="text-white hover:bg-white hover:bg-opacity-10 rounded-lg p-2 transition-colors" title="Logout">
+                            <i class='bx bx-log-out text-xl'></i>
+                        </button>
+                    </form>
+                </div>
                 <span class="text-sm text-gray-300">
                     {{ $role }}
                 </span>

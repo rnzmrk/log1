@@ -291,10 +291,10 @@
                                         <i class='bx bx-check-shield text-lg'></i>
                                     </a>
                                     
-                                    @if($supplier->status !== 'Active')
-                                        <form action="{{ route('vendors.approve', $supplier->id) }}" method="POST" class="inline" onsubmit="return confirm('Approve this supplier?')">
+                                    @if($supplier->status === 'Pending')
+                                        <form action="{{ route('vendors.approve', $supplier->id) }}" method="POST" class="inline" onsubmit="return confirm('Accept this supplier?')">
                                             @csrf
-                                            <button type="submit" class="text-purple-600 hover:text-purple-900" title="Approve">
+                                            <button type="submit" class="text-purple-600 hover:text-purple-900" title="Accept">
                                                 <i class='bx bx-check-circle text-lg'></i>
                                             </button>
                                         </form>

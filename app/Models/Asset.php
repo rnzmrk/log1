@@ -8,6 +8,7 @@ class Asset extends Model
 {
     protected $fillable = [
         'item_number',
+        'asset_tag',
         'image',
         'asset_type',
         'item_code',
@@ -90,5 +91,44 @@ class Asset extends Model
         return $this->status !== 'Disposed' && 
                in_array($this->condition, ['Poor', 'Damaged']) ||
                $this->warranty_expiry && $this->warranty_expiry->isPast();
+    }
+
+    /**
+     * Get maintenance records for this asset
+     */
+    public function maintenances()
+    {
+        return $this->hasMany(AssetMaintenance::class);
+    }
+
+    /**
+     * Get the latest maintenance record
+     */
+    public function latestMaintenance()
+    {
+        return $this->hasOne(AssetMaintenance::class)->latest();
+    }
+
+    /**
+     * Get asset display name
+     */
+    public function getDisplayNameAttribute()
+    {
+        return $this->asset_tag ? "{$this->asset_tag} - {$this->item_name}" : $this->item_name;
+    }
+
+    /**
+     * Get assets that need maintenance
+     */
+    public static function getAssetsNeedingMaintenance()
+    {
+        return self::where('status', '!=', 'Retired')
+            ->where('status', '!=', 'Disposed')
+            ->where(function($query) {
+                $query->whereNull('next_maintenance_date')
+                    ->orWhere('next_maintenance_date', '<=', now())
+                    ->orWhere('condition', 'Poor');
+            })
+            ->get();
     }
 }

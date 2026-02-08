@@ -48,20 +48,25 @@ Route::resource('inbound-logistics', InboundLogisticController::class)->except([
 // Inbound Logistics Actions
 Route::post('/inbound-logistics/{inboundLogistic}/accept', [InboundLogisticController::class, 'acceptShipment'])->name('inbound-logistics.accept');
 Route::post('/inbound-logistics/{inboundLogistic}/reject', [InboundLogisticController::class, 'rejectShipment'])->name('inbound-logistics.reject');
+Route::get('/inbound-logistics/export', [InboundLogisticController::class, 'export'])->name('inbound-logistics.export');
+Route::post('/inbound-logistics/bulk-action', [InboundLogisticController::class, 'bulkAction'])->name('inbound-logistics.bulk-action');
 
 Route::get('/admin/warehousing/storage-inventory', [InventoryController::class, 'index'])->name('admin.warehousing.storage-inventory');
-
-Route::resource('inventory', InventoryController::class)->except(['destroy']);
+Route::get('/inventory/search', [InventoryController::class, 'search'])->name('inventory.search');
+Route::resource('inventory', InventoryController::class);
 Route::post('/inventory/{id}/move', [InventoryController::class, 'move'])->name('inventory.move');
 
 // Storage and Inventory Actions
 Route::post('/inventory/{inventory}/request-supply', [InventoryController::class, 'requestSupply'])->name('inventory.request-supply');
 Route::post('/inventory/{inventory}/return-item', [InventoryController::class, 'returnItem'])->name('inventory.return-item');
 Route::post('/inventory/{inventory}/move-to-outbound', [InventoryController::class, 'moveToOutbound'])->name('inventory.move-to-outbound');
+Route::get('/inventory/export', [InventoryController::class, 'export'])->name('inventory.export');
+Route::post('/inventory/bulk-action', [InventoryController::class, 'bulkAction'])->name('inventory.bulk-action');
+Route::get('/inventory/stats', [InventoryController::class, 'getStats'])->name('inventory.stats');
 Route::get('/inventory/low-stock', [InventoryController::class, 'getLowStockItems'])->name('inventory.low-stock');
 
 Route::get('/admin/warehousing/outbound-logistics', [OutboundLogisticController::class, 'index'])->name('admin.warehousing.outbound-logistics');
-
+Route::get('/outbound-logistics/search', [OutboundLogisticController::class, 'search'])->name('outbound-logistics.search');
 Route::resource('outbound-logistics', OutboundLogisticController::class)->except(['destroy'])->names([
     'index' => 'outbound-logistics.index',
     'create' => 'outbound-logistics.create',
@@ -76,6 +81,10 @@ Route::post('/outbound-logistics/{outboundLogistic}/ship', [OutboundLogisticCont
 Route::post('/outbound-logistics/{outboundLogistic}/deliver', [OutboundLogisticController::class, 'deliverItem'])->name('outbound-logistics.deliver');
 Route::post('/outbound-logistics/{outboundLogistic}/cancel', [OutboundLogisticController::class, 'cancelShipment'])->name('outbound-logistics.cancel');
 Route::post('/outbound-logistics/{outboundLogistic}/process-supply', [OutboundLogisticController::class, 'processSupplyRequest'])->name('outbound-logistics.process-supply');
+Route::get('/outbound-logistics/export', [OutboundLogisticController::class, 'export'])->name('outbound-logistics.export');
+Route::post('/outbound-logistics/bulk-action', [OutboundLogisticController::class, 'bulkAction'])->name('outbound-logistics.bulk-action');
+Route::get('/outbound-logistics/stats', [OutboundLogisticController::class, 'getStats'])->name('outbound-logistics.stats');
+Route::get('/outbound-logistics/pending-supply', [OutboundLogisticController::class, 'getPendingSupplyRequests'])->name('outbound-logistics.pending-supply');
 Route::get('/outbound-logistics/pending-supply', [OutboundLogisticController::class, 'getPendingSupplyRequests'])->name('outbound-logistics.pending-supply');
 
 Route::get('/admin/warehousing/returns-management', [ReturnRefundController::class, 'index'])->name('admin.warehousing.returns-management');
@@ -125,6 +134,15 @@ Route::resource('contracts', ContractController::class)->names([
     'update' => 'contracts.update',
     'destroy' => 'contracts.destroy',
 ]);
+
+// Contract Management Routes
+Route::post('/contracts/{contract}/renew', [ContractController::class, 'renew'])->name('contracts.renew');
+Route::post('/contracts/{contract}/terminate', [ContractController::class, 'terminate'])->name('contracts.terminate');
+Route::get('/contracts/export', [ContractController::class, 'export'])->name('contracts.export');
+Route::post('/contracts/bulk-action', [ContractController::class, 'bulkAction'])->name('contracts.bulk-action');
+Route::get('/contracts/stats', [ContractController::class, 'getStats'])->name('contracts.stats');
+Route::get('/contracts/expiring-soon', [ContractController::class, 'getExpiringSoon'])->name('contracts.expiring-soon');
+Route::get('/contracts/needing-renewal', [ContractController::class, 'getNeedingRenewal'])->name('contracts.needing-renewal');
 
 Route::get('/admin/procurement/vendors', [VendorController::class, 'index'])->name('procurement.vendors');
 
@@ -197,6 +215,8 @@ Route::resource('asset-requests', AssetRequestController::class)->names([
 
 Route::get('/admin/assetlifecycle/asset-management', [AssetManagementController::class, 'index'])->name('admin.assetlifecycle.asset-management');
 
+Route::get('/asset-management/search', [AssetManagementController::class, 'search'])->name('asset-management.search');
+Route::get('/asset-management/export', [AssetManagementController::class, 'export'])->name('asset-management.export');
 Route::resource('asset-management', AssetManagementController::class)->except(['destroy'])->names([
     'index' => 'asset-management.index',
     'create' => 'asset-management.create',
@@ -223,6 +243,11 @@ Route::resource('asset-maintenance', AssetMaintenanceController::class)->names([
     'update' => 'asset-maintenance.update',
     'destroy' => 'asset-maintenance.destroy',
 ]);
+
+// Asset Maintenance Additional Routes
+Route::get('/asset-maintenance/export', [AssetMaintenanceController::class, 'export'])->name('asset-maintenance.export');
+Route::get('/asset-maintenance/asset-details/{assetId}', [AssetMaintenanceController::class, 'getAssetDetails'])->name('asset-maintenance.asset-details');
+Route::post('/asset-maintenance/bulk-action', [AssetMaintenanceController::class, 'bulkAction'])->name('asset-maintenance.bulk-action');
 
 // Logistic Tracking Routes
 Route::resource('delivery-confirmation', DeliveryConfirmationController::class)->names([

@@ -13,7 +13,7 @@
 @endif
 
 <div class="space-y-6">
-    {{-- Header with User Info and Logout --}}
+    {{-- Header with User Info --}}
     <div class="flex justify-between items-center">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
@@ -24,13 +24,6 @@
                 <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
                 <p class="text-sm text-gray-500">{{ $user->email }}</p>
             </div>
-            <form method="POST" action="{{ route('logout') }}" onsubmit="return confirm('Are you sure you want to logout?')">
-                @csrf
-                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
-                    <i class='bx bx-log-out'></i>
-                    <span>Logout</span>
-                </button>
-            </form>
         </div>
     </div>
 

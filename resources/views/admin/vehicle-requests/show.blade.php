@@ -11,7 +11,7 @@
                     <h4 class="page-title mb-1">Vehicle Request Details</h4>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="{{ route('vehicle-requests.index') }}">Vehicle Requests</a></li>
                             <li class="breadcrumb-item active">Details</li>
                         </ol>

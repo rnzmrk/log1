@@ -51,7 +51,11 @@ class SupplyRequestController extends Controller
      */
     public function create()
     {
-        return view('admin.procurement.request-supplies-create');
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.procurement.request-supplies-create', compact('suppliers'));
     }
 
     /**
@@ -102,7 +106,11 @@ class SupplyRequestController extends Controller
     public function edit(string $id)
     {
         $supplyRequest = SupplyRequest::findOrFail($id);
-        return view('admin.procurement.request-supplies-edit', compact('supplyRequest'));
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.procurement.request-supplies-edit', compact('supplyRequest', 'suppliers'));
     }
 
     /**

@@ -113,12 +113,29 @@
                 <!-- Supplier -->
                 <div>
                     <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
+                    <select id="supplier" 
+                            name="supplier" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required>
+                        <option value="">Select a supplier...</option>
+                        @foreach($suppliers as $supplier)
+                            <option value="{{ $supplier->name }}" 
+                                    {{ old('supplier') == $supplier->name ? 'selected' : '' }}>
+                                {{ $supplier->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Item Name -->
+                <div>
+                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
                     <input type="text" 
-                           id="supplier" 
-                           name="supplier" 
-                           value="{{ old('supplier') }}"
+                           id="item_name" 
+                           name="item_name" 
+                           value="{{ old('item_name') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., ABC Supplies"
+                           placeholder="e.g., Laptop, Office Chair"
                            required>
                 </div>
 
@@ -149,14 +166,14 @@
                     </div>
                 </div>
 
-                <!-- Notes -->
+                <!-- Description -->
                 <div class="md:col-span-2">
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                    <textarea id="notes" 
-                              name="notes" 
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea id="description" 
+                              name="description" 
                               rows="4"
                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Additional notes about this shipment...">{{ old('notes') }}</textarea>
+                              placeholder="Additional notes about this shipment...">{{ old('description') }}</textarea>
                 </div>
             </div>
 
@@ -228,7 +245,19 @@ function selectInventory(item) {
     // Auto-fill form fields
     document.getElementById('shipment_id').value = `IN-${item.sku}`;
     document.getElementById('item_name').value = item.item_name;
-    document.getElementById('quantity').value = item.stock;
+    document.getElementById('expected_units').value = 1;
+
+    if (item.supplier && document.getElementById('supplier')) {
+        // Try to find and select the supplier in the dropdown
+        const supplierSelect = document.getElementById('supplier');
+        const options = supplierSelect.options;
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].value === item.supplier) {
+                supplierSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
     
     // Set default expected date to today + 3 days
     const expectedDate = new Date();
@@ -247,8 +276,14 @@ document.getElementById('clear_inventory_selection').addEventListener('click', f
     // Clear auto-filled fields
     document.getElementById('shipment_id').value = '';
     document.getElementById('item_name').value = '';
-    document.getElementById('quantity').value = '';
+    document.getElementById('expected_units').value = '';
     document.getElementById('expected_date').value = '';
+    if (document.getElementById('supplier')) {
+        document.getElementById('supplier').selectedIndex = 0;
+    }
+    if (document.getElementById('description')) {
+        document.getElementById('description').value = '';
+    }
 });
 
 // Hide results when clicking outside

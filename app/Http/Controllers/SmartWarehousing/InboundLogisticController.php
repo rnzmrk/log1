@@ -60,7 +60,11 @@ class InboundLogisticController extends Controller
      */
     public function create()
     {
-        return view('admin.warehousing.inbound-logistics-create');
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.warehousing.inbound-logistics-create', compact('suppliers'));
     }
 
     /**
@@ -72,7 +76,7 @@ class InboundLogisticController extends Controller
             'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id',
             'supplier' => 'required|string',
             'item_name' => 'required|string',
-            'quantity' => 'required|integer|min:1',
+            'expected_units' => 'required|integer|min:1',
             'expected_date' => 'required|date',
             'description' => 'nullable|string',
         ]);
@@ -96,7 +100,11 @@ class InboundLogisticController extends Controller
      */
     public function edit(InboundLogistic $inboundLogistic)
     {
-        return view('admin.warehousing.inbound-logistics-edit', compact('inboundLogistic'));
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.warehousing.inbound-logistics-edit', compact('inboundLogistic', 'suppliers'));
     }
 
     /**
@@ -108,7 +116,7 @@ class InboundLogisticController extends Controller
             'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id,' . $inboundLogistic->id,
             'supplier' => 'required|string',
             'item_name' => 'required|string',
-            'quantity' => 'required|integer|min:1',
+            'expected_units' => 'required|integer|min:1',
             'expected_date' => 'required|date',
             'description' => 'nullable|string',
         ]);
@@ -142,7 +150,7 @@ class InboundLogisticController extends Controller
 
         if ($existingInventory) {
             // Update existing inventory
-            $existingInventory->stock += $inboundLogistic->quantity;
+            $existingInventory->stock += $inboundLogistic->expected_units;
             $existingInventory->save();
         } else {
             // Create new inventory entry
@@ -151,7 +159,7 @@ class InboundLogisticController extends Controller
                 'item_name' => $inboundLogistic->item_name,
                 'category' => 'General',
                 'location' => 'Main Warehouse',
-                'stock' => $inboundLogistic->quantity,
+                'stock' => $inboundLogistic->expected_units,
                 'description' => $inboundLogistic->description,
                 'price' => 0.00,
                 'supplier' => $inboundLogistic->supplier,
@@ -251,7 +259,7 @@ class InboundLogisticController extends Controller
                     $logistic->shipment_id,
                     $logistic->supplier,
                     $logistic->item_name,
-                    $logistic->quantity,
+                    $logistic->expected_units,
                     $logistic->expected_date->format('Y-m-d'),
                     $logistic->status,
                     $logistic->description,
@@ -291,7 +299,7 @@ class InboundLogisticController extends Controller
                     $existingInventory = Inventory::where('sku', $inbound->shipment_id)->first();
                     
                     if ($existingInventory) {
-                        $existingInventory->stock += $inbound->quantity;
+                        $existingInventory->stock += $inbound->expected_units;
                         $existingInventory->save();
                     } else {
                         Inventory::create([
@@ -299,7 +307,7 @@ class InboundLogisticController extends Controller
                             'item_name' => $inbound->item_name,
                             'category' => 'General',
                             'location' => 'Main Warehouse',
-                            'stock' => $inbound->quantity,
+                            'stock' => $inbound->expected_units,
                             'description' => $inbound->description,
                             'price' => 0.00,
                             'supplier' => $inbound->supplier,

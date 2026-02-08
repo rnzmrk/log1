@@ -59,7 +59,12 @@ class PurchaseOrderController extends Controller
             $supplyRequest = SupplyRequest::find($request->request_id);
         }
         
-        return view('admin.procurement.create-purchase-order-create', compact('supplyRequest'));
+        // Get approved and active suppliers
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.procurement.create-purchase-order-create', compact('supplyRequest', 'suppliers'));
     }
 
     /**
@@ -122,7 +127,11 @@ class PurchaseOrderController extends Controller
     public function edit(string $id)
     {
         $purchaseOrder = PurchaseOrder::findOrFail($id);
-        return view('admin.procurement.create-purchase-order-edit', compact('purchaseOrder'));
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+            ->orderBy('name')
+            ->get();
+        
+        return view('admin.procurement.create-purchase-order-edit', compact('purchaseOrder', 'suppliers'));
     }
 
     /**

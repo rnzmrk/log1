@@ -98,13 +98,22 @@
                 <!-- Supplier -->
                 <div>
                     <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
-                    <input type="text" 
-                           id="supplier" 
-                           name="supplier" 
-                           value="{{ old('supplier', $purchaseOrder->supplier) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Tech Solutions Inc."
-                           required>
+                    <select id="supplier" 
+                            name="supplier" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required>
+                        <option value="">Select a supplier...</option>
+                        @foreach($suppliers as $supplier)
+                            <option value="{{ $supplier->name }}" 
+                                    data-contact="{{ $supplier->contact_person ?? '' }}"
+                                    data-email="{{ $supplier->email ?? '' }}"
+                                    data-phone="{{ $supplier->phone ?? '' }}"
+                                    data-address="{{ $supplier->address ?? '' }}"
+                                    {{ old('supplier', $purchaseOrder->supplier) == $supplier->name ? 'selected' : '' }}>
+                                {{ $supplier->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <!-- Supplier Contact -->
@@ -374,8 +383,40 @@
 </div>
 
 <script>
-// Auto-calculate total amount
+// Auto-fill supplier fields when supplier is selected
 document.addEventListener('DOMContentLoaded', function() {
+    const supplierSelect = document.getElementById('supplier');
+    const contactField = document.getElementById('supplier_contact');
+    const emailField = document.getElementById('supplier_email');
+    const phoneField = document.getElementById('supplier_phone');
+    const billingAddressField = document.getElementById('billing_address');
+    const shippingAddressField = document.getElementById('shipping_address');
+    
+    supplierSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            // Auto-fill supplier contact information
+            contactField.value = selectedOption.dataset.contact || '';
+            emailField.value = selectedOption.dataset.email || '';
+            phoneField.value = selectedOption.dataset.phone || '';
+            
+            // Auto-fill addresses if they're empty
+            if (!billingAddressField.value) {
+                billingAddressField.value = selectedOption.dataset.address || '';
+            }
+            if (!shippingAddressField.value) {
+                shippingAddressField.value = selectedOption.dataset.address || '';
+            }
+        } else {
+            // Clear fields if no supplier selected
+            contactField.value = '';
+            emailField.value = '';
+            phoneField.value = '';
+        }
+    });
+    
+    // Auto-calculate total amount
     const subtotal = document.getElementById('subtotal');
     const taxAmount = document.getElementById('tax_amount');
     const shippingCost = document.getElementById('shipping_cost');
@@ -386,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const taxValue = parseFloat(taxAmount.value) || 0;
         const shippingValue = parseFloat(shippingCost.value) || 0;
         const total = subtotalValue + taxValue + shippingValue;
-        totalDisplay.textContent = '$' + total.toFixed(2);
+        totalDisplay.textContent = '₱' + total.toFixed(2);
     }
     
     subtotal.addEventListener('input', calculateTotal);

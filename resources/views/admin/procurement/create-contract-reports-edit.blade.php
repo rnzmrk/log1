@@ -26,15 +26,15 @@
             <li aria-current="page">
                 <div class="flex items-center">
                     <i class='bx bx-chevron-right text-gray-400'></i>
-                    <span class="ml-1 text-gray-500 md:ml-2">New Contract</span>
+                    <span class="ml-1 text-gray-500 md:ml-2">Edit Contract</span>
                 </div>
             </li>
         </ol>
     </nav>
-    
+
     <!-- Page Header -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Create New Contract</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Edit Contract</h1>
         <a href="{{ route('admin.procurement.create-contract-reports') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
             <i class='bx bx-arrow-back text-xl'></i>
             Back to Contracts
@@ -44,11 +44,12 @@
     <!-- Form Container -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">Contract Information</h2>
+            <h2 class="text-lg font-semibold text-gray-900">Edit Contract Information</h2>
         </div>
         
-        <form method="POST" action="{{ route('contracts.store') }}" class="p-6">
+        <form method="POST" action="{{ route('contracts.update', $contract->id) }}" class="p-6">
             @csrf
+            @method('PUT')
             
             <!-- Error Messages -->
             @if ($errors->any())
@@ -78,9 +79,21 @@
                     <input type="text" 
                            id="contract_name" 
                            name="contract_name" 
-                           value="{{ old('contract_name') }}"
+                           value="{{ old('contract_name', $contract->contract_name) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="e.g., Office Supplies Annual Contract"
+                           required>
+                </div>
+
+                <!-- Contract Number -->
+                <div>
+                    <label for="contract_number" class="block text-sm font-medium text-gray-700 mb-2">Contract Number *</label>
+                    <input type="text" 
+                           id="contract_number" 
+                           name="contract_number" 
+                           value="{{ old('contract_number', $contract->contract_number) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., CTR-2024-0001"
                            required>
                 </div>
 
@@ -91,7 +104,7 @@
                         <input type="text" 
                                id="vendor" 
                                name="vendor" 
-                               value="{{ old('vendor') }}"
+                               value="{{ old('vendor', $contract->vendor) }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                placeholder="Type vendor name or code..."
                                autocomplete="off"
@@ -109,7 +122,7 @@
                     <input type="text" 
                            id="vendor_contact" 
                            name="vendor_contact" 
-                           value="{{ old('vendor_contact') }}"
+                           value="{{ old('vendor_contact', $contract->vendor_contact) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="e.g., John Smith">
                     <p class="mt-1 text-sm text-gray-500">Optional: Contact person name</p>
@@ -121,7 +134,7 @@
                     <input type="email" 
                            id="vendor_email" 
                            name="vendor_email" 
-                           value="{{ old('vendor_email') }}"
+                           value="{{ old('vendor_email', $contract->vendor_email) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="e.g., john@vendor.com">
                     <p class="mt-1 text-sm text-gray-500">Optional: Contact email</p>
@@ -133,7 +146,7 @@
                     <input type="text" 
                            id="vendor_phone" 
                            name="vendor_phone" 
-                           value="{{ old('vendor_phone') }}"
+                           value="{{ old('vendor_phone', $contract->vendor_phone) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="e.g., +1 (555) 123-4567">
                     <p class="mt-1 text-sm text-gray-500">Optional: Contact phone number</p>
@@ -147,13 +160,13 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
                         <option value="">Select contract type</option>
-                        <option value="Service" {{ old('contract_type') === 'Service' ? 'selected' : '' }}>Service</option>
-                        <option value="Supply" {{ old('contract_type') === 'Supply' ? 'selected' : '' }}>Supply</option>
-                        <option value="Maintenance" {{ old('contract_type') === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
-                        <option value="Consulting" {{ old('contract_type') === 'Consulting' ? 'selected' : '' }}>Consulting</option>
-                        <option value="Software License" {{ old('contract_type') === 'Software License' ? 'selected' : '' }}>Software License</option>
-                        <option value="Hardware Lease" {{ old('contract_type') === 'Hardware Lease' ? 'selected' : '' }}>Hardware Lease</option>
-                        <option value="Other" {{ old('contract_type') === 'Other' ? 'selected' : '' }}>Other</option>
+                        <option value="Service" {{ old('contract_type', $contract->contract_type) === 'Service' ? 'selected' : '' }}>Service</option>
+                        <option value="Supply" {{ old('contract_type', $contract->contract_type) === 'Supply' ? 'selected' : '' }}>Supply</option>
+                        <option value="Maintenance" {{ old('contract_type', $contract->contract_type) === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
+                        <option value="Consulting" {{ old('contract_type', $contract->contract_type) === 'Consulting' ? 'selected' : '' }}>Consulting</option>
+                        <option value="Software License" {{ old('contract_type', $contract->contract_type) === 'Software License' ? 'selected' : '' }}>Software License</option>
+                        <option value="Hardware Lease" {{ old('contract_type', $contract->contract_type) === 'Hardware Lease' ? 'selected' : '' }}>Hardware Lease</option>
+                        <option value="Other" {{ old('contract_type', $contract->contract_type) === 'Other' ? 'selected' : '' }}>Other</option>
                     </select>
                 </div>
 
@@ -163,7 +176,7 @@
                     <input type="number" 
                            id="contract_value" 
                            name="contract_value" 
-                           value="{{ old('contract_value') }}"
+                           value="{{ old('contract_value', $contract->contract_value) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="0.00"
                            step="0.01"
@@ -180,12 +193,12 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
                         <option value="">Select status</option>
-                        <option value="Draft" {{ old('status') === 'Draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="Under Review" {{ old('status') === 'Under Review' ? 'selected' : '' }}>Under Review</option>
-                        <option value="Active" {{ old('status') === 'Active' ? 'selected' : '' }}>Active</option>
-                        <option value="Expired" {{ old('status') === 'Expired' ? 'selected' : '' }}>Expired</option>
-                        <option value="Terminated" {{ old('status') === 'Terminated' ? 'selected' : '' }}>Terminated</option>
-                        <option value="Renewed" {{ old('status') === 'Renewed' ? 'selected' : '' }}>Renewed</option>
+                        <option value="Draft" {{ old('status', $contract->status) === 'Draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="Under Review" {{ old('status', $contract->status) === 'Under Review' ? 'selected' : '' }}>Under Review</option>
+                        <option value="Active" {{ old('status', $contract->status) === 'Active' ? 'selected' : '' }}>Active</option>
+                        <option value="Expired" {{ old('status', $contract->status) === 'Expired' ? 'selected' : '' }}>Expired</option>
+                        <option value="Terminated" {{ old('status', $contract->status) === 'Terminated' ? 'selected' : '' }}>Terminated</option>
+                        <option value="Renewed" {{ old('status', $contract->status) === 'Renewed' ? 'selected' : '' }}>Renewed</option>
                     </select>
                 </div>
 
@@ -197,10 +210,10 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
                         <option value="">Select priority</option>
-                        <option value="Low" {{ old('priority') === 'Low' ? 'selected' : '' }}>Low</option>
-                        <option value="Medium" {{ old('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
-                        <option value="High" {{ old('priority') === 'High' ? 'selected' : '' }}>High</option>
-                        <option value="Urgent" {{ old('priority') === 'Urgent' ? 'selected' : '' }}>Urgent</option>
+                        <option value="Low" {{ old('priority', $contract->priority) === 'Low' ? 'selected' : '' }}>Low</option>
+                        <option value="Medium" {{ old('priority', $contract->priority) === 'Medium' ? 'selected' : '' }}>Medium</option>
+                        <option value="High" {{ old('priority', $contract->priority) === 'High' ? 'selected' : '' }}>High</option>
+                        <option value="Urgent" {{ old('priority', $contract->priority) === 'Urgent' ? 'selected' : '' }}>Urgent</option>
                     </select>
                 </div>
 
@@ -210,7 +223,7 @@
                     <input type="date" 
                            id="start_date" 
                            name="start_date" 
-                           value="{{ old('start_date', now()->format('Y-m-d')) }}"
+                           value="{{ old('start_date', $contract->start_date->format('Y-m-d')) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            required>
                 </div>
@@ -221,7 +234,7 @@
                     <input type="date" 
                            id="end_date" 
                            name="end_date" 
-                           value="{{ old('end_date') }}"
+                           value="{{ old('end_date', $contract->end_date->format('Y-m-d')) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            required>
                     <p class="mt-1 text-sm text-gray-500">Must be after start date</p>
@@ -233,7 +246,7 @@
                     <input type="date" 
                            id="renewal_date" 
                            name="renewal_date" 
-                           value="{{ old('renewal_date') }}"
+                           value="{{ old('renewal_date', $contract->renewal_date ? $contract->renewal_date->format('Y-m-d') : '') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <p class="mt-1 text-sm text-gray-500">Optional: Auto-filled when contract is renewed</p>
                 </div>
@@ -244,7 +257,7 @@
                            id="auto_renewal" 
                            name="auto_renewal" 
                            value="1"
-                           {{ old('auto_renewal') ? 'checked' : '' }}
+                           {{ old('auto_renewal', $contract->auto_renewal) ? 'checked' : '' }}
                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                     <label for="auto_renewal" class="ml-2 block text-sm text-gray-900">
                         Enable Auto-Renewal
@@ -258,7 +271,7 @@
                               name="renewal_terms" 
                               rows="3"
                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Enter renewal terms and conditions...">{{ old('renewal_terms') }}</textarea>
+                              placeholder="Enter renewal terms and conditions...">{{ old('renewal_terms', $contract->renewal_terms) }}</textarea>
                     <p class="mt-1 text-sm text-gray-500">Optional: Specific terms for contract renewal</p>
                 </div>
 
@@ -268,10 +281,10 @@
                     <input type="text" 
                            id="created_by" 
                            name="created_by" 
-                           value="{{ auth()->user()->name ?? 'Current User' }}"
+                           value="{{ old('created_by', $contract->created_by) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50"
                            readonly>
-                    <p class="mt-1 text-sm text-gray-500">Automatically filled with current user</p>
+                    <p class="mt-1 text-sm text-gray-500">Original creator of the contract</p>
                 </div>
             </div>
 
@@ -282,7 +295,7 @@
                           name="description" 
                           rows="4"
                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter contract description...">{{ old('description') }}</textarea>
+                          placeholder="Enter contract description...">{{ old('description', $contract->description) }}</textarea>
                 <p class="mt-1 text-sm text-gray-500">Optional: Brief description of the contract scope and purpose</p>
             </div>
 
@@ -293,7 +306,7 @@
                           name="terms_conditions" 
                           rows="4"
                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter terms and conditions...">{{ old('terms_conditions') }}</textarea>
+                          placeholder="Enter terms and conditions...">{{ old('terms_conditions', $contract->terms_conditions) }}</textarea>
                 <p class="mt-1 text-sm text-gray-500">Optional: Key terms, conditions, and obligations</p>
             </div>
 
@@ -304,7 +317,7 @@
                           name="notes" 
                           rows="4"
                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter additional notes...">{{ old('notes') }}</textarea>
+                          placeholder="Enter additional notes...">{{ old('notes', $contract->notes) }}</textarea>
                 <p class="mt-1 text-sm text-gray-500">Optional: Additional information about the contract</p>
             </div>
 
@@ -315,7 +328,7 @@
                 </a>
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
                     <i class='bx bx-save mr-2'></i>
-                    Create Contract
+                    Update Contract
                 </button>
             </div>
         </form>

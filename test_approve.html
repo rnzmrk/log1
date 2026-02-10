@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Approve Functionality</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .form-container { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .approve-btn { background-color: #10b981; color: white; border: none; }
+        .approve-btn:hover { background-color: #059669; }
+    </style>
+</head>
+<body>
+    <h1>Test Supply Request Approve Functionality</h1>
+    
+    <div class="form-container">
+        <h3>Correct Way to Approve (This Works):</h3>
+        <p>This form uses POST method and will work correctly:</p>
+        <form method="POST" action="http://127.0.0.1:8000/supply-requests/2/approve" 
+              onsubmit="return confirm('Are you sure you want to approve Supply Request #2?');">
+            <input type="hidden" name="_token" value="YOUR_CSRF_TOKEN_HERE">
+            <button type="submit" class="approve-btn">Approve Supply Request #2 (POST)</button>
+        </form>
+    </div>
+    
+    <div class="form-container">
+        <h3>Wrong Way (This Causes Error):</h3>
+        <p>Direct link uses GET method and will cause "Method Not Allowed" error:</p>
+        <a href="http://127.0.0.1:8000/supply-requests/2/approve" 
+           style="color: red; text-decoration: line-through;">
+            ❌ Direct Link: /supply-requests/2/approve (GET - Will Fail)
+        </a>
+    </div>
+    
+    <div class="form-container">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Go to your supply requests table: <a href="http://127.0.0.1:8000/admin/procurement/request-supplies">Supply Requests</a></li>
+            <li>Find a request with "Pending" status</li>
+            <li>Click the green checkmark icon (✓) in the Actions column</li>
+            <li>Confirm the dialog box</li>
+            <li>The request should be approved successfully!</li>
+        </ol>
+        
+        <p><strong>IMPORTANT:</strong> Never navigate directly to <code>/supply-requests/2/approve</code> in your browser!</p>
+    </div>
+</body>
+</html>

@@ -106,72 +106,43 @@
             @endif
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Supplier -->
+                <!-- Supply Request (Approved Only) -->
                 <div>
-                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
-                    <select id="supplier" 
-                            name="supplier" 
+                    <label for="supply_request" class="block text-sm font-medium text-gray-700 mb-2">Select Supply Request *</label>
+                    <select id="supply_request" 
+                            name="supply_request" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
-                        <option value="">Select a supplier...</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->name }}" 
-                                    data-contact="{{ $supplier->contact_person ?? '' }}"
-                                    data-email="{{ $supplier->email ?? '' }}"
-                                    data-phone="{{ $supplier->phone ?? '' }}"
-                                    data-address="{{ $supplier->address ?? '' }}"
-                                    {{ old('supplier') == $supplier->name ? 'selected' : '' }}>
-                                {{ $supplier->name }}
+                        <option value="">Select an approved supply request...</option>
+                        @foreach($approvedSupplyRequests as $request)
+                            <option value="{{ $request->id }}" 
+                                    data-item="{{ $request->item_name }}"
+                                    data-category="{{ $request->category }}"
+                                    data-quantity="{{ $request->quantity_requested }}"
+                                    data-unit-price="{{ $request->unit_price }}"
+                                    data-total-cost="{{ $request->total_cost }}"
+                                    data-supplier="{{ $request->supplier }}"
+                                    data-needed-by="{{ $request->needed_by_date->format('Y-m-d') }}"
+                                    data-priority="{{ $request->priority }}"
+                                    {{ old('supply_request') == $request->id ? 'selected' : '' }}>
+                                {{ $request->request_id }} - {{ $request->item_name }} ({{ $request->quantity_requested }} units)
                             </option>
                         @endforeach
                     </select>
+                    <p class="mt-1 text-sm text-gray-500">Select from approved supply requests only</p>
                 </div>
 
-                <!-- Supplier Contact -->
+                <!-- Supplier -->
                 <div>
-                    <label for="supplier_contact" class="block text-sm font-medium text-gray-700 mb-2">Supplier Contact</label>
+                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
                     <input type="text" 
-                           id="supplier_contact" 
-                           name="supplier_contact" 
-                           value="{{ old('supplier_contact') }}"
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., John Smith">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Contact person name</p>
-                </div>
-
-                <!-- Supplier Email -->
-                <div>
-                    <label for="supplier_email" class="block text-sm font-medium text-gray-700 mb-2">Supplier Email</label>
-                    <input type="email" 
-                           id="supplier_email" 
-                           name="supplier_email" 
-                           value="{{ old('supplier_email') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., john@supplier.com">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Contact email</p>
-                </div>
-
-                <!-- Supplier Phone -->
-                <div>
-                    <label for="supplier_phone" class="block text-sm font-medium text-gray-700 mb-2">Supplier Phone</label>
-                    <input type="text" 
-                           id="supplier_phone" 
-                           name="supplier_phone" 
-                           value="{{ old('supplier_phone') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., +1 (555) 123-4567">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Contact phone number</p>
-                </div>
-
-                <!-- Billing Address -->
-                <div>
-                    <label for="billing_address" class="block text-sm font-medium text-gray-700 mb-2">Billing Address</label>
-                    <textarea id="billing_address" 
-                              name="billing_address" 
-                              rows="3"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Enter billing address...">{{ old('billing_address') }}</textarea>
-                    <p class="mt-1 text-sm text-gray-500">Optional: Billing address</p>
+                           placeholder="Auto-filled from supply request or enter manually"
+                           required>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from supply request selection</p>
                 </div>
 
                 <!-- Shipping Address -->
@@ -182,152 +153,151 @@
                               rows="3"
                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                               placeholder="Enter shipping address...">{{ old('shipping_address') }}</textarea>
-                    <p class="mt-1 text-sm text-gray-500">Optional: Shipping address</p>
+                    <p class="mt-1 text-sm text-gray-500">Optional: Shipping address (auto-filled from supplier if available)</p>
                 </div>
 
-                <!-- Subtotal -->
-                <div>
-                    <label for="subtotal" class="block text-sm font-medium text-gray-700 mb-2">Subtotal *</label>
-                    <input type="number" 
-                           id="subtotal" 
-                           name="subtotal" 
-                           value="{{ old('subtotal') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0"
-                           required>
-                    <p class="mt-1 text-sm text-gray-500">Total cost before tax and shipping</p>
-                </div>
+                <!-- Item Details (Auto-filled from Supply Request) -->
+                <div class="md:col-span-2">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Item Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Item Name -->
+                        <div>
+                            <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
+                            <input type="text" 
+                                   id="item_name" 
+                                   name="item_name" 
+                                   value="{{ old('item_name') }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                   placeholder="Auto-filled from supply request"
+                                   readonly>
+                            <p class="mt-1 text-sm text-gray-500">Auto-populated from selected supply request</p>
+                        </div>
 
-                <!-- Tax Amount -->
-                <div>
-                    <label for="tax_amount" class="block text-sm font-medium text-gray-700 mb-2">Tax Amount *</label>
-                    <input type="number" 
-                           id="tax_amount" 
-                           name="tax_amount" 
-                           value="{{ old('tax_amount') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0"
-                           required>
-                    <p class="mt-1 text-sm text-gray-500">Tax amount (e.g., 10% of subtotal)</p>
-                </div>
+                        <!-- Category -->
+                        <div>
+                            <label for="item_category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                            <input type="text" 
+                                   id="item_category" 
+                                   name="item_category" 
+                                   value="{{ old('item_category') }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                   placeholder="Auto-filled from supply request"
+                                   readonly>
+                            <p class="mt-1 text-sm text-gray-500">Auto-populated from selected supply request</p>
+                        </div>
 
-                <!-- Shipping Cost -->
-                <div>
-                    <label for="shipping_cost" class="block text-sm font-medium text-gray-700 mb-2">Shipping Cost *</label>
-                    <input type="number" 
-                           id="shipping_cost" 
-                           name="shipping_cost" 
-                           value="{{ old('shipping_cost') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0"
-                           required>
-                    <p class="mt-1 text-sm text-gray-500">Shipping and handling costs</p>
+                        <!-- Quantity -->
+                        <div>
+                            <label for="item_quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                            <input type="number" 
+                                   id="item_quantity" 
+                                   name="item_quantity" 
+                                   value="{{ old('item_quantity') }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                   placeholder="Auto-filled from supply request"
+                                   min="1"
+                                   readonly>
+                            <p class="mt-1 text-sm text-gray-500">Auto-populated from selected supply request</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <!-- Unit Price -->
+                        <div>
+                            <label for="unit_price" class="block text-sm font-medium text-gray-700 mb-2">Unit Price *</label>
+                            <input type="number" 
+                                   id="unit_price" 
+                                   name="unit_price" 
+                                   value="{{ old('unit_price') }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                                   placeholder="Auto-filled from supply request"
+                                   step="0.01"
+                                   min="0"
+                                   readonly>
+                            <p class="mt-1 text-sm text-gray-500">Auto-populated from selected supply request</p>
+                        </div>
+
+                        <!-- Total Cost -->
+                        <div>
+                            <label for="total_cost" class="block text-sm font-medium text-gray-700 mb-2">Total Cost *</label>
+                            <input type="number" 
+                                   id="total_cost" 
+                                   name="total_cost" 
+                                   value="{{ old('total_cost') }}"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-green-700 font-medium"
+                                   placeholder="Auto-filled from supply request"
+                                   step="0.01"
+                                   min="0"
+                                   readonly>
+                            <p class="mt-1 text-sm text-gray-500">Auto-populated from selected supply request</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Total Amount Display -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount</label>
-                    <div class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50">
-                        <span class="text-gray-900 font-medium text-lg">₱0.00</span>
+                <div class="md:col-span-2">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                                <p class="text-sm text-gray-500">Total cost from supply request</p>
+                            </div>
+                            <div class="text-right">
+                                <span id="total_amount_display" class="text-2xl font-bold text-green-700">₱0.00</span>
+                            </div>
+                        </div>
                     </div>
-                    <p class="mt-1 text-sm text-gray-500">Auto-calculated: Subtotal + Tax + Shipping</p>
                 </div>
 
-                <!-- Priority -->
+                <!-- Hidden Status Field (automatically set to Sent) -->
+<input type="hidden" name="status" value="Sent">
+
+                <!-- Priority (Auto-filled from Supply Request) -->
                 <div>
                     <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">Priority *</label>
-                    <select id="priority" 
-                            name="priority" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select priority</option>
-                        <option value="Low" {{ old('priority') === 'Low' ? 'selected' : '' }}>Low</option>
-                        <option value="Medium" {{ old('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
-                        <option value="High" {{ old('priority') === 'High' ? 'selected' : '' }}>High</option>
-                        <option value="Urgent" {{ old('priority') === 'Urgent' ? 'selected' : '' }}>Urgent</option>
-                    </select>
+                    <input type="text" 
+                           id="priority" 
+                           name="priority" 
+                           value="{{ old('priority') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                           placeholder="Auto-filled from supply request"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-populated from selected supply request</p>
                 </div>
 
-                <!-- Status -->
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select id="status" 
-                            name="status" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select status</option>
-                        <option value="Draft" {{ old('status') === 'Draft' ? 'selected' : '' }}>Draft</option>
-                        <option value="Sent" {{ old('status') === 'Sent' ? 'selected' : '' }}>Sent</option>
-                        <option value="Approved" {{ old('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="Rejected" {{ old('status') === 'Rejected' ? 'selected' : '' }}>Rejected</option>
-                        <option value="Partially Received" {{ old('status') === 'Partially Received' ? 'selected' : '' }}>Partially Received</option>
-                        <option value="Received" {{ old('status') === 'Received' ? 'selected' : '' }}>Received</option>
-                        <option value="Cancelled" {{ old('status') === 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    </select>
-                </div>
+                <!-- Hidden Order Date (automatically set to creation date) -->
+<input type="hidden" name="order_date" value="{{ now()->format('Y-m-d') }}">
 
-                <!-- Order Date -->
-                <div>
-                    <label for="order_date" class="block text-sm font-medium text-gray-700 mb-2">Order Date *</label>
-                    <input type="date" 
-                           id="order_date" 
-                           name="order_date" 
-                           value="{{ old('order_date', now()->format('Y-m-d')) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           required>
-                </div>
-
-                <!-- Expected Delivery Date -->
+                <!-- Expected Delivery Date (Auto-filled from Supply Request) -->
                 <div>
                     <label for="expected_delivery_date" class="block text-sm font-medium text-gray-700 mb-2">Expected Delivery Date *</label>
                     <input type="date" 
                            id="expected_delivery_date" 
                            name="expected_delivery_date" 
                            value="{{ old('expected_delivery_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           required>
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                           placeholder="Auto-filled from supply request"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-populated from selected supply request (needed by date)</p>
                 </div>
 
-                <!-- Actual Delivery Date -->
-                <div>
-                    <label for="actual_delivery_date" class="block text-sm font-medium text-gray-700 mb-2">Actual Delivery Date</label>
-                    <input type="date" 
-                           id="actual_delivery_date" 
-                           name="actual_delivery_date" 
-                           value="{{ old('actual_delivery_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Auto-filled when marked as received</p>
-                </div>
+                <!-- Hidden Actual Delivery Date (auto-filled when status is received) -->
+<input type="hidden" name="actual_delivery_date" value="">
 
-                <!-- Created By -->
+                <!-- Created By (Auto-filled with logged-in user) -->
                 <div>
-                    <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">Created By *</label>
+                    <label for="created_by" class="block text-sm font-medium text-gray-700 mb-2">Created By</label>
                     <input type="text" 
                            id="created_by" 
                            name="created_by" 
-                           value="{{ old('created_by') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., John Smith"
-                           required>
+                           value="{{ auth()->user()->name ?? 'Current User' }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Automatically set to current logged-in user</p>
                 </div>
 
-                <!-- Approved By -->
-                <div>
-                    <label for="approved_by" class="block text-sm font-medium text-gray-700 mb-2">Approved By</label>
-                    <input type="text" 
-                           id="approved_by" 
-                           name="approved_by" 
-                           value="{{ old('approved_by') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Jane Manager">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Name of approving manager</p>
-                </div>
+                <!-- Hidden Approved By (auto-filled when approved) -->
+<input type="hidden" name="approved_by" value="">
             </div>
 
             <!-- Notes -->
@@ -340,6 +310,14 @@
                           placeholder="Enter additional notes about this purchase order...">{{ old('notes') }}</textarea>
                 <p class="mt-1 text-sm text-gray-500">Optional: Additional information about the purchase order</p>
             </div>
+
+            <!-- Hidden fields for item data (to ensure submission) -->
+            <input type="hidden" id="hidden_item_name" name="item_name" value="">
+            <input type="hidden" id="hidden_item_category" name="item_category" value="">
+            <input type="hidden" id="hidden_item_quantity" name="item_quantity" value="">
+            <input type="hidden" id="hidden_unit_price" name="unit_price" value="">
+            <input type="hidden" id="hidden_total_cost" name="total_cost" value="">
+            <input type="hidden" id="hidden_priority" name="priority" value="">
 
             <!-- Form Actions -->
             <div class="flex justify-end gap-3 mt-8">
@@ -356,56 +334,93 @@
 </div>
 
 <script>
+// Supplier data for auto-fill
+const supplierData = [
+    @foreach($suppliers as $supplier)
+    {
+        name: "{{ $supplier->name ?? '' }}",
+        contact: "{{ $supplier->contact_person ?? '' }}",
+        email: "{{ $supplier->email ?? '' }}",
+        phone: "{{ $supplier->phone ?? '' }}",
+        address: "{{ $supplier->address ?? '' }}"
+    }@if(!$loop->last),@endif
+    @endforeach
+];
+
+// Function to auto-fill supplier details
+function autoFillSupplierDetails(supplierName) {
+    const supplier = supplierData.find(s => s.name === supplierName);
+    if (supplier) {
+        // Auto-fill shipping address if it's empty
+        const shippingAddress = document.getElementById('shipping_address');
+        if (shippingAddress && !shippingAddress.value) {
+            shippingAddress.value = supplier.address || '';
+        }
+    }
+}
+
 // Auto-fill supplier fields when supplier is selected
 document.addEventListener('DOMContentLoaded', function() {
-    const supplierSelect = document.getElementById('supplier');
-    const contactField = document.getElementById('supplier_contact');
-    const emailField = document.getElementById('supplier_email');
-    const phoneField = document.getElementById('supplier_phone');
-    const billingAddressField = document.getElementById('billing_address');
-    const shippingAddressField = document.getElementById('shipping_address');
+    const supplyRequestSelect = document.getElementById('supply_request');
     
-    supplierSelect.addEventListener('change', function() {
+    // Auto-fill item details when supply request is selected
+    supplyRequestSelect.addEventListener('change', function() {
         const selectedOption = this.options[this.selectedIndex];
         
         if (selectedOption.value) {
-            // Auto-fill supplier contact information
-            contactField.value = selectedOption.dataset.contact || '';
-            emailField.value = selectedOption.dataset.email || '';
-            phoneField.value = selectedOption.dataset.phone || '';
+            // Auto-fill supplier from supply request
+            const supplierName = selectedOption.dataset.supplier || '';
+            document.getElementById('supplier').value = supplierName;
             
-            // Auto-fill addresses if they're empty
-            if (!billingAddressField.value) {
-                billingAddressField.value = selectedOption.dataset.address || '';
-            }
-            if (!shippingAddressField.value) {
-                shippingAddressField.value = selectedOption.dataset.address || '';
-            }
+            // Auto-fill supplier details based on supplier name
+            autoFillSupplierDetails(supplierName);
+            
+            // Auto-fill item details (visible fields)
+            document.getElementById('item_name').value = selectedOption.dataset.item || '';
+            document.getElementById('item_category').value = selectedOption.dataset.category || '';
+            document.getElementById('item_quantity').value = selectedOption.dataset.quantity || '';
+            document.getElementById('unit_price').value = selectedOption.dataset.unitPrice || '';
+            document.getElementById('total_cost').value = selectedOption.dataset.totalCost || '';
+            
+            // Auto-fill item details (hidden fields for submission)
+            document.getElementById('hidden_item_name').value = selectedOption.dataset.item || '';
+            document.getElementById('hidden_item_category').value = selectedOption.dataset.category || '';
+            document.getElementById('hidden_item_quantity').value = selectedOption.dataset.quantity || '';
+            document.getElementById('hidden_unit_price').value = selectedOption.dataset.unitPrice || '';
+            document.getElementById('hidden_total_cost').value = selectedOption.dataset.totalCost || '';
+            document.getElementById('hidden_priority').value = selectedOption.dataset.priority || '';
+            
+            // Auto-fill expected delivery date from needed by date
+            document.getElementById('expected_delivery_date').value = selectedOption.dataset.neededBy || '';
+            
+            // Calculate total amount from supply request (quantity × unit price)
+            const quantity = parseFloat(selectedOption.dataset.quantity) || 0;
+            const unitPrice = parseFloat(selectedOption.dataset.unitPrice) || 0;
+            const calculatedTotal = quantity * unitPrice;
+            document.getElementById('total_amount_display').textContent = '₱' + calculatedTotal.toFixed(2);
         } else {
-            // Clear fields if no supplier selected
-            contactField.value = '';
-            emailField.value = '';
-            phoneField.value = '';
+            // Clear item fields if no supply request selected
+            document.getElementById('supplier').value = '';
+            document.getElementById('item_name').value = '';
+            document.getElementById('item_category').value = '';
+            document.getElementById('item_quantity').value = '';
+            document.getElementById('unit_price').value = '';
+            document.getElementById('total_cost').value = '';
+            document.getElementById('priority').value = '';
+            document.getElementById('expected_delivery_date').value = '';
+            
+            // Clear hidden fields
+            document.getElementById('hidden_item_name').value = '';
+            document.getElementById('hidden_item_category').value = '';
+            document.getElementById('hidden_item_quantity').value = '';
+            document.getElementById('hidden_unit_price').value = '';
+            document.getElementById('hidden_total_cost').value = '';
+            document.getElementById('hidden_priority').value = '';
+            
+            // Reset total amount display
+            document.getElementById('total_amount_display').textContent = '₱0.00';
         }
     });
-    
-    // Auto-calculate total amount
-    const subtotal = document.getElementById('subtotal');
-    const taxAmount = document.getElementById('tax_amount');
-    const shippingCost = document.getElementById('shipping_cost');
-    const totalDisplay = document.querySelector('.bg-gray-50 span');
-    
-    function calculateTotal() {
-        const subtotalValue = parseFloat(subtotal.value) || 0;
-        const taxValue = parseFloat(taxAmount.value) || 0;
-        const shippingValue = parseFloat(shippingCost.value) || 0;
-        const total = subtotalValue + taxValue + shippingValue;
-        totalDisplay.textContent = '₱' + total.toFixed(2);
-    }
-    
-    subtotal.addEventListener('input', calculateTotal);
-    taxAmount.addEventListener('input', calculateTotal);
-    shippingCost.addEventListener('input', calculateTotal);
 });
 </script>
 @endsection

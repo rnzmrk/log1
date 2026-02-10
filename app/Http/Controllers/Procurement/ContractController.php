@@ -455,4 +455,24 @@ class ContractController extends Controller
         
         return response()->json($contracts);
     }
+
+    /**
+     * Search vendors for contract creation
+     */
+    public function searchVendors(Request $request)
+    {
+        $search = $request->get('q');
+        
+        if (empty($search)) {
+            return response()->json([]);
+        }
+
+        $vendors = Supplier::where('name', 'LIKE', "%{$search}%")
+            ->orWhere('vendor_code', 'LIKE', "%{$search}%")
+            ->select('id', 'name', 'vendor_code', 'contact_person', 'email', 'phone', 'address', 'city', 'state', 'country', 'category')
+            ->limit(10)
+            ->get();
+
+        return response()->json($vendors);
+    }
 }

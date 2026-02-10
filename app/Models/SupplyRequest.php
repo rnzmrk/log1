@@ -52,8 +52,9 @@ class SupplyRequest extends Model
 
         static::saving(function ($request) {
             // Auto-calculate total cost when unit price and quantity are set
-            if ($request->unit_price && $request->quantity_approved) {
-                $request->total_cost = $request->unit_price * $request->quantity_approved;
+            $quantity = $request->quantity_approved ?? $request->quantity_requested;
+            if ($request->unit_price && $quantity) {
+                $request->total_cost = $request->unit_price * $quantity;
             }
             
             // Auto-update approval_date when status changes to 'Approved'
@@ -66,6 +67,25 @@ class SupplyRequest extends Model
                 $request->order_date = now();
             }
         });
+    }
+
+    /**
+     * Get calculated total cost
+     */
+    public function getTotalCostAttribute($value)
+    {
+        // If total_cost is already set, return it
+        if ($value !== null) {
+            return $value;
+        }
+        
+        // Otherwise calculate it from quantity and unit price
+        $quantity = $this->quantity_approved ?? $this->quantity_requested;
+        if ($this->unit_price && $quantity) {
+            return $this->unit_price * $quantity;
+        }
+        
+        return 0;
     }
 
     /**

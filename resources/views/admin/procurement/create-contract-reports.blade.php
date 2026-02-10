@@ -326,28 +326,8 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $contract->start_date->format('M d, Y') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $contract->end_date->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                @php
-                                    $daysUntilExpiration = $contract->status === 'Active' ? now()->diffInDays($contract->end_date, false) : null;
-                                    $renewalStatus = $contract->renewal_status ?? 'Active';
-                                @endphp
-                                @if($daysUntilExpiration !== null)
-                                    @if($daysUntilExpiration < 0)
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                            Expired
-                                        </span>
-                                    @elseif($daysUntilExpiration <= 30)
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                            {{ $daysUntilExpiration }} days
-                                        </span>
-                                    @else
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            {{ $daysUntilExpiration }} days
-                                        </span>
-                                    @endif
-                                @else
-                                    <span class="text-gray-500">-</span>
-                                @endif
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <x-contract-days-left :contract="$contract" />
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if ($contract->status === 'Draft')

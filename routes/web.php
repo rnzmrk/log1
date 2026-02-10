@@ -52,6 +52,8 @@ Route::resource('inbound-logistics', InboundLogisticController::class)->except([
 // Inbound Logistics Actions
 Route::post('/inbound-logistics/{inboundLogistic}/accept', [InboundLogisticController::class, 'acceptShipment'])->name('inbound-logistics.accept');
 Route::post('/inbound-logistics/{inboundLogistic}/reject', [InboundLogisticController::class, 'rejectShipment'])->name('inbound-logistics.reject');
+Route::post('/inbound-logistics/{inboundLogistic}/receive', [InboundLogisticController::class, 'receive'])->name('inbound-logistics.receive');
+Route::post('/inbound-logistics/{inboundLogistic}/move', [InboundLogisticController::class, 'moveToStorage'])->name('inbound-logistics.move');
 Route::get('/inbound-logistics/export', [InboundLogisticController::class, 'export'])->name('inbound-logistics.export');
 Route::post('/inbound-logistics/bulk-action', [InboundLogisticController::class, 'bulkAction'])->name('inbound-logistics.bulk-action');
 
@@ -134,8 +136,13 @@ Route::resource('purchase-orders', PurchaseOrderController::class)->names([
 // Purchase Order Approval Routes
 Route::post('/purchase-orders/{purchaseOrder}/approve', [PurchaseOrderController::class, 'approve'])->name('purchase-orders.approve');
 Route::post('/purchase-orders/{purchaseOrder}/reject', [PurchaseOrderController::class, 'reject'])->name('purchase-orders.reject');
+Route::post('/purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receive'])->name('purchase-orders.receive');
+Route::get('/purchase-orders/search', [PurchaseOrderController::class, 'search'])->name('purchase-orders.search');
 
 Route::get('/admin/procurement/create-contract-reports', [ContractController::class, 'index'])->name('admin.procurement.create-contract-reports');
+
+// Contract search route (must be before resource route)
+Route::get('/contracts/search-vendors', [ContractController::class, 'searchVendors'])->name('contracts.search-vendors');
 
 Route::resource('contracts', ContractController::class)->names([
     'index' => 'contracts.index',
@@ -162,6 +169,10 @@ Route::get('/admin/procurement/vendors', [VendorController::class, 'index'])->na
 Route::resource('vendors', VendorController::class)->except(['index']);
 Route::post('vendors/{vendor}/approve', [VendorController::class, 'approve'])->name('vendors.approve');
 Route::get('vendors/export', [VendorController::class, 'export'])->name('vendors.export');
+
+// Contract Management Routes
+Route::get('/contracts/create', [ContractController::class, 'create'])->name('contracts.create');
+Route::post('/contracts', [ContractController::class, 'store'])->name('contracts.store');
 
 // Supplier Validation Routes
 Route::prefix('vendors/{vendor}/validations')->name('vendors.validations.')->group(function () {

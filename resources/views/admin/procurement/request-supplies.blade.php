@@ -137,6 +137,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($supplyRequests as $request)
+                        @if ($request->status !== 'Ordered')
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $request->request_id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -198,10 +199,6 @@
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                         Rejected
                                     </span>
-                                @elseif ($request->status === 'Ordered')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                                        Ordered
-                                    </span>
                                 @else
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Received
@@ -218,12 +215,14 @@
                                         <a href="{{ route('supply-requests.edit', $request->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
                                             <i class='bx bx-edit text-lg'></i>
                                         </a>
-                                        <button class="approve-btn text-green-600 hover:text-green-900" 
-                                                data-item="Supply Request #{{ $request->id }}" 
-                                                data-url="{{ route('supply-requests.approve', $request->id) }}" 
-                                                title="Approve">
-                                            <i class='bx bx-check-circle text-lg'></i>
-                                        </button>
+                                        <form method="POST" action="{{ route('supply-requests.approve', $request->id) }}" 
+                                              onsubmit="return confirm('Are you sure you want to approve Supply Request #{{ $request->id }}?');"
+                                              class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-green-600 hover:text-green-900" title="Approve">
+                                                <i class='bx bx-check-circle text-lg'></i>
+                                            </button>
+                                        </form>
                                     @endif
                                     
                                     @if($request->status === 'Approved')
@@ -241,6 +240,7 @@
                                 </div>
                             </td>
                         </tr>
+                        @endif
                     @empty
                         <tr>
                             <td colspan="10" class="px-6 py-8 text-center text-gray-500">

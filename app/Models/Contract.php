@@ -117,9 +117,137 @@ class Contract extends Model
      */
     public function getDaysUntilExpirationAttribute()
     {
-        if ($this->status !== 'Active') return null;
+        if (!$this->end_date) return null;
         
         return now()->diffInDays($this->end_date, false);
+    }
+
+    /**
+     * Get formatted days left text with automation
+     */
+    public function getDaysLeftTextAttribute()
+    {
+        $days = $this->days_until_expiration;
+        
+        if ($days === null) {
+            return 'N/A';
+        }
+        
+        if ($days < 0) {
+            $absDays = abs($days);
+            return "Expired {$absDays} day" . ($absDays !== 1 ? 's' : '') . " ago";
+        }
+        
+        if ($days === 0) {
+            return 'Expires Today';
+        }
+        
+        if ($days === 1) {
+            return 'Expires Tomorrow';
+        }
+        
+        if ($days <= 7) {
+            return "{$days} days left";
+        }
+        
+        if ($days <= 30) {
+            $weeks = floor($days / 7);
+            $remainingDays = $days % 7;
+            $text = "{$weeks} week" . ($weeks !== 1 ? 's' : '');
+            if ($remainingDays > 0) {
+                $text .= " {$remainingDays} day" . ($remainingDays !== 1 ? 's' : '');
+            }
+            return $text . " left";
+        }
+        
+        if ($days <= 90) {
+            $months = floor($days / 30);
+            $remainingDays = $days % 30;
+            $text = "{$months} month" . ($months !== 1 ? 's' : '');
+            if ($remainingDays > 0 && $remainingDays <= 7) {
+                $text .= " {$remainingDays} day" . ($remainingDays !== 1 ? 's' : '');
+            }
+            return $text . " left";
+        }
+        
+        $months = floor($days / 30);
+        return "{$months}+ month" . ($months !== 1 ? 's' : '') . " left";
+    }
+
+    /**
+     * Get days left color class for UI
+     */
+    public function getDaysLeftColorAttribute()
+    {
+        $days = $this->days_until_expiration;
+        
+        if ($days === null) return 'text-gray-500';
+        if ($days < 0) return 'text-red-600 font-semibold';
+        if ($days === 0) return 'text-red-600 font-semibold';
+        if ($days <= 7) return 'text-red-600 font-semibold';
+        if ($days <= 30) return 'text-orange-600 font-semibold';
+        if ($days <= 90) return 'text-yellow-600';
+        return 'text-green-600';
+    }
+
+    /**
+     * Get automated status based on days left
+     */
+    public function getAutomatedStatusAttribute()
+    {
+        $days = $this->days_until_expiration;
+        
+        if ($days === null) return $this->status;
+        
+        if ($days < 0) {
+            return 'Expired';
+        }
+        
+        if ($days === 0) {
+            return 'Expires Today';
+        }
+        
+        if ($days <= 7) {
+            return 'Critical - Expiring Soon';
+        }
+        
+        if ($days <= 30) {
+            return 'Warning - Expiring Soon';
+        }
+        
+        if ($days <= 90) {
+            return 'Monitor - Expiring';
+        }
+        
+        return 'Active';
+    }
+
+    /**
+     * Check if contract needs attention
+     */
+    public function getNeedsAttentionAttribute()
+    {
+        $days = $this->days_until_expiration;
+        
+        if ($days === null) return false;
+        
+        return $days <= 30 || $days < 0;
+    }
+
+    /**
+     * Get urgency level for automation
+     */
+    public function getUrgencyLevelAttribute()
+    {
+        $days = $this->days_until_expiration;
+        
+        if ($days === null) return 'low';
+        
+        if ($days < 0) return 'critical'; // Expired
+        if ($days <= 7) return 'critical'; // This week
+        if ($days <= 30) return 'high'; // This month
+        if ($days <= 90) return 'medium'; // This quarter
+        return 'low'; // More than 3 months
     }
 
     /**

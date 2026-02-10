@@ -125,6 +125,7 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PO Number</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
@@ -137,8 +138,17 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($purchaseOrders as $po)
+                        @if ($po->status !== 'To Received' && $po->status !== 'Received')
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $po->po_number }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ $po->item_name ?? 'N/A' }}</p>
+                                    @if ($po->item_category)
+                                        <p class="text-xs text-gray-500">{{ $po->item_category }}</p>
+                                    @endif
+                                </div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div>
                                     <p class="text-sm font-medium text-gray-900">{{ $po->supplier }}</p>
@@ -169,8 +179,8 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $po->order_date->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $po->expected_delivery_date->format('M d, Y') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $po->order_date ? $po->order_date->format('M d, Y') : 'N/A' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $po->expected_delivery_date ? $po->expected_delivery_date->format('M d, Y') : 'N/A' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if ($po->status === 'Draft')
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
@@ -184,17 +194,13 @@
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Approved
                                     </span>
-                                @elseif ($po->status === 'Rejected')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        Rejected
+                                @elseif ($po->status === 'To Received')
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        To Received
                                     </span>
                                 @elseif ($po->status === 'Partially Received')
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
                                         Partially Received
-                                    </span>
-                                @elseif ($po->status === 'Received')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Received
                                     </span>
                                 @else
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
@@ -208,26 +214,22 @@
                                     <a href="{{ route('purchase-orders.show', $po->id) }}" class="text-blue-600 hover:text-blue-900" title="View">
                                         <i class='bx bx-show text-lg'></i>
                                     </a>
-                                    @if ($po->status === 'Draft' || $po->status === 'Sent')
+                                    @if ($po->status === 'Draft' || $po->status === 'Sent' || $po->status === 'Approved')
                                         <a href="{{ route('purchase-orders.edit', $po->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
                                             <i class='bx bx-edit text-lg'></i>
                                         </a>
-                                        <button class="approve-btn text-green-600 hover:text-green-900" 
-                                                data-item="{{ $po->po_number }}" 
-                                                data-url="{{ route('purchase-orders.approve', $po->id) }}" 
-                                                title="Approve">
-                                            <i class='bx bx-check-circle text-lg'></i>
-                                        </button>
+                                        <!-- Receive button - works for all non-received items -->
+                                        <form method="POST" action="{{ route('purchase-orders.receive', $po->id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to mark purchase order {{ $po->po_number }} as to be received?');">
+                                            @csrf
+                                            <button type="submit" class="text-blue-600 hover:text-blue-900 bg-transparent border-none cursor-pointer p-0 m-0" title="Mark as To Received" style="vertical-align: middle;">
+                                                <i class='bx bx-package text-lg'></i>
+                                            </button>
+                                        </form>
                                     @endif
-                                    <button class="delete-btn text-red-600 hover:text-red-900" 
-                                            data-item="{{ $po->po_number }}" 
-                                            data-url="{{ route('purchase-orders.destroy', $po->id) }}" 
-                                            title="Delete">
-                                        <i class='bx bx-trash text-lg'></i>
-                                    </button>
                                 </div>
                             </td>
                         </tr>
+                        @endif
                     @empty
                         <tr>
                             <td colspan="9" class="px-6 py-8 text-center text-gray-500">
@@ -268,4 +270,5 @@
 </div>
 
 <script src="{{ asset('js/excel-export.js') }}"></script>
+
 @endsection

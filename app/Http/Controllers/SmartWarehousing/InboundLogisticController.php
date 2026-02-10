@@ -16,6 +16,9 @@ class InboundLogisticController extends Controller
     {
         $query = InboundLogistic::query();
 
+        // Exclude shipments that are already in storage
+        $query->where('status', '!=', 'Storage');
+
         // Search by shipment ID or supplier
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -25,8 +28,8 @@ class InboundLogisticController extends Controller
             });
         }
 
-        // Filter by status
-        if ($request->filled('status')) {
+        // Filter by status (but allow viewing Storage if explicitly selected)
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
@@ -64,8 +67,8 @@ class InboundLogisticController extends Controller
             ->orderBy('name')
             ->get();
             
-        // Get approved purchase orders for connection
-        $purchaseOrders = \App\Models\PurchaseOrder::whereIn('status', ['Approved', 'Sent'])
+        // Get purchase orders with "To Received" status for inbound logistics
+        $purchaseOrders = \App\Models\PurchaseOrder::where('status', 'To Received')
             ->orderBy('po_number')
             ->get();
             
@@ -82,18 +85,35 @@ class InboundLogisticController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id',
-            'supplier' => 'required|string',
+            'shipment_id' => 'nullable|string|unique:inbound_logistics,shipment_id',
+            'po_number' => 'nullable|string',
+            'supplier' => 'nullable|string',
             'item_name' => 'nullable|string',
-            'expected_units' => 'required|integer|min:1',
+            'quantity' => 'nullable|integer|min:1',
+            'department' => 'nullable|string',
+            'status' => 'nullable|string',
+            'quality' => 'nullable|string',
+            'received_by' => 'nullable|string',
+            'expected_units' => 'nullable|integer|min:1',
             'expected_date' => 'required|date',
             'description' => 'nullable|string',
         ]);
 
+        // Create inbound logistics record
         InboundLogistic::create($request->all());
 
+        // Update PO status to "Received" if PO number is provided
+        if ($request->filled('po_number')) {
+            $po = \App\Models\PurchaseOrder::where('po_number', $request->po_number)->first();
+            if ($po) {
+                $po->status = 'Received';
+                $po->actual_delivery_date = now();
+                $po->save();
+            }
+        }
+
         return redirect()->route('admin.warehousing.inbound-logistics')
-            ->with('success', 'Inbound shipment created successfully.');
+            ->with('success', 'Inbound shipment created successfully and PO marked as received.');
     }
 
     /**
@@ -122,12 +142,19 @@ class InboundLogisticController extends Controller
     public function update(Request $request, InboundLogistic $inboundLogistic)
     {
         $request->validate([
-            'shipment_id' => 'required|string|unique:inbound_logistics,shipment_id,' . $inboundLogistic->id,
-            'supplier' => 'required|string',
-            'item_name' => 'required|string',
-            'expected_units' => 'required|integer|min:1',
+            'shipment_id' => 'nullable|string|unique:inbound_logistics,shipment_id,' . $inboundLogistic->id,
+            'po_number' => 'nullable|string',
+            'supplier' => 'nullable|string',
+            'item_name' => 'nullable|string',
+            'quantity' => 'nullable|integer|min:1',
+            'department' => 'nullable|string',
+            'status' => 'nullable|string',
+            'quality' => 'nullable|string',
+            'received_by' => 'nullable|string',
+            'expected_units' => 'nullable|integer|min:1',
             'expected_date' => 'required|date',
-            'description' => 'nullable|string',
+            'received_date' => 'nullable|date',
+            'notes' => 'nullable|string',
         ]);
 
         $inboundLogistic->update($request->all());
@@ -205,6 +232,46 @@ class InboundLogisticController extends Controller
 
         return redirect()->back()
             ->with('success', 'Shipment rejected successfully.');
+    }
+
+    /**
+     * Mark the inbound shipment as received.
+     */
+    public function receive(InboundLogistic $inboundLogistic)
+    {
+        if ($inboundLogistic->status === 'Delivered') {
+            return redirect()->back()
+                ->with('error', 'This shipment has already been marked as delivered.');
+        }
+
+        $inboundLogistic->status = 'Delivered';
+        $inboundLogistic->received_date = now();
+        $inboundLogistic->save();
+
+        return redirect()->back()
+            ->with('success', 'Shipment marked as received successfully.');
+    }
+
+    /**
+     * Move the inbound shipment to storage.
+     */
+    public function moveToStorage(InboundLogistic $inboundLogistic)
+    {
+        if ($inboundLogistic->status === 'Storage') {
+            return redirect()->back()
+                ->with('error', 'This shipment is already in storage.');
+        }
+
+        if ($inboundLogistic->status !== 'Delivered') {
+            return redirect()->back()
+                ->with('error', 'Only delivered shipments can be moved to storage.');
+        }
+
+        $inboundLogistic->status = 'Storage';
+        $inboundLogistic->save();
+
+        return redirect()->back()
+            ->with('success', 'Shipment moved to storage successfully.');
     }
 
     /**

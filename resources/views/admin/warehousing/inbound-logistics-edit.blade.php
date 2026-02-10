@@ -69,107 +69,108 @@
             @endif
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Shipment ID -->
-                <div>
-                    <label for="shipment_id" class="block text-sm font-medium text-gray-700 mb-2">Shipment ID *</label>
-                    <input type="text" 
-                           id="shipment_id" 
-                           name="shipment_id" 
-                           value="{{ old('shipment_id', $inboundLogistic->shipment_id) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., SHP-2024-001"
-                           required>
-                </div>
-
                 <!-- PO Number -->
                 <div>
-                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number *</label>
+                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number</label>
                     <input type="text" 
                            id="po_number" 
                            name="po_number" 
                            value="{{ old('po_number', $inboundLogistic->po_number) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., PO-2024-001"
-                           required>
+                           placeholder="e.g., PO-2024-001">
                 </div>
 
                 <!-- Supplier -->
                 <div>
-                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
-                    <select id="supplier" 
-                            name="supplier" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select a supplier...</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->name }}" 
-                                    {{ old('supplier', $inboundLogistic->supplier) == $supplier->name ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Expected Units -->
-                <div>
-                    <label for="expected_units" class="block text-sm font-medium text-gray-700 mb-2">Expected Units *</label>
-                    <input type="number" 
-                           id="expected_units" 
-                           name="expected_units" 
-                           value="{{ old('expected_units', $inboundLogistic->expected_units) }}"
+                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier', $inboundLogistic->supplier) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., 100"
-                           min="1"
-                           required>
+                           placeholder="Supplier name">
                 </div>
 
-                <!-- Received Units -->
+                <!-- Item Name -->
                 <div>
-                    <label for="received_units" class="block text-sm font-medium text-gray-700 mb-2">Received Units</label>
-                    <input type="number" 
-                           id="received_units" 
-                           name="received_units" 
-                           value="{{ old('received_units', $inboundLogistic->received_units) }}"
+                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
+                    <input type="text" 
+                           id="item_name" 
+                           name="item_name" 
+                           value="{{ old('item_name', $inboundLogistic->item_name) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., 95"
-                           min="0">
+                           placeholder="Item description">
                 </div>
 
-                <!-- Quality -->
+                <!-- Quantity -->
                 <div>
-                    <label for="quality" class="block text-sm font-medium text-gray-700 mb-2">Quality *</label>
-                    <select id="quality" 
-                            name="quality" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="Good" {{ old('quality', $inboundLogistic->quality) === 'Good' ? 'selected' : '' }}>Good</option>
-                        <option value="Pending" {{ old('quality', $inboundLogistic->quality) === 'Pending' ? 'selected' : '' }}>Pending</option>
-                    </select>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                    <input type="number" 
+                           id="quantity" 
+                           name="quantity" 
+                           value="{{ old('quantity', $inboundLogistic->quantity) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Number of units">
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                    <input type="text" 
+                           id="department" 
+                           name="department" 
+                           value="{{ old('department', $inboundLogistic->department) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., IT Department">
+                </div>
+
+                <!-- Received By -->
+                <div>
+                    <label for="received_by" class="block text-sm font-medium text-gray-700 mb-2">Received By</label>
+                    <input type="text" 
+                           id="received_by" 
+                           name="received_by" 
+                           value="{{ old('received_by', $inboundLogistic->received_by) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Person who received the shipment">
                 </div>
 
                 <!-- Status -->
                 <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                     <select id="status" 
                             name="status" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="In Progress" {{ old('status', $inboundLogistic->status) === 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="Verified" {{ old('status', $inboundLogistic->status) === 'Verified' ? 'selected' : '' }}>Verified</option>
-                        <option value="Putaway Complete" {{ old('status', $inboundLogistic->status) === 'Putaway Complete' ? 'selected' : '' }}>Putaway Complete</option>
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select status...</option>
+                        <option value="Pending" {{ old('status', $inboundLogistic->status) === 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="In Transit" {{ old('status', $inboundLogistic->status) === 'In Transit' ? 'selected' : '' }}>In Transit</option>
+                        <option value="Delivered" {{ old('status', $inboundLogistic->status) === 'Delivered' ? 'selected' : '' }}>Delivered</option>
+                        <option value="Storage" {{ old('status', $inboundLogistic->status) === 'Storage' ? 'selected' : '' }}>Storage</option>
+                    </select>
+                </div>
+
+                <!-- Quality Check -->
+                <div>
+                    <label for="quality" class="block text-sm font-medium text-gray-700 mb-2">Quality Check</label>
+                    <select id="quality" 
+                            name="quality" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select quality status...</option>
+                        <option value="Pass" {{ old('quality', $inboundLogistic->quality) === 'Pass' ? 'selected' : '' }}>Pass</option>
+                        <option value="Fail" {{ old('quality', $inboundLogistic->quality) === 'Fail' ? 'selected' : '' }}>Fail</option>
+                        <option value="Pending" {{ old('quality', $inboundLogistic->quality) === 'Pending' ? 'selected' : '' }}>Pending</option>
                     </select>
                 </div>
 
                 <!-- Expected Date -->
                 <div>
-                    <label for="expected_date" class="block text-sm font-medium text-gray-700 mb-2">Expected Date *</label>
+                    <label for="expected_date" class="block text-sm font-medium text-gray-700 mb-2">Expected Date</label>
                     <div class="relative">
                         <input type="date" 
                                id="expected_date" 
                                name="expected_date" 
-                               value="{{ old('expected_date', $inboundLogistic->expected_date->format('Y-m-d')) }}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               required>
+                               value="{{ old('expected_date', $inboundLogistic->expected_date ? $inboundLogistic->expected_date->format('Y-m-d') : '') }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <i class='bx bx-calendar absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl pointer-events-none'></i>
                     </div>
                 </div>
@@ -181,25 +182,25 @@
                         <input type="date" 
                                id="received_date" 
                                name="received_date" 
-                               value="{{ old('received_date', $inboundLogistic->received_date? $inboundLogistic->received_date->format('Y-m-d') : '') }}"
+                               value="{{ old('received_date', $inboundLogistic->received_date ? $inboundLogistic->received_date->format('Y-m-d') : '') }}"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <i class='bx bx-calendar absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl pointer-events-none'></i>
                     </div>
                 </div>
-
-                <!-- Notes -->
-                <div class="md:col-span-2">
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                    <textarea id="notes" 
-                              name="notes" 
-                              rows="4"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Additional notes about this shipment...">{{ old('notes', $inboundLogistic->notes) }}</textarea>
-                </div>
             </div>
 
-            <!-- Form Actions -->
-            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-200">
+            <!-- Notes -->
+            <div class="mt-6">
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                <textarea id="notes" 
+                          name="notes" 
+                          rows="4"
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Additional notes about this shipment...">{{ old('notes', $inboundLogistic->notes) }}</textarea>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="mt-8 flex justify-end gap-3">
                 <a href="{{ route('admin.warehousing.inbound-logistics') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
                     Cancel
                 </a>

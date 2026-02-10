@@ -61,24 +61,32 @@
                 </div>
             @endif
 
-            <!-- Inventory Selection -->
+            <!-- PO Selection -->
             <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Search by SKU or Item Name</h3>
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Select Purchase Order</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="inventory_search" class="block text-sm font-medium text-gray-700 mb-2">Search SKU or Item Name</label>
-                        <div class="relative">
-                            <input type="text" 
-                                   id="inventory_search" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="Type SKU or item name..."
-                                   autocomplete="off">
-                            <div id="inventory_search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
-                        </div>
-                        <p class="mt-1 text-sm text-gray-500">Search existing inventory items to auto-fill all details</p>
+                        <label for="po_select" class="block text-sm font-medium text-gray-700 mb-2">Purchase Order *</label>
+                        <select id="po_select" 
+                                name="po_id" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                            <option value="">Select a purchase order...</option>
+                            @foreach($purchaseOrders as $po)
+                                <option value="{{ $po->id }}" 
+                                        data-po-number="{{ $po->po_number }}"
+                                        data-item-name="{{ $po->item_name ?? 'N/A' }}"
+                                        data-supplier="{{ $po->supplier }}"
+                                        data-quantity="{{ $po->item_quantity ?? 'N/A' }}"
+                                        data-status="{{ $po->status }}">
+                                    {{ $po->po_number }} - {{ $po->item_name ?? 'N/A' }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">Select a purchase order with "To Received" status</p>
                     </div>
                     <div class="flex items-end">
-                        <button type="button" id="clear_inventory_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
+                        <button type="button" id="clear_po_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
                             Clear Selection
                         </button>
                     </div>
@@ -86,18 +94,6 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Shipment ID -->
-                <div>
-                    <label for="shipment_id" class="block text-sm font-medium text-gray-700 mb-2">Shipment ID *</label>
-                    <input type="text" 
-                           id="shipment_id" 
-                           name="shipment_id" 
-                           value="{{ old('shipment_id') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., SHP-2024-001"
-                           required>
-                </div>
-
                 <!-- PO Number -->
                 <div>
                     <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number *</label>
@@ -106,39 +102,22 @@
                            name="po_number" 
                            value="{{ old('po_number') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Select from PO search above"
+                           placeholder="Auto-filled from PO selection"
                            readonly>
-                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO search</p>
-                </div>
-
-                <!-- SKU -->
-                <div>
-                    <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">SKU</label>
-                    <input type="text" 
-                           id="sku" 
-                           name="sku" 
-                           value="{{ old('sku') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Auto-filled from PO or inventory"
-                           readonly>
-                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO or inventory selection</p>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO selection</p>
                 </div>
 
                 <!-- Supplier -->
                 <div>
                     <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
-                    <select id="supplier" 
-                            name="supplier" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select a supplier...</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->name }}" 
-                                    {{ old('supplier') == $supplier->name ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Auto-filled from PO"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO selection</p>
                 </div>
 
                 <!-- Item Name -->
@@ -149,22 +128,73 @@
                            name="item_name" 
                            value="{{ old('item_name') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Auto-filled from SKU search"
+                           placeholder="Auto-filled from PO"
                            readonly>
-                    <p class="mt-1 text-sm text-gray-500">Auto-filled from SKU selection</p>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO selection</p>
                 </div>
 
-                <!-- Expected Units -->
+                <!-- Quantity -->
                 <div>
-                    <label for="expected_units" class="block text-sm font-medium text-gray-700 mb-2">Expected Units *</label>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
                     <input type="number" 
-                           id="expected_units" 
-                           name="expected_units" 
-                           value="{{ old('expected_units') }}"
+                           id="quantity" 
+                           name="quantity" 
+                           value="{{ old('quantity') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Auto-filled from PO"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from PO selection</p>
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
+                    <input type="text" 
+                           id="department" 
+                           name="department" 
+                           value="{{ old('department') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., 100"
-                           min="1"
+                           placeholder="e.g., IT Department, HR Department"
                            required>
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                    <select id="status" 
+                            name="status" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required>
+                        <option value="">Select status...</option>
+                        <option value="Pending">Pending</option>
+                        <option value="In Transit">In Transit</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                </div>
+
+                <!-- Quality Check -->
+                <div>
+                    <label for="quality" class="block text-sm font-medium text-gray-700 mb-2">Quality Check</label>
+                    <select id="quality" 
+                            name="quality" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select quality status...</option>
+                        <option value="Pass">Pass</option>
+                        <option value="Fail">Fail</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                </div>
+
+                <!-- Received By -->
+                <div>
+                    <label for="received_by" class="block text-sm font-medium text-gray-700 mb-2">Received By *</label>
+                    <input type="text" 
+                           id="received_by" 
+                           name="received_by" 
+                           value="{{ Auth::user()->name }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled with logged-in user</p>
                 </div>
 
                 <!-- Expected Date -->
@@ -207,108 +237,58 @@
 </div>
 
 <script>
-let inventorySearchTimeout;
-let selectedInventory = null;
+let selectedPO = null;
 
-// Inventory search autocomplete
-document.getElementById('inventory_search').addEventListener('input', function(e) {
-    const query = e.target.value.trim();
-    const resultsDiv = document.getElementById('inventory_search_results');
+// PO selection change handler
+document.getElementById('po_select').addEventListener('change', function(e) {
+    const selectedOption = e.target.options[e.target.selectedIndex];
     
-    clearTimeout(inventorySearchTimeout);
-    
-    if (query.length < 2) {
-        resultsDiv.classList.add('hidden');
+    if (e.target.value === '') {
+        // Clear all fields if no selection
+        clearPOSelection();
         return;
     }
     
-    inventorySearchTimeout = setTimeout(() => {
-        fetch(`/inventory/search?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(data => {
-                resultsDiv.innerHTML = '';
-                if (data.length === 0) {
-                    resultsDiv.innerHTML = '<div class="p-3 text-gray-500 text-sm">No items found</div>';
-                } else {
-                    data.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0';
-                        div.innerHTML = `
-                            <div class="font-medium text-sm">${item.item_name}</div>
-                            <div class="text-xs text-gray-500">SKU: ${item.sku} | Stock: ${item.stock} | Location: ${item.location}</div>
-                            <div class="text-xs text-blue-600">Category: ${item.category} | Supplier: ${item.supplier || 'N/A'}</div>
-                        `;
-                        div.addEventListener('click', () => selectInventory(item));
-                        resultsDiv.appendChild(div);
-                    });
-                }
-                resultsDiv.classList.remove('hidden');
-            })
-            .catch(error => {
-                console.error('Search error:', error);
-                resultsDiv.innerHTML = '<div class="p-3 text-red-500 text-sm">Search failed</div>';
-                resultsDiv.classList.remove('hidden');
-            });
-    }, 300);
-});
+    // Auto-fill all form fields from selected option data attributes
+    document.getElementById('po_number').value = selectedOption.dataset.poNumber;
+    document.getElementById('supplier').value = selectedOption.dataset.supplier;
+    document.getElementById('item_name').value = selectedOption.dataset.itemName;
+    document.getElementById('quantity').value = selectedOption.dataset.quantity;
 
-// Select inventory and populate form
-function selectInventory(item) {
-    selectedInventory = item;
-    document.getElementById('inventory_search').value = `${item.sku} - ${item.item_name}`;
-    document.getElementById('inventory_search_results').classList.add('hidden');
-    
-    // Auto-fill all form fields
-    document.getElementById('shipment_id').value = `IN-${item.sku}`;
-    document.getElementById('po_number').value = `PO-${item.sku}`;
-    document.getElementById('sku').value = item.sku;
-    document.getElementById('item_name').value = item.item_name;
-    document.getElementById('expected_units').value = 1;
-
-    // Auto-select supplier if available
-    if (item.supplier && document.getElementById('supplier')) {
-        const supplierSelect = document.getElementById('supplier');
-        const options = supplierSelect.options;
-        for (let i = 0; i < options.length; i++) {
-            if (options[i].value === item.supplier) {
-                supplierSelect.selectedIndex = i;
-                break;
-            }
-        }
-    }
-    
     // Set default expected date to today + 3 days
     const expectedDate = new Date();
     expectedDate.setDate(expectedDate.getDate() + 3);
     document.getElementById('expected_date').value = expectedDate.toISOString().split('T')[0];
-}
+});
 
 // Clear selection
-document.getElementById('clear_inventory_selection').addEventListener('click', function() {
-    selectedInventory = null;
-    document.getElementById('inventory_search').value = '';
-    document.getElementById('inventory_search_results').classList.add('hidden');
+document.getElementById('clear_po_selection').addEventListener('click', function() {
+    clearPOSelection();
+});
+
+function clearPOSelection() {
+    document.getElementById('po_select').selectedIndex = 0;
     // Clear auto-filled fields
-    document.getElementById('shipment_id').value = '';
     document.getElementById('po_number').value = '';
-    document.getElementById('sku').value = '';
+    document.getElementById('supplier').value = '';
     document.getElementById('item_name').value = '';
-    document.getElementById('expected_units').value = '';
+    document.getElementById('quantity').value = '';
     document.getElementById('expected_date').value = '';
-    // Reset supplier dropdown
-    if (document.getElementById('supplier')) {
-        document.getElementById('supplier').selectedIndex = 0;
+    // Reset status dropdown
+    if (document.getElementById('status')) {
+        document.getElementById('status').selectedIndex = 0;
+    }
+    // Reset quality dropdown
+    if (document.getElementById('quality')) {
+        document.getElementById('quality').selectedIndex = 0;
+    }
+    // Clear department
+    if (document.getElementById('department')) {
+        document.getElementById('department').value = '';
     }
     if (document.getElementById('description')) {
         document.getElementById('description').value = '';
     }
-});
-
-// Hide results when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('#inventory_search') && !e.target.closest('#inventory_search_results')) {
-        document.getElementById('inventory_search_results').classList.add('hidden');
-    }
-});
+}
 </script>
 @endsection

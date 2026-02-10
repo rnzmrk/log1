@@ -87,34 +87,37 @@
                 <!-- Category -->
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                    <select id="category" 
-                            name="category" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select category</option>
-                        <option value="Office Supplies" {{ old('category') === 'Office Supplies' ? 'selected' : '' }}>Office Supplies</option>
-                        <option value="IT Equipment" {{ old('category') === 'IT Equipment' ? 'selected' : '' }}>IT Equipment</option>
-                        <option value="Furniture" {{ old('category') === 'Furniture' ? 'selected' : '' }}>Furniture</option>
-                        <option value="Safety Equipment" {{ old('category') === 'Safety Equipment' ? 'selected' : '' }}>Safety Equipment</option>
-                    </select>
+                    <input type="text" 
+                           id="category" 
+                           name="category" 
+                           value="{{ old('category') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Auto-filled from vendor selection"
+                           required>
+                    <p class="mt-1 text-sm text-gray-500">Automatically filled when vendor is selected</p>
                 </div>
 
-                <!-- Supplier -->
+                <!-- Supplier (Searchable Vendor) -->
                 <div>
                     <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
-                    <select id="supplier" 
-                            name="supplier" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select a supplier...</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->name }}" 
-                                    {{ old('supplier') == $supplier->name ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="relative">
+                        <input type="text" 
+                               id="supplier" 
+                               name="supplier" 
+                               value="{{ old('supplier') }}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Search vendor by name or code..."
+                               autocomplete="off"
+                               required>
+                        <div id="supplier-search-results" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg hidden max-h-60 overflow-y-auto">
+                            <!-- Search results will appear here -->
+                        </div>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">Search and select a vendor to auto-fill category</p>
                 </div>
+
+                <!-- Hidden Request Date (automatically set to creation date) -->
+<input type="hidden" name="request_date" value="{{ now()->format('Y-m-d') }}">
 
                 <!-- Quantity Requested -->
                 <div>
@@ -123,23 +126,10 @@
                            id="quantity_requested" 
                            name="quantity_requested" 
                            value="{{ old('quantity_requested') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           class="cost-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="1"
                            min="1"
                            required>
-                </div>
-
-                <!-- Quantity Approved -->
-                <div>
-                    <label for="quantity_approved" class="block text-sm font-medium text-gray-700 mb-2">Quantity Approved</label>
-                    <input type="number" 
-                           id="quantity_approved" 
-                           name="quantity_approved" 
-                           value="{{ old('quantity_approved') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="Leave blank if not approved"
-                           min="1">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Fill when request is approved</p>
                 </div>
 
                 <!-- Unit Price -->
@@ -149,11 +139,31 @@
                            id="unit_price" 
                            name="unit_price" 
                            value="{{ old('unit_price') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           class="cost-input w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="0.00"
                            step="0.01"
                            min="0">
                     <p class="mt-1 text-sm text-gray-500">Optional: Price per unit</p>
+                </div>
+
+                <!-- Total Cost (Auto-calculated) -->
+                <div>
+                    <label for="total_cost" class="block text-sm font-medium text-gray-700 mb-2">Total Cost</label>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg font-bold text-green-600">₱</span>
+                            <input type="number" 
+                                   id="total_cost" 
+                                   name="total_cost" 
+                                   value="{{ old('total_cost', '0') }}"
+                                   class="text-lg font-bold text-green-600 bg-transparent border-0 focus:outline-none focus:ring-0 w-32"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   readonly>
+                        </div>
+                        <p class="mt-1 text-sm text-green-600">Automatically calculated (Quantity × Unit Price)</p>
+                    </div>
                 </div>
 
                 <!-- Priority -->
@@ -171,34 +181,10 @@
                     </select>
                 </div>
 
-                <!-- Status -->
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select id="status" 
-                            name="status" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select status</option>
-                        <option value="Pending" {{ old('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="Approved" {{ old('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="Rejected" {{ old('status') === 'Rejected' ? 'selected' : '' }}>Rejected</option>
-                        <option value="Ordered" {{ old('status') === 'Ordered' ? 'selected' : '' }}>Ordered</option>
-                        <option value="Received" {{ old('status') === 'Received' ? 'selected' : '' }}>Received</option>
-                    </select>
-                </div>
+                <!-- Hidden Status Field (automatically set to Pending) -->
+<input type="hidden" name="status" value="Pending">
 
-                <!-- Request Date -->
-                <div>
-                    <label for="request_date" class="block text-sm font-medium text-gray-700 mb-2">Request Date *</label>
-                    <input type="date" 
-                           id="request_date" 
-                           name="request_date" 
-                           value="{{ old('request_date', now()->format('Y-m-d')) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           required>
-                </div>
-
-                <!-- Needed By Date -->
+<!-- Needed By Date -->
                 <div>
                     <label for="needed_by_date" class="block text-sm font-medium text-gray-700 mb-2">Needed By Date *</label>
                     <input type="date" 
@@ -209,28 +195,6 @@
                            required>
                 </div>
 
-                <!-- Approval Date -->
-                <div>
-                    <label for="approval_date" class="block text-sm font-medium text-gray-700 mb-2">Approval Date</label>
-                    <input type="date" 
-                           id="approval_date" 
-                           name="approval_date" 
-                           value="{{ old('approval_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Auto-filled when approved</p>
-                </div>
-
-                <!-- Order Date -->
-                <div>
-                    <label for="order_date" class="block text-sm font-medium text-gray-700 mb-2">Order Date</label>
-                    <input type="date" 
-                           id="order_date" 
-                           name="order_date" 
-                           value="{{ old('order_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Auto-filled when ordered</p>
-                </div>
-
                 <!-- Expected Delivery -->
                 <div>
                     <label for="expected_delivery" class="block text-sm font-medium text-gray-700 mb-2">Expected Delivery</label>
@@ -238,32 +202,20 @@
                            id="expected_delivery" 
                            name="expected_delivery" 
                            value="{{ old('expected_delivery') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Estimated delivery date</p>
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Optional: Estimated delivery date">
                 </div>
 
-                <!-- Requested By -->
+                <!-- Requested By (Auto-filled with logged-in user) -->
                 <div>
-                    <label for="requested_by" class="block text-sm font-medium text-gray-700 mb-2">Requested By *</label>
+                    <label for="requested_by" class="block text-sm font-medium text-gray-700 mb-2">Requested By</label>
                     <input type="text" 
                            id="requested_by" 
                            name="requested_by" 
-                           value="{{ old('requested_by') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., John Smith"
-                           required>
-                </div>
-
-                <!-- Approved By -->
-                <div>
-                    <label for="approved_by" class="block text-sm font-medium text-gray-700 mb-2">Approved By</label>
-                    <input type="text" 
-                           id="approved_by" 
-                           name="approved_by" 
-                           value="{{ old('approved_by') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Jane Manager">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Name of approving manager</p>
+                           value="{{ auth()->user()->name ?? 'Current User' }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-700"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Automatically set to current logged-in user</p>
                 </div>
             </div>
 
@@ -291,4 +243,115 @@
         </form>
     </div>
 </div>
+
+<script>
+let selectedSupplier = null;
+let searchTimeout;
+
+// Vendor Search Functionality for Supply Request
+document.getElementById('supplier').addEventListener('input', function(e) {
+    const query = e.target.value.trim();
+    const resultsDiv = document.getElementById('supplier-search-results');
+    
+    clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        resultsDiv.classList.add('hidden');
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        fetch(`/contracts/search-vendors?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                resultsDiv.innerHTML = '';
+                
+                if (data.length === 0) {
+                    resultsDiv.innerHTML = '<div class="p-3 text-gray-500 text-sm">No vendors found</div>';
+                } else {
+                    data.forEach(supplier => {
+                        const item = document.createElement('div');
+                        item.className = 'p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0';
+                        item.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <div class="font-medium text-gray-900">${supplier.name}</div>
+                                    <div class="text-sm text-gray-500">Code: ${supplier.vendor_code}</div>
+                                    ${supplier.category ? `<div class="text-xs text-blue-600">Category: ${supplier.category}</div>` : ''}
+                                    <div class="text-xs text-gray-400">${supplier.email || 'No email'}</div>
+                                </div>
+                                <div class="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                                    ${supplier.city || 'Location'}
+                                </div>
+                            </div>
+                        `;
+                        
+                        item.addEventListener('click', () => selectSupplier(supplier));
+                        resultsDiv.appendChild(item);
+                    });
+                }
+                
+                resultsDiv.classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Error searching suppliers:', error);
+                resultsDiv.innerHTML = '<div class="p-3 text-red-500 text-sm">Error searching suppliers</div>';
+                resultsDiv.classList.remove('hidden');
+            });
+    }, 300);
+});
+
+function selectSupplier(supplier) {
+    selectedSupplier = supplier;
+    document.getElementById('supplier').value = supplier.name;
+    document.getElementById('supplier-search-results').classList.add('hidden');
+    
+    // Auto-fill category based on vendor
+    if (supplier.category && !document.getElementById('category').value) {
+        document.getElementById('category').value = supplier.category;
+    }
+    
+    // You can also auto-fill other fields if needed
+    if (supplier.contact_person) {
+        // If you have a contact field, you could fill it here
+    }
+}
+
+// Hide search results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#supplier') && !e.target.closest('#supplier-search-results')) {
+        document.getElementById('supplier-search-results').classList.add('hidden');
+    }
+});
+
+// Automatic Total Cost Calculation for Supply Request
+function calculateTotalCost() {
+    const quantity = parseFloat(document.getElementById('quantity_requested').value) || 0;
+    const unitPrice = parseFloat(document.getElementById('unit_price').value) || 0;
+    
+    const totalCost = quantity * unitPrice;
+    
+    // Update the total cost field
+    document.getElementById('total_cost').value = totalCost.toFixed(2);
+    
+    return totalCost;
+}
+
+// Add event listeners for automatic calculation
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('quantity_requested');
+    const unitPriceInput = document.getElementById('unit_price');
+    
+    // Calculate on input change
+    quantityInput.addEventListener('input', calculateTotalCost);
+    unitPriceInput.addEventListener('input', calculateTotalCost);
+    
+    // Calculate on change (for when values are pasted or changed via arrows)
+    quantityInput.addEventListener('change', calculateTotalCost);
+    unitPriceInput.addEventListener('change', calculateTotalCost);
+    
+    // Initial calculation
+    calculateTotalCost();
+});
+</script>
 @endsection

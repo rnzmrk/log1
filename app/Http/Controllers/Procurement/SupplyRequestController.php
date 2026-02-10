@@ -163,7 +163,7 @@ class SupplyRequestController extends Controller
         $supplyRequest = SupplyRequest::findOrFail($id);
         $supplyRequest->status = 'Approved';
         $supplyRequest->approved_by = auth()->user()->name;
-        $supplyRequest->approved_at = now();
+        $supplyRequest->approval_date = now();
         $supplyRequest->save();
 
         return redirect()->route('supply-requests.index')

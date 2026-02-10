@@ -72,6 +72,41 @@
             @endif
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Inbound Logistics Selection -->
+                <div>
+                    <label for="inbound_logistic_id" class="block text-sm font-medium text-gray-700 mb-2">Select from Inbound Storage</label>
+                    <select id="inbound_logistic_id" 
+                            name="inbound_logistic_id" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            onchange="autoFillFromInbound(this)">
+                        <option value="">-- Select Inbound Shipment --</option>
+                        @foreach($inboundLogistics as $inbound)
+                            <option value="{{ $inbound->id }}" 
+                                    data-po-number="{{ $inbound->po_number }}"
+                                    data-item-name="{{ $inbound->item_name }}"
+                                    data-quantity="{{ $inbound->quantity }}"
+                                    data-supplier="{{ $inbound->supplier }}"
+                                    data-department="{{ $inbound->department }}"
+                                    data-category="{{ $inbound->category }}">
+                                {{ $inbound->po_number }} - {{ $inbound->item_name }} ({{ $inbound->quantity }} units)
+                            </option>
+                        @endforeach
+                    </select>
+                    <p class="mt-1 text-sm text-gray-500">Select to auto-fill PO details</p>
+                </div>
+
+                <!-- PO Number (Auto-filled) -->
+                <div>
+                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number</label>
+                    <input type="text" 
+                           id="po_number" 
+                           name="po_number" 
+                           value="{{ old('po_number') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Auto-filled from inbound selection"
+                           readonly>
+                </div>
+
                 <!-- Item Name -->
                 <div>
                     <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
@@ -84,28 +119,17 @@
                            required>
                 </div>
 
-                <!-- Category -->
+                <!-- Department -->
                 <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
                     <input type="text" 
-                           id="category" 
-                           name="category" 
-                           value="{{ old('category') }}"
+                           id="department" 
+                           name="department" 
+                           value="{{ old('department') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Electronics"
-                           required>
-                </div>
-
-                <!-- Location -->
-                <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location *</label>
-                    <input type="text" 
-                           id="location" 
-                           name="location" 
-                           value="{{ old('location') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Warehouse A, Shelf 1"
-                           required>
+                           placeholder="Auto-filled from inbound selection"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from inbound selection</p>
                 </div>
 
                 <!-- Stock -->
@@ -118,38 +142,21 @@
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="0"
                            min="0"
-                           required>
-                </div>
-
-                <!-- Price -->
-                <div>
-                    <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                    <input type="number" 
-                           id="price" 
-                           name="price" 
-                           value="{{ old('price') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Unit price</p>
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from inbound selection</p>
                 </div>
 
                 <!-- Supplier -->
                 <div>
                     <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
-                    <select id="supplier" 
-                            name="supplier" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select a supplier...</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->name }}" 
-                                    {{ old('supplier') == $supplier->name ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <p class="mt-1 text-sm text-gray-500">Optional: Select from approved suppliers</p>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Auto-filled from inbound selection"
+                           readonly>
+                    <p class="mt-1 text-sm text-gray-500">Auto-filled from inbound selection</p>
                 </div>
             </div>
 
@@ -177,4 +184,28 @@
         </form>
     </div>
 </div>
+
+<script>
+function autoFillFromInbound(select) {
+    const selectedOption = select.options[select.selectedIndex];
+    
+    if (select.value === '') {
+        // Clear all fields if no selection
+        document.getElementById('po_number').value = '';
+        document.getElementById('item_name').value = '';
+        document.getElementById('stock').value = '';
+        document.getElementById('supplier').value = '';
+        document.getElementById('department').value = '';
+        return;
+    }
+    
+    // Auto-fill fields from selected inbound shipment
+    document.getElementById('po_number').value = selectedOption.getAttribute('data-po-number') || '';
+    document.getElementById('item_name').value = selectedOption.getAttribute('data-item-name') || '';
+    document.getElementById('stock').value = selectedOption.getAttribute('data-quantity') || '';
+    document.getElementById('supplier').value = selectedOption.getAttribute('data-supplier') || '';
+    document.getElementById('department').value = selectedOption.getAttribute('data-department') || '';
+}
+</script>
+
 @endsection

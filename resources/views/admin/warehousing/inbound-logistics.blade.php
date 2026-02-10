@@ -57,9 +57,10 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                     <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">All Status</option>
-                        <option value="In Progress" {{ request('status') === 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="Verified" {{ request('status') === 'Verified' ? 'selected' : '' }}>Verified</option>
-                        <option value="Putaway Complete" {{ request('status') === 'Putaway Complete' ? 'selected' : '' }}>Putaway Complete</option>
+                        <option value="Pending" {{ request('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="In Transit" {{ request('status') === 'In Transit' ? 'selected' : '' }}>In Transit</option>
+                        <option value="Delivered" {{ request('status') === 'Delivered' ? 'selected' : '' }}>Delivered</option>
+                        <option value="Storage" {{ request('status') === 'Storage' ? 'selected' : '' }}>Storage</option>
                     </select>
                 </div>
 
@@ -116,16 +117,15 @@
             <table id="inboundTable" class="w-full" data-export="excel">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipment ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inbound ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PO Number</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quality</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Received By</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quality</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -133,40 +133,30 @@
                     @forelse ($inboundLogistics as $logistic)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{{ $logistic->id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $logistic->shipment_id }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $logistic->po_number }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                @if($logistic->sku)
-                                    <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ $logistic->sku }}</span>
-                                @else
-                                    <span class="text-gray-400 text-sm">-</span>
-                                @endif
+                                {{ $logistic->item_name ?? 'N/A' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                @if($logistic->item_name)
-                                    {{ $logistic->item_name }}
+                                @if($logistic->quantity)
+                                    {{ $logistic->quantity }} units
                                 @else
                                     <span class="text-gray-400 text-sm">-</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $logistic->supplier }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $logistic->expected_units }} units</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($logistic->received_units)
-                                    <div class="flex items-center">
-                                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                            <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min(100, ($logistic->received_units / $logistic->expected_units) * 100) }}%"></div>
-                                        </div>
-                                        <span class="text-sm text-gray-900">{{ $logistic->received_units }}</span>
-                                    </div>
-                                @else
-                                    <span class="text-sm text-gray-400">-</span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($logistic->quality === 'Good')
+                                @if ($logistic->status === 'Delivered')
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Good
+                                        Delivered
+                                    </span>
+                                @elseif ($logistic->status === 'In Transit')
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        In Transit
+                                    </span>
+                                @elseif ($logistic->status === 'Storage')
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                        Storage
                                     </span>
                                 @else
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
@@ -174,18 +164,24 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $logistic->department ?? 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $logistic->received_by ?? 'N/A' }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($logistic->status === 'Putaway Complete')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        Putaway Complete
-                                    </span>
-                                @elseif ($logistic->status === 'Verified')
+                                @if ($logistic->quality === 'Pass')
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Verified
+                                        Pass
+                                    </span>
+                                @elseif ($logistic->quality === 'Fail')
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Fail
                                     </span>
                                 @else
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        In Progress
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        Pending
                                     </span>
                                 @endif
                             </td>
@@ -197,12 +193,28 @@
                                     <a href="{{ route('inbound-logistics.edit', $logistic->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
                                         <i class='bx bx-edit text-lg'></i>
                                     </a>
+                                    @if ($logistic->status !== 'Delivered')
+                                        <form method="POST" action="{{ route('inbound-logistics.receive', $logistic->id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to mark this shipment as received?');">
+                                            @csrf
+                                            <button type="submit" class="text-purple-600 hover:text-purple-900 bg-transparent border-none cursor-pointer p-0 m-0" title="Mark as Received" style="vertical-align: middle;">
+                                                <i class='bx bx-package text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if ($logistic->status === 'Delivered')
+                                        <form method="POST" action="{{ route('inbound-logistics.move', $logistic->id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to move this shipment to storage?');">
+                                            @csrf
+                                            <button type="submit" class="text-orange-600 hover:text-orange-900 bg-transparent border-none cursor-pointer p-0 m-0" title="Move to Storage" style="vertical-align: middle;">
+                                                <i class='bx bx-archive-in text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="10" class="px-6 py-8 text-center text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <i class='bx bx-package text-4xl text-gray-300 mb-3'></i>
                                     <p class="text-lg font-medium">No inbound logistics data found</p>

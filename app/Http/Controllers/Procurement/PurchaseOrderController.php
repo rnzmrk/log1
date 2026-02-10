@@ -44,6 +44,36 @@ class PurchaseOrderController extends Controller
 
         $purchaseOrders = $query->orderBy('created_at', 'desc')->paginate(10);
         
+        // Load item data from supply requests for POs that don't have item data
+        foreach ($purchaseOrders as $po) {
+            if (empty($po->item_name) && $po->supply_request_id) {
+                $supplyRequest = \App\Models\SupplyRequest::find($po->supply_request_id);
+                if ($supplyRequest) {
+                    $po->item_name = $supplyRequest->item_name;
+                    $po->item_category = $supplyRequest->category;
+                    $po->item_quantity = $supplyRequest->quantity_requested;
+                    $po->unit_price = $supplyRequest->unit_price;
+                    $po->total_cost = $supplyRequest->total_cost;
+                }
+            }
+            
+            // Ensure total amount is calculated and available
+            if (empty($po->total_amount) || $po->total_amount == 0) {
+                // Try multiple calculation methods
+                if (!empty($po->item_quantity) && !empty($po->unit_price)) {
+                    $po->total_amount = $po->item_quantity * $po->unit_price;
+                } elseif (!empty($po->total_cost)) {
+                    $po->total_amount = $po->total_cost;
+                } elseif ($po->supply_request_id) {
+                    // Fallback to supply request calculation
+                    $supplyRequest = \App\Models\SupplyRequest::find($po->supply_request_id);
+                    if ($supplyRequest) {
+                        $po->total_amount = $supplyRequest->quantity_requested * $supplyRequest->unit_price;
+                    }
+                }
+            }
+        }
+        
         return view('admin.procurement.create-purchase-order', compact('purchaseOrders'));
     }
 
@@ -60,11 +90,16 @@ class PurchaseOrderController extends Controller
         }
         
         // Get approved and active suppliers
-        $suppliers = \App\Models\Supplier::whereIn('status', ['Accepted', 'Active'])
+        $suppliers = \App\Models\Supplier::whereIn('status', ['Active'])
             ->orderBy('name')
             ->get();
         
-        return view('admin.procurement.create-purchase-order-create', compact('supplyRequest', 'suppliers'));
+        // Get approved supply requests for selection
+        $approvedSupplyRequests = \App\Models\SupplyRequest::where('status', 'Approved')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('admin.procurement.create-purchase-order-create', compact('supplyRequest', 'suppliers', 'approvedSupplyRequests'));
     }
 
     /**
@@ -73,25 +108,37 @@ class PurchaseOrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'supply_request' => 'required|integer|exists:supply_requests,id',
             'supplier' => 'required|string|max:255',
             'supplier_contact' => 'nullable|string|max:255',
             'supplier_email' => 'nullable|email|max:255',
             'supplier_phone' => 'nullable|string|max:255',
             'billing_address' => 'nullable|string',
             'shipping_address' => 'nullable|string',
-            'subtotal' => 'required|numeric|min:0|max:999999999999.99',
-            'tax_amount' => 'required|numeric|min:0|max:999999999999.99',
-            'shipping_cost' => 'required|numeric|min:0|max:999999999999.99',
+            'item_name' => 'required|string|max:255',
+            'item_category' => 'required|string|max:255',
+            'item_quantity' => 'required|integer|min:1',
+            'unit_price' => 'required|numeric|min:0|max:999999999999.99',
+            'total_cost' => 'required|numeric|min:0|max:999999999999.99',
+            'subtotal' => 'nullable|numeric|min:0|max:999999999999.99',
+            'tax_amount' => 'nullable|numeric|min:0|max:999999999999.99',
+            'shipping_cost' => 'nullable|numeric|min:0|max:999999999999.99',
             'priority' => 'required|in:Low,Medium,High,Urgent',
-            'status' => 'required|in:Draft,Sent,Approved,Rejected,Partially Received,Received,Cancelled',
+            'status' => 'required|string|max:255',
             'order_date' => 'required|date',
             'expected_delivery_date' => 'required|date',
             'actual_delivery_date' => 'nullable|date',
             'notes' => 'nullable|string',
             'created_by' => 'required|string|max:255',
             'approved_by' => 'nullable|string|max:255',
-            'supply_request_id' => 'nullable|integer|exists:supply_requests,id',
         ]);
+
+        // Calculate total amount from item details
+        $validated['total_amount'] = $validated['item_quantity'] * $validated['unit_price'];
+        
+        // Map supply_request to supply_request_id for model
+        $validated['supply_request_id'] = $validated['supply_request'];
+        unset($validated['supply_request']);
 
         // Auto-generate PO number based on supply request connection
         if (!empty($validated['supply_request_id'])) {
@@ -185,6 +232,26 @@ class PurchaseOrderController extends Controller
     }
 
     /**
+     * Search purchase orders for inbound logistics.
+     */
+    public function search(Request $request)
+    {
+        $query = $request->get('q');
+        
+        $purchaseOrders = PurchaseOrder::where('status', 'To Received')
+            ->where(function($q) use ($query) {
+                $q->where('po_number', 'LIKE', "%{$query}%")
+                  ->orWhere('item_name', 'LIKE', "%{$query}%")
+                  ->orWhere('supplier', 'LIKE', "%{$query}%");
+            })
+            ->select(['id', 'po_number', 'item_name', 'supplier', 'item_quantity'])
+            ->limit(10)
+            ->get();
+        
+        return response()->json($purchaseOrders);
+    }
+
+    /**
      * Approve the purchase order.
      */
     public function approve(string $id)
@@ -195,8 +262,38 @@ class PurchaseOrderController extends Controller
         $purchaseOrder->approved_at = now();
         $purchaseOrder->save();
 
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Purchase order approved successfully.'
+            ]);
+        }
+
         return redirect()->route('purchase-orders.index')
             ->with('success', 'Purchase order approved successfully.');
+    }
+
+    /**
+     * Receive the purchase order.
+     */
+    public function receive(string $id)
+    {
+        $purchaseOrder = PurchaseOrder::findOrFail($id);
+        $purchaseOrder->status = 'To Received';
+        $purchaseOrder->received_by = auth()->user()->name;
+        $purchaseOrder->received_at = now();
+        $purchaseOrder->actual_delivery_date = now(); // Set actual delivery date
+        $purchaseOrder->save();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Purchase order marked as to be received successfully.'
+            ]);
+        }
+
+        return redirect()->route('purchase-orders.index')
+            ->with('success', 'Purchase order marked as to be received successfully.');
     }
 
     /**

@@ -63,7 +63,12 @@ class InventoryController extends Controller
             ->orderBy('name')
             ->get();
         
-        return view('admin.warehousing.storage-inventory-create', compact('suppliers'));
+        // Get inbound logistics with Storage status for selection
+        $inboundLogistics = \App\Models\InboundLogistic::where('status', 'Storage')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('admin.warehousing.storage-inventory-create', compact('suppliers', 'inboundLogistics'));
     }
 
     /**
@@ -72,29 +77,53 @@ class InventoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'inbound_logistic_id' => 'required|exists:inbound_logistics,id',
             'item_name' => 'required|string',
-            'category' => 'required|string',
-            'location' => 'required|string',
+            'department' => 'nullable|string',
             'stock' => 'required|integer|min:0',
             'description' => 'nullable|string',
             'sku' => 'nullable|string|unique:inventories,sku',
-            'price' => 'nullable|numeric|min:0',
             'supplier' => 'nullable|string',
         ]);
 
         $data = $request->only([
             'sku',
             'item_name',
-            'category',
-            'location',
+            'department',
             'stock',
             'description',
-            'price',
             'supplier',
         ]);
 
-        if (empty($data['sku'])) {
-            $data['sku'] = $this->generateSku();
+        // Auto-set status to "On Stock" for all new inventory items
+        $data['status'] = 'On Stock';
+
+        // Auto-fill data from inbound logistics if selected
+        if ($request->filled('inbound_logistic_id')) {
+            $inboundLogistic = \App\Models\InboundLogistic::find($request->inbound_logistic_id);
+            if ($inboundLogistic) {
+                // Update inbound status to "Stored"
+                $inboundLogistic->status = 'Stored';
+                $inboundLogistic->save();
+                
+                // Auto-fill inventory data from inbound
+                $data['po_number'] = $inboundLogistic->po_number;
+                $data['supplier'] = $inboundLogistic->supplier;
+                $data['stock'] = $inboundLogistic->quantity; // Use quantity from inbound
+                $data['department'] = $inboundLogistic->department; // Auto-fill department
+                $data['category'] = $inboundLogistic->category; // Auto-fill category (can be null)
+                $data['location'] = 'Storage'; // Set default location
+                
+                // If no SKU provided, generate one based on item name
+                if (empty($data['sku'])) {
+                    $data['sku'] = $this->generateSku();
+                }
+            }
+        } else {
+            // Manual entry is no longer allowed - require inbound selection
+            return redirect()->back()
+                ->with('error', 'Please select an inbound shipment to create inventory.')
+                ->withInput();
         }
 
         Inventory::create($data);

@@ -11,11 +11,13 @@ class Inventory extends Model
         'item_name',
         'category',
         'location',
+        'department',
         'stock',
         'status',
         'description',
         'price',
         'supplier',
+        'po_number',
         'last_updated',
     ];
 
@@ -36,7 +38,7 @@ class Inventory extends Model
             } elseif ($inventory->stock <= 10) {
                 $inventory->status = 'Low Stock';
             } else {
-                $inventory->status = 'In Stock';
+                $inventory->status = 'On Stock';
             }
 
             // Auto-update last_updated date

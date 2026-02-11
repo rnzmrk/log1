@@ -73,38 +73,82 @@
 
             <!-- Inventory Selection -->
             <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Quick Fill from Inventory</h3>
+                <h3 class="text-sm font-semibold text-gray-900 mb-3">Select from Moved Inventory</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="inventory_search" class="block text-sm font-medium text-gray-700 mb-2">Select Inventory Item (SKU or Name)</label>
-                        <div class="relative">
-                            <input type="text" 
-                                   id="inventory_search" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="Type SKU or item name..."
-                                   autocomplete="off">
-                            <div id="inventory_search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
-                        </div>
-                        <p class="mt-1 text-sm text-gray-500">Start typing to search existing inventory items</p>
+                        <label for="sku_dropdown" class="block text-sm font-medium text-gray-700 mb-2">Select SKU (Moved Items Only)</label>
+                        <select id="sku_dropdown" 
+                                name="sku" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                required>
+                            <option value="">Select an item...</option>
+                            @foreach ($movedInventory as $item)
+                                <option value="{{ $item->sku }}" 
+                                        data-po="{{ $item->po_number ?? '' }}"
+                                        data-department="{{ $item->department ?? '' }}"
+                                        data-supplier="{{ $item->supplier ?? '' }}"
+                                        data-item-name="{{ $item->item_name }}"
+                                        data-stock="{{ $item->stock }}">
+                                    {{ $item->sku }} - {{ $item->item_name }} (Stock: {{ $item->stock }})
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-sm text-gray-500">Only items with "Moved" status are shown</p>
                     </div>
                     <div class="flex items-end">
-                        <button type="button" id="clear_inventory_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
+                        <button type="button" id="clear_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
                             Clear Selection
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Shipment ID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- SKU -->
                 <div>
-                    <label for="shipment_id" class="block text-sm font-medium text-gray-700 mb-2">Shipment ID *</label>
+                    <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">SKU *</label>
                     <input type="text" 
-                           id="shipment_id" 
-                           name="shipment_id" 
-                           value="{{ old('shipment_id') }}"
+                           id="sku" 
+                           name="sku" 
+                           value="{{ old('sku') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., SHIP-2024-001"
+                           placeholder="e.g., SKU-12345"
+                           required>
+                </div>
+
+                <!-- PO Number -->
+                <div>
+                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number *</label>
+                    <input type="text" 
+                           id="po_number" 
+                           name="po_number" 
+                           value="{{ old('po_number') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., PO2024-001"
+                           required>
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
+                    <input type="text" 
+                           id="department" 
+                           name="department" 
+                           value="{{ old('department') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., IT Department"
+                           required>
+                </div>
+
+                <!-- Supplier -->
+                <div>
+                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., TechCorp"
                            required>
                 </div>
 
@@ -116,193 +160,54 @@
                            name="item_name" 
                            value="{{ old('item_name') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Laptop, Office Chair"
+                           placeholder="e.g., Laptop Computer"
                            required>
                 </div>
 
-                <!-- Quantity -->
+                <!-- Stock -->
                 <div>
-                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
                     <input type="number" 
-                           id="quantity" 
-                           name="quantity" 
-                           value="{{ old('quantity') }}"
+                           id="stock" 
+                           name="stock" 
+                           value="{{ old('stock') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0"
+                           placeholder="e.g., 10"
                            min="1"
                            required>
                 </div>
 
-                <!-- Expected Date -->
-                <div>
-                    <label for="expected_date" class="block text-sm font-medium text-gray-700 mb-2">Expected Date *</label>
-                    <input type="date" 
-                           id="expected_date" 
-                           name="expected_date" 
-                           value="{{ old('expected_date') }}"
+                <!-- Address -->
+                <div class="lg:col-span-2">
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+                    <input type="text" 
+                           id="address" 
+                           name="address" 
+                           value="{{ old('address') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., 123 Main St, City, State"
                            required>
                 </div>
 
-                <!-- Order Number -->
-                <div>
-                    <label for="order_number" class="block text-sm font-medium text-gray-700 mb-2">Order Number *</label>
+                <!-- Contact -->
+                <div class="lg:col-span-2">
+                    <label for="contact" class="block text-sm font-medium text-gray-700 mb-2">Contact *</label>
                     <input type="text" 
-                           id="order_number" 
-                           name="order_number" 
-                           value="{{ old('order_number') }}"
+                           id="contact" 
+                           name="contact" 
+                           value="{{ old('contact') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., ORD-2024-001"
+                           placeholder="e.g., John Doe - john@example.com - 555-0123"
                            required>
-                </div>
-
-                <!-- Customer Name -->
-                <div>
-                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Customer Name *</label>
-                    <input type="text" 
-                           id="customer_name" 
-                           name="customer_name" 
-                           value="{{ old('customer_name') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Acme Corporation"
-                           required>
-                </div>
-
-                <!-- Destination -->
-                <div>
-                    <label for="destination" class="block text-sm font-medium text-gray-700 mb-2">Destination *</label>
-                    <input type="text" 
-                           id="destination" 
-                           name="destination" 
-                           value="{{ old('destination') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., New York, NY"
-                           required>
-                </div>
-
-                <!-- Total Units -->
-                <div>
-                    <label for="total_units" class="block text-sm font-medium text-gray-700 mb-2">Total Units *</label>
-                    <input type="number" 
-                           id="total_units" 
-                           name="total_units" 
-                           value="{{ old('total_units') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0"
-                           min="1"
-                           required>
-                </div>
-
-                <!-- Priority -->
-                <div>
-                    <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">Priority *</label>
-                    <select id="priority" 
-                            name="priority" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select priority</option>
-                        <option value="Low" {{ old('priority') === 'Low' ? 'selected' : '' }}>Low</option>
-                        <option value="Medium" {{ old('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
-                        <option value="High" {{ old('priority') === 'High' ? 'selected' : '' }}>High</option>
-                        <option value="Urgent" {{ old('priority') === 'Urgent' ? 'selected' : '' }}>Urgent</option>
-                    </select>
-                </div>
-
-                <!-- Status -->
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select id="status" 
-                            name="status" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select status</option>
-                        <option value="Pending" {{ old('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="Processing" {{ old('status') === 'Processing' ? 'selected' : '' }}>Processing</option>
-                        <option value="Shipped" {{ old('status') === 'Shipped' ? 'selected' : '' }}>Shipped</option>
-                        <option value="Delivered" {{ old('status') === 'Delivered' ? 'selected' : '' }}>Delivered</option>
-                        <option value="Cancelled" {{ old('status') === 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    </select>
-                </div>
-
-                <!-- Total Value -->
-                <div>
-                    <label for="total_value" class="block text-sm font-medium text-gray-700 mb-2">Total Value</label>
-                    <input type="number" 
-                           id="total_value" 
-                           name="total_value" 
-                           value="{{ old('total_value') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Total shipment value</p>
-                </div>
-
-                <!-- Carrier -->
-                <div>
-                    <label for="carrier" class="block text-sm font-medium text-gray-700 mb-2">Carrier</label>
-                    <input type="text" 
-                           id="carrier" 
-                           name="carrier" 
-                           value="{{ old('carrier') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., FedEx, UPS, DHL">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Shipping carrier</p>
-                </div>
-
-                <!-- Tracking Number -->
-                <div>
-                    <label for="tracking_number" class="block text-sm font-medium text-gray-700 mb-2">Tracking Number</label>
-                    <input type="text" 
-                           id="tracking_number" 
-                           name="tracking_number" 
-                           value="{{ old('tracking_number') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., 1234567890">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Tracking number</p>
-                </div>
-
-                <!-- Shipping Date -->
-                <div>
-                    <label for="shipping_date" class="block text-sm font-medium text-gray-700 mb-2">Shipping Date</label>
-                    <input type="date" 
-                           id="shipping_date" 
-                           name="shipping_date" 
-                           value="{{ old('shipping_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Planned shipping date</p>
-                </div>
-
-                <!-- Delivery Date -->
-                <div>
-                    <label for="delivery_date" class="block text-sm font-medium text-gray-700 mb-2">Delivery Date</label>
-                    <input type="date" 
-                           id="delivery_date" 
-                           name="delivery_date" 
-                           value="{{ old('delivery_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Expected delivery date</p>
                 </div>
             </div>
 
-            <!-- Notes -->
-            <div class="mt-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                <textarea id="notes" 
-                          name="notes" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter shipment notes...">{{ old('notes') }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Additional notes about the shipment</p>
-            </div>
-
-            <!-- Form Actions -->
+            <!-- Submit Button -->
             <div class="flex justify-end gap-3 mt-8">
-                <a href="{{ route('admin.warehousing.outbound-logistics') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
+                <a href="{{ route('admin.warehousing.outbound-logistics') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
                     Cancel
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                    <i class='bx bx-save mr-2'></i>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                     Create Shipment
                 </button>
             </div>
@@ -311,78 +216,36 @@
 </div>
 
 <script>
-let inventorySearchTimeout;
-let selectedInventory = null;
-
-// Inventory search autocomplete
-document.getElementById('inventory_search').addEventListener('input', function(e) {
-    const query = e.target.value.trim();
-    const resultsDiv = document.getElementById('inventory_search_results');
+document.addEventListener('DOMContentLoaded', function() {
+    const skuDropdown = document.getElementById('sku_dropdown');
+    const clearButton = document.getElementById('clear_selection');
     
-    clearTimeout(inventorySearchTimeout);
+    // Auto-fill form fields when SKU is selected
+    skuDropdown.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (selectedOption.value) {
+            document.getElementById('sku').value = selectedOption.value;
+            document.getElementById('po_number').value = selectedOption.getAttribute('data-po') || '';
+            document.getElementById('department').value = selectedOption.getAttribute('data-department') || '';
+            document.getElementById('supplier').value = selectedOption.getAttribute('data-supplier') || '';
+            document.getElementById('item_name').value = selectedOption.getAttribute('data-item-name') || '';
+            document.getElementById('stock').value = selectedOption.getAttribute('data-stock') || '';
+        }
+    });
     
-    if (query.length < 2) {
-        resultsDiv.classList.add('hidden');
-        return;
-    }
-    
-    inventorySearchTimeout = setTimeout(() => {
-        fetch(`/inventory/search?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(data => {
-                resultsDiv.innerHTML = '';
-                if (data.length === 0) {
-                    resultsDiv.innerHTML = '<div class="p-3 text-gray-500 text-sm">No items found</div>';
-                } else {
-                    data.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
-                        div.innerHTML = `
-                            <div class="font-medium text-sm">${item.item_name}</div>
-                            <div class="text-xs text-gray-500">SKU: ${item.sku} | Stock: ${item.stock} | Location: ${item.location}</div>
-                        `;
-                        div.addEventListener('click', () => selectInventory(item));
-                        resultsDiv.appendChild(div);
-                    });
-                }
-                resultsDiv.classList.remove('hidden');
-            })
-            .catch(error => {
-                console.error('Search error:', error);
-                resultsDiv.innerHTML = '<div class="p-3 text-red-500 text-sm">Search failed</div>';
-                resultsDiv.classList.remove('hidden');
-            });
-    }, 300);
-});
-
-// Select inventory and populate form
-function selectInventory(item) {
-    selectedInventory = item;
-    document.getElementById('inventory_search').value = `${item.sku} - ${item.item_name}`;
-    document.getElementById('inventory_search_results').classList.add('hidden');
-    
-    // Auto-fill form fields
-    document.getElementById('shipment_id').value = `SHIP-${item.sku}`;
-    document.getElementById('item_name').value = item.item_name;
-    document.getElementById('quantity').value = item.stock;
-    document.getElementById('total_units').value = item.stock;
-    
-    // Set default expected date to today + 3 days
-    const expectedDate = new Date();
-    expectedDate.setDate(expectedDate.getDate() + 3);
-    document.getElementById('expected_date').value = expectedDate.toISOString().split('T')[0];
-    
-    // Optional: fill destination with location
-    if (!document.getElementById('destination').value) {
-        document.getElementById('destination').value = item.location;
-    }
-}
-
-// Clear selection
-document.getElementById('clear_inventory_selection').addEventListener('click', function() {
-    selectedInventory = null;
-    document.getElementById('inventory_search').value = '';
-    document.getElementById('inventory_search_results').classList.add('hidden');
+    // Clear selection
+    clearButton.addEventListener('click', function() {
+        skuDropdown.value = '';
+        document.getElementById('sku').value = '';
+        document.getElementById('po_number').value = '';
+        document.getElementById('department').value = '';
+        document.getElementById('supplier').value = '';
+        document.getElementById('item_name').value = '';
+        document.getElementById('stock').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('contact').value = '';
+    });
     // Clear auto-filled fields
     document.getElementById('shipment_id').value = '';
     document.getElementById('item_name').value = '';

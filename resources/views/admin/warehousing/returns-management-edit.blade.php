@@ -95,42 +95,6 @@
                     <p class="mt-1 text-sm text-gray-500">Unique return identifier</p>
                 </div>
 
-                <!-- Order Number -->
-                <div>
-                    <label for="order_number" class="block text-sm font-medium text-gray-700 mb-2">Order Number *</label>
-                    <input type="text" 
-                           id="order_number" 
-                           name="order_number" 
-                           value="{{ old('order_number', $returnRefund->order_number) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., ORD-2024-001"
-                           required>
-                </div>
-
-                <!-- Customer Name -->
-                <div>
-                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Customer Name *</label>
-                    <input type="text" 
-                           id="customer_name" 
-                           name="customer_name" 
-                           value="{{ old('customer_name', $returnRefund->customer_name) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., John Smith"
-                           required>
-                </div>
-
-                <!-- Product Name -->
-                <div>
-                    <label for="product_name" class="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
-                    <input type="text" 
-                           id="product_name" 
-                           name="product_name" 
-                           value="{{ old('product_name', $returnRefund->product_name) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Wireless Headphones"
-                           required>
-                </div>
-
                 <!-- SKU -->
                 <div>
                     <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">SKU *</label>
@@ -143,47 +107,49 @@
                            required>
                 </div>
 
-                <!-- Quantity -->
+                <!-- PO Number -->
                 <div>
-                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
-                    <input type="number" 
-                           id="quantity" 
-                           name="quantity" 
-                           value="{{ old('quantity', $returnRefund->quantity) }}"
+                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number</label>
+                    <input type="text" 
+                           id="po_number" 
+                           name="po_number" 
+                           value="{{ old('po_number', $returnRefund->po_number) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="1"
-                           min="1"
-                           required>
+                           placeholder="e.g., PO2024-001">
                 </div>
 
-                <!-- Refund Amount -->
+                <!-- Item Name -->
                 <div>
-                    <label for="refund_amount" class="block text-sm font-medium text-gray-700 mb-2">Refund Amount *</label>
-                    <input type="number" 
-                           id="refund_amount" 
-                           name="refund_amount" 
-                           value="{{ old('refund_amount', $returnRefund->refund_amount) }}"
+                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
+                    <input type="text" 
+                           id="item_name" 
+                           name="item_name" 
+                           value="{{ old('item_name', $returnRefund->item_name ?? $returnRefund->product_name) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0"
-                           required>
+                           placeholder="e.g., Wireless Headphones">
                 </div>
 
-                <!-- Return Reason -->
+                <!-- Supplier -->
                 <div>
-                    <label for="return_reason" class="block text-sm font-medium text-gray-700 mb-2">Return Reason *</label>
-                    <select id="return_reason" 
-                            name="return_reason" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select reason</option>
-                        <option value="Defective" {{ old('return_reason', $returnRefund->return_reason) === 'Defective' ? 'selected' : '' }}>Defective</option>
-                        <option value="Wrong Item" {{ old('return_reason', $returnRefund->return_reason) === 'Wrong Item' ? 'selected' : '' }}>Wrong Item</option>
-                        <option value="Damaged" {{ old('return_reason', $returnRefund->return_reason) === 'Damaged' ? 'selected' : '' }}>Damaged</option>
-                        <option value="Not Satisfied" {{ old('return_reason', $returnRefund->return_reason) === 'Not Satisfied' ? 'selected' : '' }}>Not Satisfied</option>
-                        <option value="Other" {{ old('return_reason', $returnRefund->return_reason) === 'Other' ? 'selected' : '' }}>Other</option>
-                    </select>
+                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier', $returnRefund->supplier) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., Supplier Co.">
+                </div>
+
+                <!-- Stock -->
+                <div>
+                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock</label>
+                    <input type="number" 
+                           id="stock" 
+                           name="stock" 
+                           value="{{ old('stock', $returnRefund->stock) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="0"
+                           min="0">
                 </div>
 
                 <!-- Status -->
@@ -201,96 +167,28 @@
                         <option value="Refunded" {{ old('status', $returnRefund->status) === 'Refunded' ? 'selected' : '' }}>Refunded</option>
                     </select>
                 </div>
-
-                <!-- Return Date -->
-                <div>
-                    <label for="return_date" class="block text-sm font-medium text-gray-700 mb-2">Return Date *</label>
-                    <input type="date" 
-                           id="return_date" 
-                           name="return_date" 
-                           value="{{ old('return_date', $returnRefund->return_date ? $returnRefund->return_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           required>
-                </div>
-
-                <!-- Refund Date -->
-                <div>
-                    <label for="refund_date" class="block text-sm font-medium text-gray-700 mb-2">Refund Date</label>
-                    <input type="date" 
-                           id="refund_date" 
-                           name="refund_date" 
-                           value="{{ old('refund_date', $returnRefund->refund_date ? $returnRefund->refund_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Date refund was processed</p>
-                </div>
-
-                <!-- Refund Method -->
-                <div>
-                    <label for="refund_method" class="block text-sm font-medium text-gray-700 mb-2">Refund Method</label>
-                    <select id="refund_method" 
-                            name="refund_method" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select method</option>
-                        <option value="Bank Transfer" {{ old('refund_method', $returnRefund->refund_method) === 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                        <option value="Credit Card" {{ old('refund_method', $returnRefund->refund_method) === 'Credit Card' ? 'selected' : '' }}>Credit Card</option>
-                        <option value="Store Credit" {{ old('refund_method', $returnRefund->refund_method) === 'Store Credit' ? 'selected' : '' }}>Store Credit</option>
-                        <option value="Cash" {{ old('refund_method', $returnRefund->refund_method) === 'Cash' ? 'selected' : '' }}>Cash</option>
-                    </select>
-                    <p class="mt-1 text-sm text-gray-500">Optional: How the refund was processed</p>
-                </div>
-
-                <!-- Tracking Number -->
-                <div>
-                    <label for="tracking_number" class="block text-sm font-medium text-gray-700 mb-2">Tracking Number</label>
-                    <input type="text" 
-                           id="tracking_number" 
-                           name="tracking_number" 
-                           value="{{ old('tracking_number', $returnRefund->tracking_number) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., 1234567890">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Return shipment tracking</p>
-                </div>
             </div>
 
-            <!-- Notes -->
+            <!-- Reason -->
             <div class="mt-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Reason</label>
                 <textarea id="notes" 
                           name="notes" 
-                          rows="4"
+                          rows="3"
                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter return notes...">{{ old('notes', $returnRefund->notes) }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Additional notes about the return</p>
+                          placeholder="Enter return reason...">{{ old('notes', $returnRefund->notes ?? $returnRefund->return_reason) }}</textarea>
+                <p class="mt-1 text-sm text-gray-500">Reason for return (from inventory notes)</p>
             </div>
 
-            <!-- Current Status Info -->
-            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h3 class="text-sm font-medium text-gray-700 mb-2">Current Status</h3>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-600">Status:</span>
-                    @if ($returnRefund->status === 'Pending')
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                            Pending
-                        </span>
-                    @elseif ($returnRefund->status === 'Approved')
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                            Approved
-                        </span>
-                    @elseif ($returnRefund->status === 'Rejected')
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                            Rejected
-                        </span>
-                    @elseif ($returnRefund->status === 'Processed')
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                            Processed
-                        </span>
-                    @else
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            Refunded
-                        </span>
-                    @endif
-                    <span class="text-sm text-gray-600">| Created: {{ $returnRefund->created_at->format('M d, Y') }}</span>
-                </div>
+            <!-- Return Date -->
+            <div class="mt-6">
+                <label for="return_date" class="block text-sm font-medium text-gray-700 mb-2">Return Date *</label>
+                <input type="date" 
+                       id="return_date" 
+                       name="return_date" 
+                       value="{{ old('return_date', $returnRefund->return_date ? $returnRefund->return_date->format('Y-m-d') : '') }}"
+                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       required>
             </div>
 
             <!-- Form Actions -->

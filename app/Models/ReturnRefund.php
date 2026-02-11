@@ -21,6 +21,11 @@ class ReturnRefund extends Model
         'notes',
         'refund_method',
         'tracking_number',
+        'po_number',
+        'department',
+        'item_name',
+        'stock',
+        'supplier',
     ];
 
     protected $casts = [

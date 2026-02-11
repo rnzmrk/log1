@@ -315,4 +315,35 @@ class PurchaseOrderController extends Controller
         return redirect()->route('purchase-orders.index')
             ->with('success', 'Purchase order rejected successfully.');
     }
+
+    /**
+     * Display purchase orders history with all items and search/filter functionality
+     */
+    public function history(Request $request)
+    {
+        $query = PurchaseOrder::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('po_number', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('supplier', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by latest first
+        $purchaseOrders = $query->orderBy('updated_at', 'desc')->paginate(50);
+
+        // Get unique statuses for filter
+        $statuses = PurchaseOrder::distinct()->pluck('status')->filter();
+
+        return view('admin.procurement.purchase-orders-history', compact('purchaseOrders', 'statuses'));
+    }
 }

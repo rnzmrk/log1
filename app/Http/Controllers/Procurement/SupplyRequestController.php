@@ -189,4 +189,46 @@ class SupplyRequestController extends Controller
         return redirect()->route('supply-requests.index')
             ->with('success', 'Supply request rejected successfully.');
     }
+
+    /**
+     * Display supply requests history with all items and search/filter functionality
+     */
+    public function history(Request $request)
+    {
+        $query = SupplyRequest::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('request_id', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('supplier', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by latest first
+        $supplyRequests = $query->orderBy('updated_at', 'desc')->paginate(50);
+
+        // Get unique statuses for filter
+        $statuses = SupplyRequest::distinct()->pluck('status')->filter();
+
+        return view('admin.procurement.supply-requests-history', compact('supplyRequests', 'statuses'));
+    }
+
+    /**
+     * Show the form for creating a supply request from inventory
+     */
+    public function createFromInventory()
+    {
+        // Get inventory items for selection
+        $inventoryItems = \App\Models\Inventory::all();
+        
+        return view('admin.procurement.supply-requests-create-from-inventory', compact('inventoryItems'));
+    }
 }

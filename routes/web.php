@@ -40,6 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('/admin/warehousing/inbound-logistics', [InboundLogisticController::class, 'index'])->name('admin.warehousing.inbound-logistics');
+Route::get('/inbound-logistics/history', [InboundLogisticController::class, 'history'])->name('inbound-logistics.history');
 Route::resource('inbound-logistics', InboundLogisticController::class)->except(['destroy'])->names([
     'index' => 'inbound-logistics.index',
     'create' => 'inbound-logistics.create',
@@ -59,6 +60,7 @@ Route::post('/inbound-logistics/bulk-action', [InboundLogisticController::class,
 
 Route::get('/admin/warehousing/storage-inventory', [InventoryController::class, 'index'])->name('admin.warehousing.storage-inventory');
 Route::get('/inventory/search', [InventoryController::class, 'search'])->name('inventory.search');
+Route::get('/inventory/history', [InventoryController::class, 'history'])->name('inventory.history');
 Route::resource('inventory', InventoryController::class);
 Route::post('/inventory/{id}/move', [InventoryController::class, 'move'])->name('inventory.move');
 
@@ -72,6 +74,7 @@ Route::get('/inventory/stats', [InventoryController::class, 'getStats'])->name('
 Route::get('/inventory/low-stock', [InventoryController::class, 'getLowStockItems'])->name('inventory.low-stock');
 
 Route::get('/admin/warehousing/outbound-logistics', [OutboundLogisticController::class, 'index'])->name('admin.warehousing.outbound-logistics');
+Route::get('/outbound-logistics/history', [OutboundLogisticController::class, 'history'])->name('outbound-logistics.history');
 Route::get('/outbound-logistics/search', [OutboundLogisticController::class, 'search'])->name('outbound-logistics.search');
 Route::resource('outbound-logistics', OutboundLogisticController::class)->except(['destroy'])->names([
     'index' => 'outbound-logistics.index',
@@ -94,7 +97,7 @@ Route::get('/outbound-logistics/pending-supply', [OutboundLogisticController::cl
 Route::get('/outbound-logistics/pending-supply', [OutboundLogisticController::class, 'getPendingSupplyRequests'])->name('outbound-logistics.pending-supply');
 
 Route::get('/admin/warehousing/returns-management', [ReturnRefundController::class, 'index'])->name('admin.warehousing.returns-management');
-
+Route::get('/returns-management/history', [ReturnRefundController::class, 'history'])->name('returns-management.history');
 Route::resource('returns-management', ReturnRefundController::class)->except(['destroy'])->names([
     'index' => 'returns-management.index',
     'create' => 'returns-management.create',
@@ -106,7 +109,8 @@ Route::resource('returns-management', ReturnRefundController::class)->except(['d
 
 // Procurement Routes
 Route::get('/admin/procurement/request-supplies', [SupplyRequestController::class, 'index'])->name('admin.procurement.request-supplies');
-
+Route::get('/supply-requests/create-from-inventory', [SupplyRequestController::class, 'createFromInventory'])->name('supply-requests.create-from-inventory');
+Route::get('/supply-requests/history', [SupplyRequestController::class, 'history'])->name('supply-requests.history');
 Route::resource('supply-requests', SupplyRequestController::class)->names([
     'index' => 'supply-requests.index',
     'create' => 'supply-requests.create',
@@ -122,7 +126,7 @@ Route::post('/supply-requests/{supplyRequest}/approve', [SupplyRequestController
 Route::post('/supply-requests/{supplyRequest}/reject', [SupplyRequestController::class, 'reject'])->name('supply-requests.reject');
 
 Route::get('/admin/procurement/create-purchase-order', [PurchaseOrderController::class, 'index'])->name('admin.procurement.create-purchase-order');
-
+Route::get('/purchase-orders/history', [PurchaseOrderController::class, 'history'])->name('purchase-orders.history');
 Route::resource('purchase-orders', PurchaseOrderController::class)->names([
     'index' => 'purchase-orders.index',
     'create' => 'purchase-orders.create',

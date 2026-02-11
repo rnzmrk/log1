@@ -58,7 +58,16 @@ class OutboundLogisticController extends Controller
      */
     public function create()
     {
-        return view('admin.warehousing.outbound-logistics-create');
+        // Get SKUs that are already in outbound logistics
+        $usedSkus = OutboundLogistic::pluck('sku')->filter()->unique();
+        
+        // Get inventory items with "Moved" status that are NOT already in outbound logistics
+        $movedInventory = \App\Models\Inventory::where('status', 'Moved')
+            ->whereNotIn('sku', $usedSkus)
+            ->orderBy('item_name')
+            ->get();
+            
+        return view('admin.warehousing.outbound-logistics-create', compact('movedInventory'));
     }
 
     /**
@@ -67,20 +76,37 @@ class OutboundLogisticController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'shipment_id' => 'required|string|unique:outbound_logistics,shipment_id',
-            'order_number' => 'required|string',
-            'customer_name' => 'required|string',
+            'sku' => 'required|string',
+            'po_number' => 'required|string',
+            'department' => 'required|string',
+            'supplier' => 'required|string',
             'item_name' => 'required|string',
-            'quantity' => 'required|integer|min:1',
-            'destination' => 'required|string',
-            'priority' => 'required|in:Low,Medium,High',
-            'expected_date' => 'required|date',
+            'stock' => 'required|integer|min:1',
+            'address' => 'required|string',
+            'contact' => 'required|string',
         ]);
 
-        OutboundLogistic::create($request->all());
+        // Create outbound shipment with Pending status
+        OutboundLogistic::create([
+            'shipment_id' => 'SHIP-' . date('Y-m-d-His'),
+            'sku' => $request->sku,
+            'po_number' => $request->po_number,
+            'department' => $request->department,
+            'supplier' => $request->supplier,
+            'item_name' => $request->item_name,
+            'total_units' => $request->stock,
+            'shipped_units' => 0,
+            'destination' => $request->address,
+            'address' => $request->address,
+            'contact' => $request->contact,
+            'customer_name' => $request->contact,
+            'status' => 'Pending',
+            'priority' => 'Medium',
+            'shipping_date' => now(),
+        ]);
 
         return redirect()->route('admin.warehousing.outbound-logistics')
-            ->with('success', 'Outbound shipment created successfully.');
+            ->with('success', 'Shipment created successfully and set to Pending status.');
     }
 
     /**
@@ -106,13 +132,15 @@ class OutboundLogisticController extends Controller
     {
         $request->validate([
             'shipment_id' => 'required|string|unique:outbound_logistics,shipment_id,' . $outboundLogistic->id,
-            'order_number' => 'required|string',
-            'customer_name' => 'required|string',
-            'item_name' => 'required|string',
-            'quantity' => 'required|integer|min:1',
-            'destination' => 'required|string',
-            'priority' => 'required|in:Low,Medium,High',
-            'expected_date' => 'required|date',
+            'sku' => 'nullable|string',
+            'po_number' => 'nullable|string',
+            'department' => 'nullable|string',
+            'item_name' => 'nullable|string',
+            'total_units' => 'nullable|integer|min:1',
+            'supplier' => 'nullable|string',
+            'address' => 'nullable|string',
+            'contact' => 'nullable|string',
+            'status' => 'nullable|string',
         ]);
 
         $outboundLogistic->update($request->all());
@@ -410,5 +438,38 @@ class OutboundLogisticController extends Controller
         ];
 
         return response()->json($stats);
+    }
+
+    /**
+     * Display outbound logistics history with all items and search/filter functionality
+     */
+    public function history(Request $request)
+    {
+        $query = OutboundLogistic::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('shipment_id', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('sku', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('po_number', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('department', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by latest first
+        $outboundLogistics = $query->orderBy('updated_at', 'desc')->paginate(50);
+
+        // Get unique statuses for filter
+        $statuses = OutboundLogistic::distinct()->pluck('status')->filter();
+
+        return view('admin.warehousing.outbound-logistics-history', compact('outboundLogistics', 'statuses'));
     }
 }

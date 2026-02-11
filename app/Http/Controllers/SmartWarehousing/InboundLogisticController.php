@@ -141,15 +141,19 @@ class InboundLogisticController extends Controller
      */
     public function update(Request $request, InboundLogistic $inboundLogistic)
     {
-        $request->validate([
-            'shipment_id' => 'nullable|string|unique:inbound_logistics,shipment_id,' . $inboundLogistic->id,
+        $validated = $request->validate([
+            'shipment_id' => 'nullable|string',
             'po_number' => 'nullable|string',
-            'supplier' => 'nullable|string',
+            'sku' => 'nullable|string',
             'item_name' => 'nullable|string',
+            'category' => 'nullable|string',
+            'supplier' => 'nullable|string',
+            'expected_units' => 'nullable|integer|min:1',
+            'received_units' => 'nullable|integer|min:1',
             'quantity' => 'nullable|integer|min:1',
             'department' => 'nullable|string',
             'status' => 'nullable|string',
-            'quality' => 'nullable|string',
+            'quality' => 'required|string|in:Pending,Pass,Fail',
             'received_by' => 'nullable|string',
             'expected_units' => 'nullable|integer|min:1',
             'expected_date' => 'required|date',
@@ -157,7 +161,17 @@ class InboundLogisticController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $inboundLogistic->update($request->all());
+        // Ensure status is not null
+        if (!isset($validated['status']) || $validated['status'] === null) {
+            $validated['status'] = 'Pending';
+        }
+
+        // Ensure quality is not null
+        if (!isset($validated['quality']) || $validated['quality'] === null) {
+            $validated['quality'] = 'Pending';
+        }
+
+        $inboundLogistic->update($validated);
 
         return redirect()->route('admin.warehousing.inbound-logistics')
             ->with('success', 'Inbound shipment updated successfully.');
@@ -415,5 +429,38 @@ class InboundLogisticController extends Controller
         }
 
         return redirect()->back()->with('error', 'Invalid action.');
+    }
+
+    /**
+     * Display inbound logistics history with all items and search/filter functionality
+     */
+    public function history(Request $request)
+    {
+        $query = InboundLogistic::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('id', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('po_number', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('department', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('supplier', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by latest first
+        $inboundLogistics = $query->orderBy('updated_at', 'desc')->paginate(50);
+
+        // Get unique statuses for filter
+        $statuses = InboundLogistic::distinct()->pluck('status')->filter();
+
+        return view('admin.warehousing.inbound-logistics-history', compact('inboundLogistics', 'statuses'));
     }
 }

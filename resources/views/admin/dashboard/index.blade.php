@@ -30,7 +30,7 @@
     {{-- Stats Cards --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {{-- Total Inventory --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('admin.warehousing.storage-inventory') }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Inventory</p>
@@ -41,10 +41,10 @@
                     <i class='bx bx-package text-blue-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
 
         {{-- Low Stock Alerts --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('admin.warehousing.storage-inventory', ['low_stock' => 'true']) }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Low Stock Alerts</p>
@@ -55,10 +55,10 @@
                     <i class='bx bx-error-circle text-red-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
 
         {{-- Inbound Shipments --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('admin.warehousing.inbound-logistics') }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Inbound Shipments</p>
@@ -69,10 +69,10 @@
                     <i class='bx bx-down-arrow-circle text-green-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
 
         {{-- Outbound Shipments --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('admin.warehousing.outbound-logistics') }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Outbound Shipments</p>
@@ -83,13 +83,13 @@
                     <i class='bx bx-up-arrow-circle text-purple-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     {{-- Additional Stats Row --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {{-- Active Suppliers --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('procurement.vendors') }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Active Suppliers</p>
@@ -100,10 +100,10 @@
                     <i class='bx bx-building text-indigo-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
 
         {{-- Pending Posts --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('admin.supplier.posts.index', ['status' => 'pending']) }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Pending Posts</p>
@@ -114,10 +114,10 @@
                     <i class='bx bx-file text-orange-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
 
         {{-- Asset Requests --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('asset-requests.index') }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Asset Requests</p>
@@ -128,10 +128,10 @@
                     <i class='bx bx-cube text-teal-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
 
         {{-- Total Users --}}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+        <a href="{{ route('users.index') }}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer block">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Total Users</p>
@@ -142,7 +142,7 @@
                     <i class='bx bx-user text-pink-600 text-2xl'></i>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     {{-- Stock Movement Trends Chart --}}

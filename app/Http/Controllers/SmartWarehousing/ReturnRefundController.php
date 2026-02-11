@@ -47,7 +47,14 @@ class ReturnRefundController extends Controller
      */
     public function create()
     {
-        return view('admin.warehousing.returns-management-create');
+        // Get returned items that are NOT already in return_refunds table
+        $returnedItems = \App\Models\Inventory::where('status', 'Returned')
+            ->whereNotIn('sku', function($query) {
+                $query->select('sku')->from('return_refunds');
+            })
+            ->get();
+        
+        return view('admin.warehousing.returns-management-create', compact('returnedItems'));
     }
 
     /**
@@ -56,19 +63,14 @@ class ReturnRefundController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'order_number' => 'required|string',
-            'customer_name' => 'required|string|max:255',
-            'product_name' => 'required|string|max:255',
             'sku' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:1',
-            'refund_amount' => 'required|numeric|min:0|max:999999.99',
-            'return_reason' => 'required|in:Defective,Wrong Item,Damaged,Not Satisfied,Other',
+            'po_number' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
+            'item_name' => 'nullable|string|max:255',
+            'stock' => 'nullable|integer|min:0',
+            'supplier' => 'nullable|string|max:255',
             'status' => 'required|in:Pending,Approved,Rejected,Processed,Refunded',
             'return_date' => 'required|date',
-            'refund_date' => 'nullable|date',
-            'notes' => 'nullable|string',
-            'refund_method' => 'nullable|string|max:255',
-            'tracking_number' => 'nullable|string|max:255',
         ]);
 
         // Auto-generate return ID
@@ -76,7 +78,7 @@ class ReturnRefundController extends Controller
 
         ReturnRefund::create($validated);
 
-        return redirect()->route('returns-management.index')
+        return redirect()->route('admin.warehousing.returns-management')
             ->with('success', 'Return/refund created successfully.');
     }
 
@@ -107,25 +109,57 @@ class ReturnRefundController extends Controller
 
         $validated = $request->validate([
             'return_id' => 'required|string|unique:return_refunds,return_id,'.$id,
-            'order_number' => 'required|string',
-            'customer_name' => 'required|string|max:255',
-            'product_name' => 'required|string|max:255',
             'sku' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:1',
-            'refund_amount' => 'required|numeric|min:0|max:999999.99',
-            'return_reason' => 'required|in:Defective,Wrong Item,Damaged,Not Satisfied,Other',
+            'po_number' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
+            'item_name' => 'nullable|string|max:255',
+            'stock' => 'nullable|integer|min:0',
+            'supplier' => 'nullable|string|max:255',
             'status' => 'required|in:Pending,Approved,Rejected,Processed,Refunded',
             'return_date' => 'required|date',
-            'refund_date' => 'nullable|date',
             'notes' => 'nullable|string',
-            'refund_method' => 'nullable|string|max:255',
-            'tracking_number' => 'nullable|string|max:255',
         ]);
 
         $returnRefund->update($validated);
 
         return redirect()->route('returns-management.index')
             ->with('success', 'Return/refund updated successfully.');
+    }
+
+    /**
+     * Display returns management history with all items and search/filter functionality
+     */
+    public function history(Request $request)
+    {
+        $query = ReturnRefund::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('return_id', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('sku', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('po_number', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('product_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('supplier', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('return_reason', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('notes', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by latest first
+        $returnRefunds = $query->orderBy('updated_at', 'desc')->paginate(50);
+
+        // Get unique statuses for filter
+        $statuses = ReturnRefund::distinct()->pluck('status')->filter();
+
+        return view('admin.warehousing.returns-management-history', compact('returnRefunds', 'statuses'));
     }
 
     /**

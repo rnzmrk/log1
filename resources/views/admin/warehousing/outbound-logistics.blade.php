@@ -17,7 +17,7 @@
                     <a href="#" class="text-gray-700 hover:text-blue-600 ml-1 md:ml-2">Smart Warehousing</a>
                 </div>
             </li>
-            <li>
+            <li>    
                 <div class="flex items-center">
                     <i class='bx bx-chevron-right text-gray-400'></i>
                     <a href="#" class="text-gray-700 hover:text-blue-600 ml-1 md:ml-2">Outbound Logistics</a>
@@ -35,10 +35,16 @@
     <!-- Page Header -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Outbound Logistics</h1>
-        <a href="{{ route('outbound-logistics.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-            <i class='bx bx-plus text-xl'></i>
-            New Shipment
-        </a>
+        <div class="flex gap-3">
+            <a href="{{ route('outbound-logistics.history') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                <i class='bx bx-history text-xl'></i>
+                History
+            </a>
+            <a href="{{ route('outbound-logistics.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                <i class='bx bx-plus text-xl'></i>
+                New Shipment
+            </a>
+        </div>
     </div>
 
     <!-- Filter Section -->
@@ -113,11 +119,11 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipment ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PO ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -126,32 +132,15 @@
                     @forelse ($outboundLogistics as $outbound)
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $outbound->shipment_id }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $outbound->order_number }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $outbound->customer_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $outbound->destination }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <span class="text-sm font-medium text-gray-900">{{ $outbound->shipped_units ?? 0 }}</span>
-                                    <span class="text-sm text-gray-500 ml-1">/ {{ $outbound->total_units }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($outbound->priority === 'Urgent')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        Urgent
-                                    </span>
-                                @elseif ($outbound->priority === 'High')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                        High
-                                    </span>
-                                @elseif ($outbound->priority === 'Medium')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        Medium
-                                    </span>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $outbound->sku ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $outbound->po_number ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $outbound->department ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $outbound->item_name ?? '-' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                @if($outbound->total_units)
+                                    {{ $outbound->total_units }}
                                 @else
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        Low
-                                    </span>
+                                    <span class="text-gray-400 text-sm">-</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">

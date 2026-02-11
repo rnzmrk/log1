@@ -79,120 +79,61 @@
                             <p class="text-gray-900 font-medium">{{ $returnRefund->return_id }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Order Number</label>
-                            <p class="text-gray-900 font-medium">{{ $returnRefund->order_number }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Customer Name</label>
-                            <p class="text-gray-900">{{ $returnRefund->customer_name }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Product Name</label>
-                            <p class="text-gray-900">{{ $returnRefund->product_name }}</p>
-                        </div>
-                        <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">SKU</label>
                             <p class="text-gray-900 font-mono">{{ $returnRefund->sku }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Quantity</label>
-                            <p class="text-gray-900">{{ $returnRefund->quantity }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">PO Number</label>
+                            <p class="text-gray-900">{{ $returnRefund->po_number ?? '-' }}</p>
                         </div>
-                        @if ($returnRefund->refund_method)
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Refund Method</label>
-                            <p class="text-gray-900">{{ $returnRefund->refund_method }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Item Name</label>
+                            <p class="text-gray-900">{{ $returnRefund->item_name ?? $returnRefund->product_name ?? '-' }}</p>
                         </div>
-                        @endif
-                        @if ($returnRefund->tracking_number)
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Tracking Number</label>
-                            <p class="text-gray-900 font-mono">{{ $returnRefund->tracking_number }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
+                            <p class="text-gray-900">{{ $returnRefund->supplier ?? '-' }}</p>
                         </div>
-                        @endif
-                    </div>
-                    
-                    @if ($returnRefund->notes)
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-500 mb-1">Notes</label>
-                        <p class="text-gray-900">{{ $returnRefund->notes }}</p>
-                    </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Status Information Card -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Status Information</h2>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900">₱{{ number_format($returnRefund->refund_amount, 2) }}</div>
-                            <div class="text-sm text-gray-500 mt-1">Refund Amount</div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Stock</label>
+                            <p class="text-gray-900">{{ $returnRefund->stock ?? '-' }}</p>
                         </div>
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900">{{ $returnRefund->quantity }}</div>
-                            <div class="text-sm text-gray-500 mt-1">Items Returned</div>
-                        </div>
-                        <div class="text-center">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Status</label>
                             @if ($returnRefund->status === 'Pending')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
                                     Pending
                                 </span>
                             @elseif ($returnRefund->status === 'Approved')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                     Approved
                                 </span>
                             @elseif ($returnRefund->status === 'Rejected')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                     Rejected
                                 </span>
                             @elseif ($returnRefund->status === 'Processed')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                     Processed
                                 </span>
-                            @else
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            @elseif ($returnRefund->status === 'Refunded')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
                                     Refunded
                                 </span>
+                            @else
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    {{ $returnRefund->status }}
+                                </span>
                             @endif
-                            <div class="text-sm text-gray-500 mt-1">Current Status</div>
                         </div>
                     </div>
                     
-                    <!-- Return Reason Indicator -->
                     <div class="mt-6">
-                        <div class="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Return Reason</span>
-                            <span>{{ $returnRefund->return_reason }}</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            @if ($returnRefund->return_reason === 'Defective')
-                                <div class="bg-red-500 h-3 rounded-full" style="width: 100%"></div>
-                            @elseif ($returnRefund->return_reason === 'Wrong Item')
-                                <div class="bg-orange-500 h-3 rounded-full" style="width: 80%"></div>
-                            @elseif ($returnRefund->return_reason === 'Damaged')
-                                <div class="bg-yellow-500 h-3 rounded-full" style="width: 60%"></div>
-                            @elseif ($returnRefund->return_reason === 'Not Satisfied')
-                                <div class="bg-blue-500 h-3 rounded-full" style="width: 40%"></div>
-                            @else
-                                <div class="bg-gray-500 h-3 rounded-full" style="width: 20%"></div>
-                            @endif
-                        </div>
-                        <div class="mt-2 text-xs text-gray-500">
-                            @if ($returnRefund->return_reason === 'Defective')
-                                High Priority - Product defect investigation required
-                            @elseif ($returnRefund->return_reason === 'Wrong Item')
-                                Medium Priority - Shipping error investigation
-                            @elseif ($returnRefund->return_reason === 'Damaged')
-                                Medium Priority - Damage assessment needed
-                            @elseif ($returnRefund->return_reason === 'Not Satisfied')
-                                Low Priority - Customer satisfaction review
-                            @else
-                                Low Priority - Custom review required
-                            @endif
+                        <label class="block text-sm font-medium text-gray-500 mb-1">Reason</label>
+                        <div class="mt-1">
+                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                {{ $returnRefund->notes ?? $returnRefund->return_reason ?? '-' }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -260,18 +201,6 @@
                         </div>
                     </a>
                     @endif
-                    
-                    <form action="{{ route('returns-management.destroy', $returnRefund->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this return? This action cannot be undone.')" class="w-full">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="w-full text-left px-4 py-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-trash text-red-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-red-900">Delete Return</p>
-                                <p class="text-sm text-red-600">Remove from system</p>
-                            </div>
-                        </button>
-                    </form>
                 </div>
             </div>
 

@@ -89,7 +89,39 @@
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="e.g., ELEC-001"
                            required>
-                    <p class="mt-1 text-sm text-gray-500">Unique Stock Keeping Unit</p>
+                </div>
+
+                <!-- PO Number -->
+                <div>
+                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO</label>
+                    <input type="text" 
+                           id="po_number" 
+                           name="po_number" 
+                           value="{{ old('po_number', $inventory->po_number) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., PO-2024-001">
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                    <input type="text" 
+                           id="department" 
+                           name="department" 
+                           value="{{ old('department', $inventory->department) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., IT Department">
+                </div>
+
+                <!-- Supplier -->
+                <div>
+                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier', $inventory->supplier) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., Supplier Co.">
                 </div>
 
                 <!-- Item Name -->
@@ -104,37 +136,9 @@
                            required>
                 </div>
 
-                <!-- Category -->
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                    <select id="category" 
-                            name="category" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select a category</option>
-                        <option value="Electronics" {{ old('category', $inventory->category) === 'Electronics' ? 'selected' : '' }}>Electronics</option>
-                        <option value="Furniture" {{ old('category', $inventory->category) === 'Furniture' ? 'selected' : '' }}>Furniture</option>
-                        <option value="Raw Materials" {{ old('category', $inventory->category) === 'Raw Materials' ? 'selected' : '' }}>Raw Materials</option>
-                        <option value="Medical" {{ old('category', $inventory->category) === 'Medical' ? 'selected' : '' }}>Medical</option>
-                        <option value="Finished Goods" {{ old('category', $inventory->category) === 'Finished Goods' ? 'selected' : '' }}>Finished Goods</option>
-                    </select>
-                </div>
-
-                <!-- Location -->
-                <div>
-                    <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location *</label>
-                    <input type="text" 
-                           id="location" 
-                           name="location" 
-                           value="{{ old('location', $inventory->location) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Warehouse A - A1-23"
-                           required>
-                </div>
-
                 <!-- Stock -->
                 <div>
-                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock Quantity *</label>
+                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
                     <input type="number" 
                            id="stock" 
                            name="stock" 
@@ -143,76 +147,25 @@
                            placeholder="0"
                            min="0"
                            required>
-                    <p class="mt-1 text-sm text-gray-500">Current quantity in stock</p>
                 </div>
 
-                <!-- Price -->
+                <!-- Status -->
                 <div>
-                    <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Unit Price</label>
-                    <input type="number" 
-                           id="price" 
-                           name="price" 
-                           value="{{ old('price', $inventory->price) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Price per unit</p>
-                </div>
-
-                <!-- Supplier -->
-                <div>
-                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
-                    <select id="supplier" 
-                            name="supplier" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select a supplier...</option>
-                        @foreach($suppliers as $supplier)
-                            <option value="{{ $supplier->name }}" 
-                                    {{ old('supplier', $inventory->supplier) == $supplier->name ? 'selected' : '' }}>
-                                {{ $supplier->name }}
-                            </option>
-                        @endforeach
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
+                    <select id="status" 
+                            name="status" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            required>
+                        <option value="">Select status</option>
+                        <option value="In Stock" {{ old('status', $inventory->status) === 'In Stock' ? 'selected' : '' }}>In Stock</option>
+                        <option value="Low Stock" {{ old('status', $inventory->status) === 'Low Stock' ? 'selected' : '' }}>Low Stock</option>
+                        <option value="Out of Stock" {{ old('status', $inventory->status) === 'Out of Stock' ? 'selected' : '' }}>Out of Stock</option>
                     </select>
-                    <p class="mt-1 text-sm text-gray-500">Optional: Select from approved suppliers</p>
-                </div>
-            </div>
-
-            <!-- Description -->
-            <div class="mt-6">
-                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea id="description" 
-                          name="description" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter item description...">{{ old('description', $inventory->description) }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Additional details about the item</p>
-            </div>
-
-            <!-- Current Status Info -->
-            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h3 class="text-sm font-medium text-gray-700 mb-2">Current Status</h3>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-600">Status:</span>
-                    @if ($inventory->status === 'In Stock')
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            In Stock
-                        </span>
-                    @elseif ($inventory->status === 'Low Stock')
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                            Low Stock
-                        </span>
-                    @else
-                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                            Out of Stock
-                        </span>
-                    @endif
-                    <span class="text-sm text-gray-600">| Last Updated: {{ $inventory->last_updated ? $inventory->last_updated->format('M d, Y') : 'Never' }}</span>
                 </div>
             </div>
 
             <!-- Form Actions -->
-            <div class="flex justify-end gap-3 mt-8">
+            <div class="mt-8 flex justify-end gap-3">
                 <a href="{{ route('admin.warehousing.storage-inventory') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
                     Cancel
                 </a>

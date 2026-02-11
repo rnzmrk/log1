@@ -35,10 +35,16 @@
     <!-- Page Header -->
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Request Supplies</h1>
-        <a href="{{ route('supply-requests.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-            <i class='bx bx-plus text-xl'></i>
-            New Request
-        </a>
+        <div class="flex gap-3">
+            <a href="{{ route('supply-requests.history') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                <i class='bx bx-history text-xl'></i>
+                History
+            </a>
+            <a href="{{ route('supply-requests.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                <i class='bx bx-plus text-xl'></i>
+                New Request
+            </a>
+        </div>
     </div>
 
     <!-- Filter Section -->
@@ -230,13 +236,6 @@
                                             <i class='bx bx-shopping-bag text-lg'></i>
                                         </a>
                                     @endif
-                                    
-                                    <button class="delete-btn text-red-600 hover:text-red-900" 
-                                            data-item="Supply Request #{{ $request->id }}" 
-                                            data-url="{{ route('supply-requests.destroy', $request->id) }}" 
-                                            title="Delete">
-                                        <i class='bx bx-trash text-lg'></i>
-                                    </button>
                                 </div>
                             </td>
                         </tr>

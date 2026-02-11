@@ -79,100 +79,48 @@
                             <p class="text-gray-900 font-medium">{{ $inventory->sku }}</p>
                         </div>
                         <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">PO</label>
+                            <p class="text-gray-900 font-medium">{{ $inventory->po_number ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Department</label>
+                            <p class="text-gray-900">{{ $inventory->department ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
+                            <p class="text-gray-900">{{ $inventory->supplier ?? '-' }}</p>
+                        </div>
+                        <div>
                             <label class="block text-sm font-medium text-gray-500 mb-1">Item Name</label>
                             <p class="text-gray-900 font-medium">{{ $inventory->item_name }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Category</label>
-                            <p class="text-gray-900">{{ $inventory->category }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Stock</label>
+                            <p class="text-gray-900 font-medium">{{ $inventory->stock }} units</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Location</label>
-                            <p class="text-gray-900">{{ $inventory->location }}</p>
-                        </div>
-                        @if ($inventory->supplier)
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
-                            <p class="text-gray-900">{{ $inventory->supplier }}</p>
-                        </div>
-                        @endif
-                        @if ($inventory->price)
-                        <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Unit Price</label>
-                            <p class="text-gray-900">₱{{ number_format($inventory->price, 2) }}</p>
-                        </div>
-                        @endif
-                    </div>
-                    
-                    @if ($inventory->description)
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-500 mb-1">Description</label>
-                        <p class="text-gray-900">{{ $inventory->description }}</p>
-                    </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Stock Information Card -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Stock Information</h2>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900">{{ $inventory->stock }}</div>
-                            <div class="text-sm text-gray-500 mt-1">Current Stock</div>
-                        </div>
-                        <div class="text-center">
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Status</label>
                             @if ($inventory->status === 'In Stock')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                     In Stock
                                 </span>
                             @elseif ($inventory->status === 'Low Stock')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                     Low Stock
                                 </span>
-                            @else
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            @elseif ($inventory->status === 'Out of Stock')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                     Out of Stock
                                 </span>
-                            @endif
-                            <div class="text-sm text-gray-500 mt-1">Status</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-lg font-medium text-gray-900">
-                                {{ $inventory->last_updated ? $inventory->last_updated->format('M d, Y') : 'Never' }}
-                            </div>
-                            <div class="text-sm text-gray-500 mt-1">Last Updated</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Stock Status Indicator -->
-                    <div class="mt-6">
-                        <div class="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Stock Level</span>
-                            <span>{{ $inventory->stock }} units</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            @if ($inventory->stock == 0)
-                                <div class="bg-red-500 h-3 rounded-full" style="width: 0%"></div>
-                            @elseif ($inventory->stock <= 10)
-                                <div class="bg-yellow-500 h-3 rounded-full" style="width: 25%"></div>
                             @else
-                                <div class="bg-green-500 h-3 rounded-full" style="width: 100%"></div>
-                            @endif
-                        </div>
-                        <div class="mt-2 text-xs text-gray-500">
-                            @if ($inventory->stock == 0)
-                                Out of Stock - Order needed
-                            @elseif ($inventory->stock <= 10)
-                                Low Stock - Consider reordering
-                            @else
-                                Good Stock Level
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    {{ $inventory->status }}
+                                </span>
                             @endif
                         </div>
                     </div>
+                </div>
+            </div>
                 </div>
             </div>
         </div>

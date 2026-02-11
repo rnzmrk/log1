@@ -95,45 +95,57 @@
                     <p class="mt-1 text-sm text-gray-500">Unique shipment identifier</p>
                 </div>
 
-                <!-- Order Number -->
+                <!-- SKU -->
                 <div>
-                    <label for="order_number" class="block text-sm font-medium text-gray-700 mb-2">Order Number *</label>
+                    <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">SKU *</label>
                     <input type="text" 
-                           id="order_number" 
-                           name="order_number" 
-                           value="{{ old('order_number', $outboundLogistic->order_number) }}"
+                           id="sku" 
+                           name="sku" 
+                           value="{{ old('sku', $outboundLogistic->sku) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., ORD-2024-001"
+                           placeholder="e.g., SKU-12345"
                            required>
                 </div>
 
-                <!-- Customer Name -->
+                <!-- PO Number -->
                 <div>
-                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Customer Name *</label>
+                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number *</label>
                     <input type="text" 
-                           id="customer_name" 
-                           name="customer_name" 
-                           value="{{ old('customer_name', $outboundLogistic->customer_name) }}"
+                           id="po_number" 
+                           name="po_number" 
+                           value="{{ old('po_number', $outboundLogistic->po_number) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Acme Corporation"
+                           placeholder="e.g., PO-2024-001"
                            required>
                 </div>
 
-                <!-- Destination -->
+                <!-- Department -->
                 <div>
-                    <label for="destination" class="block text-sm font-medium text-gray-700 mb-2">Destination *</label>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
                     <input type="text" 
-                           id="destination" 
-                           name="destination" 
-                           value="{{ old('destination', $outboundLogistic->destination) }}"
+                           id="department" 
+                           name="department" 
+                           value="{{ old('department', $outboundLogistic->department) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., New York, NY"
+                           placeholder="e.g., IT Department"
                            required>
                 </div>
 
-                <!-- Total Units -->
+                <!-- Item Name -->
                 <div>
-                    <label for="total_units" class="block text-sm font-medium text-gray-700 mb-2">Total Units *</label>
+                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
+                    <input type="text" 
+                           id="item_name" 
+                           name="item_name" 
+                           value="{{ old('item_name', $outboundLogistic->item_name) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., Cellphone"
+                           required>
+                </div>
+
+                <!-- Stock (Total Units) -->
+                <div>
+                    <label for="total_units" class="block text-sm font-medium text-gray-700 mb-2">Stock *</label>
                     <input type="number" 
                            id="total_units" 
                            name="total_units" 
@@ -144,32 +156,40 @@
                            required>
                 </div>
 
-                <!-- Shipped Units -->
+                <!-- Supplier -->
                 <div>
-                    <label for="shipped_units" class="block text-sm font-medium text-gray-700 mb-2">Shipped Units</label>
-                    <input type="number" 
-                           id="shipped_units" 
-                           name="shipped_units" 
-                           value="{{ old('shipped_units', $outboundLogistic->shipped_units) }}"
+                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier *</label>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier', $outboundLogistic->supplier) }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0"
-                           min="0">
-                    <p class="mt-1 text-sm text-gray-500">Number of units already shipped</p>
+                           placeholder="e.g., ABCDE Supplier"
+                           required>
                 </div>
 
-                <!-- Priority -->
+                <!-- Address -->
                 <div>
-                    <label for="priority" class="block text-sm font-medium text-gray-700 mb-2">Priority *</label>
-                    <select id="priority" 
-                            name="priority" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select priority</option>
-                        <option value="Low" {{ old('priority', $outboundLogistic->priority) === 'Low' ? 'selected' : '' }}>Low</option>
-                        <option value="Medium" {{ old('priority', $outboundLogistic->priority) === 'Medium' ? 'selected' : '' }}>Medium</option>
-                        <option value="High" {{ old('priority', $outboundLogistic->priority) === 'High' ? 'selected' : '' }}>High</option>
-                        <option value="Urgent" {{ old('priority', $outboundLogistic->priority) === 'Urgent' ? 'selected' : '' }}>Urgent</option>
-                    </select>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+                    <input type="text" 
+                           id="address" 
+                           name="address" 
+                           value="{{ old('address', $outboundLogistic->address) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., 123 Main St, City, State"
+                           required>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <label for="contact" class="block text-sm font-medium text-gray-700 mb-2">Contact *</label>
+                    <input type="text" 
+                           id="contact" 
+                           name="contact" 
+                           value="{{ old('contact', $outboundLogistic->contact) }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., John Doe - 555-0123"
+                           required>
                 </div>
 
                 <!-- Status -->
@@ -186,66 +206,6 @@
                         <option value="Delivered" {{ old('status', $outboundLogistic->status) === 'Delivered' ? 'selected' : '' }}>Delivered</option>
                         <option value="Cancelled" {{ old('status', $outboundLogistic->status) === 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
-                </div>
-
-                <!-- Total Value -->
-                <div>
-                    <label for="total_value" class="block text-sm font-medium text-gray-700 mb-2">Total Value</label>
-                    <input type="number" 
-                           id="total_value" 
-                           name="total_value" 
-                           value="{{ old('total_value', $outboundLogistic->total_value) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Total shipment value</p>
-                </div>
-
-                <!-- Carrier -->
-                <div>
-                    <label for="carrier" class="block text-sm font-medium text-gray-700 mb-2">Carrier</label>
-                    <input type="text" 
-                           id="carrier" 
-                           name="carrier" 
-                           value="{{ old('carrier', $outboundLogistic->carrier) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., FedEx, UPS, DHL">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Shipping carrier</p>
-                </div>
-
-                <!-- Tracking Number -->
-                <div>
-                    <label for="tracking_number" class="block text-sm font-medium text-gray-700 mb-2">Tracking Number</label>
-                    <input type="text" 
-                           id="tracking_number" 
-                           name="tracking_number" 
-                           value="{{ old('tracking_number', $outboundLogistic->tracking_number) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., 1234567890">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Tracking number</p>
-                </div>
-
-                <!-- Shipping Date -->
-                <div>
-                    <label for="shipping_date" class="block text-sm font-medium text-gray-700 mb-2">Shipping Date</label>
-                    <input type="date" 
-                           id="shipping_date" 
-                           name="shipping_date" 
-                           value="{{ old('shipping_date', $outboundLogistic->shipping_date ? $outboundLogistic->shipping_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Shipping date</p>
-                </div>
-
-                <!-- Delivery Date -->
-                <div>
-                    <label for="delivery_date" class="block text-sm font-medium text-gray-700 mb-2">Delivery Date</label>
-                    <input type="date" 
-                           id="delivery_date" 
-                           name="delivery_date" 
-                           value="{{ old('delivery_date', $outboundLogistic->delivery_date ? $outboundLogistic->delivery_date->format('Y-m-d') : '') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Delivery date</p>
                 </div>
             </div>
 

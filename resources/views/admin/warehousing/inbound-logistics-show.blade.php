@@ -41,115 +41,158 @@
         </div>
     </div>
 
-    <!-- Shipment Details -->
+    <!-- Shipment Details - Main Information -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Shipment ID -->
+                <!-- Inbound ID -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Shipment ID</h3>
-                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->shipment_id }}</p>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Inbound ID</label>
+                    <p class="text-lg font-semibold text-gray-900">#{{ $inboundLogistic->id }}</p>
                 </div>
 
                 <!-- PO Number -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">PO Number</h3>
-                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->po_number }}</p>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">PO</label>
+                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->po_number ?? '-' }}</p>
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Department</label>
+                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->department ?? '-' }}</p>
                 </div>
 
                 <!-- Supplier -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Supplier</h3>
-                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->supplier }}</p>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
+                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->supplier ?? '-' }}</p>
                 </div>
 
-                <!-- Expected Units -->
+                <!-- Item Name -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Expected Units</h3>
-                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->expected_units }} units</p>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Item Name</label>
+                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->item_name ?? '-' }}</p>
                 </div>
 
-                <!-- Received Units -->
+                <!-- Stock (Quantity) -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Received Units</h3>
-                    <div class="flex items-center gap-3">
-                        <p class="text-lg font-semibold text-gray-900">
-                            {{ $inboundLogistic->received_units ?? 0 }} units
-                        </p>
-                        @if ($inboundLogistic->received_units)
-                            <div class="flex items-center">
-                                <div class="w-20 bg-gray-200 rounded-full h-2 mr-2">
-                                    <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min(100, ($inboundLogistic->received_units / $inboundLogistic->expected_units) * 100) }}%"></div>
-                                </div>
-                                <span class="text-sm text-gray-600">{{ round(($inboundLogistic->received_units / $inboundLogistic->expected_units) * 100) }}%</span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Quality -->
-                <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Quality</h3>
-                    @if ($inboundLogistic->quality === 'Good')
-                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            Good
-                        </span>
-                    @else
-                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                            Pending
-                        </span>
-                    @endif
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Stock</label>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {{ $inboundLogistic->quantity ?? $inboundLogistic->received_units ?? 0 }} units
+                    </p>
                 </div>
 
                 <!-- Status -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Status</h3>
-                    @if ($inboundLogistic->status === 'Putaway Complete')
-                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                            Putaway Complete
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Status</label>
+                    @if ($inboundLogistic->status === 'Pending')
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            Pending
                         </span>
-                    @elseif ($inboundLogistic->status === 'Verified')
-                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                            Verified
+                    @elseif ($inboundLogistic->status === 'In Transit')
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            In Transit
+                        </span>
+                    @elseif ($inboundLogistic->status === 'Delivered')
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Delivered
+                        </span>
+                    @elseif ($inboundLogistic->status === 'Storage')
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                            Storage
                         </span>
                     @else
-                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                            In Progress
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                            {{ $inboundLogistic->status }}
+                        </span>
+                    @endif
+                </div>
+
+                <!-- Quality Check -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Quality Check</label>
+                    @if ($inboundLogistic->quality === 'Pass')
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Pass
+                        </span>
+                    @elseif ($inboundLogistic->quality === 'Fail')
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            Fail
+                        </span>
+                    @else
+                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            Pending
                         </span>
                     @endif
                 </div>
 
                 <!-- Expected Date -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Expected Date</h3>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Expected Date</label>
                     <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->expected_date->format('M d, Y') }}</p>
                 </div>
 
                 <!-- Received Date -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-500 mb-1">Received Date</h3>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Received Date</label>
                     <p class="text-lg font-semibold text-gray-900">
                         {{ $inboundLogistic->received_date ? $inboundLogistic->received_date->format('M d, Y') : 'Not received yet' }}
                     </p>
                 </div>
 
+                <!-- Received By -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Received By</label>
+                    <p class="text-lg font-semibold text-gray-900">{{ $inboundLogistic->received_by ?? '-' }}</p>
+                </div>
+
                 <!-- Notes -->
                 @if ($inboundLogistic->notes)
                     <div class="md:col-span-2">
-                        <h3 class="text-sm font-medium text-gray-500 mb-1">Notes</h3>
-                        <p class="text-gray-900">{{ $inboundLogistic->notes }}</p>
+                        <label class="block text-sm font-medium text-gray-500 mb-1">Notes</label>
+                        <p class="text-gray-900 bg-gray-50 p-3 rounded-lg">{{ $inboundLogistic->notes }}</p>
                     </div>
                 @endif
             </div>
+        </div>
+    </div>
 
-            <!-- Timestamps -->
-            <div class="mt-8 pt-6 border-t border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
-                    <div>
-                        <span class="font-medium">Created:</span> {{ $inboundLogistic->created_at->format('M d, Y H:i') }}
+    <!-- Additional Information Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+        <!-- Timeline -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Timeline</h2>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">Expected Date</p>
+                            <p class="text-sm text-gray-500">{{ $inboundLogistic->expected_date->format('M d, Y H:i') }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <span class="font-medium">Last Updated:</span> {{ $inboundLogistic->updated_at->format('M d, Y H:i') }}
+                    @if ($inboundLogistic->received_date)
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Received</p>
+                                <p class="text-sm text-gray-500">{{ $inboundLogistic->received_date->format('M d, Y H:i') }}</p>
+                                @if ($inboundLogistic->received_by)
+                                    <p class="text-xs text-gray-400">by {{ $inboundLogistic->received_by }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 w-2 h-2 bg-gray-400 rounded-full mt-2"></div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">Last Updated</p>
+                            <p class="text-sm text-gray-500">{{ $inboundLogistic->updated_at->format('M d, Y H:i') }}</p>
+                        </div>
                     </div>
                 </div>
             </div>

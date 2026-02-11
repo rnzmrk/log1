@@ -5,7 +5,7 @@ namespace App\Http\Controllers\SmartWarehousing;
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
 use App\Models\OutboundLogistic;
-use App\Models\ReturnRefund;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -17,13 +17,18 @@ class InventoryController extends Controller
     {
         $query = Inventory::query();
 
+        // Filter out items with "Returned" and "Moved" status
+        $query->whereNotIn('status', ['Returned', 'Moved']);
+
         // Search functionality
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('sku', 'like', '%' . $searchTerm . '%')
                   ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('category', 'like', '%' . $searchTerm . '%');
+                  ->orWhere('category', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('supplier', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('department', 'like', '%' . $searchTerm . '%');
             });
         }
 
@@ -37,21 +42,49 @@ class InventoryController extends Controller
             $query->where('category', $request->category);
         }
 
+        // Filter by department
+        if ($request->filled('department')) {
+            $query->where('department', $request->department);
+        }
+
+        // Filter by supplier
+        if ($request->filled('supplier')) {
+            $query->where('supplier', $request->supplier);
+        }
+
         $inventories = $query->orderBy('created_at', 'desc')->paginate(10);
         
+        // Get returned items for the return modal dropdown
+        $returnedItems = Inventory::where('status', 'Returned')->get();
+
         // Get statistics
         $stats = [
-            'total_items' => Inventory::count(),
-            'total_stock' => Inventory::sum('stock'),
-            'low_stock' => Inventory::where('status', 'Low Stock')->count(),
-            'out_of_stock' => Inventory::where('stock', 0)->count(),
-            'total_value' => Inventory::selectRaw('SUM(stock * price) as total_value')->value('total_value'),
+            'total_items' => $query->count(),
+            'total_stock' => $query->sum('stock'),
+            'low_stock' => $query->where('stock', '<=', 10)->where('stock', '>', 0)->count(),
+            'out_of_stock' => $query->where('stock', 0)->count(),
         ];
         
         // Get categories for filter
-        $categories = Inventory::distinct()->pluck('category');
+        $categories = Inventory::whereNotIn('status', ['Returned', 'Moved'])
+            ->whereNotNull('category')
+            ->distinct()
+            ->pluck('category');
         
-        return view('admin.warehousing.storage-inventory', compact('inventories', 'stats', 'categories'));
+        $departments = Inventory::whereNotIn('status', ['Returned', 'Moved'])
+            ->whereNotNull('department')
+            ->distinct()
+            ->pluck('department');
+        
+        $suppliers = Inventory::whereNotIn('status', ['Returned', 'Moved'])
+            ->whereNotNull('supplier')
+            ->distinct()
+            ->pluck('supplier');
+
+        // Get active vendors for the request modal
+        $vendors = Supplier::where('status', 'Active')->get();
+
+        return view('admin.warehousing.storage-inventory', compact('inventories', 'stats', 'categories', 'departments', 'suppliers', 'vendors'));
     }
 
     /**
@@ -219,33 +252,47 @@ class InventoryController extends Controller
     }
 
     /**
-     * Return item to returns management
+     * Return item - update inventory status to Returned
      */
     public function returnItem(Request $request, Inventory $inventory)
     {
         $request->validate([
-            'return_reason' => 'required|string',
             'return_quantity' => 'required|integer|min:1|max:' . $inventory->stock,
+            'return_reason' => 'required|string',
         ]);
 
-        // Create return entry
-        ReturnRefund::create([
-            'inventory_id' => $inventory->id,
-            'item_name' => $inventory->item_name,
-            'sku' => $inventory->sku,
-            'quantity' => $request->return_quantity,
-            'reason' => $request->return_reason,
-            'status' => 'Return Pending',
-            'return_date' => now(),
-            'returned_by' => 'Warehouse Staff',
-        ]);
+        $returnQuantity = $request->integer('return_quantity');
+        $returnReason = $request->input('return_reason');
 
-        // Update inventory stock
-        $inventory->stock -= $request->return_quantity;
-        $inventory->save();
+        // If returning all stock, update status to Returned
+        if ($returnQuantity >= $inventory->stock) {
+            $inventory->stock = 0;
+            $inventory->status = 'Returned';
+            $inventory->notes = $returnReason; // Save return reason to notes field
+            $inventory->save();
 
-        return redirect()->back()
-            ->with('success', 'Item return processed successfully.');
+            return response()->json([
+                'success' => true,
+                'message' => "Returned all {$returnQuantity} units - Status set to Returned",
+            ]);
+        } else {
+            // Partial return: create new record for returned items
+            $returnedInventory = $inventory->replicate();
+            $returnedInventory->stock = $returnQuantity;
+            $returnedInventory->sku = $this->generateSku();
+            $returnedInventory->status = 'Returned';
+            $returnedInventory->notes = $returnReason; // Save return reason to notes field
+            $returnedInventory->save();
+
+            // Reduce original stock
+            $inventory->stock -= $returnQuantity;
+            $inventory->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Returned {$returnQuantity} units - Status set to Returned",
+            ]);
+        }
     }
 
     /**
@@ -280,35 +327,38 @@ class InventoryController extends Controller
     }
 
     /**
-     * Move inventory item to a new location (with partial quantity support)
+     * Move inventory item to a new department (with partial quantity support)
      */
     public function move(Request $request, $id)
     {
         $inventory = Inventory::findOrFail($id);
 
         $request->validate([
-            'new_location' => 'required|string',
             'move_quantity' => 'required|integer|min:1|max:' . $inventory->stock,
+            'new_department' => 'required|string',
         ]);
 
         $moveQuantity = $request->integer('move_quantity');
+        $newDepartment = $request->input('new_department');
 
-        // If moving the full stock, just update location
+        // If moving the full stock, just update department and status
         if ($moveQuantity >= $inventory->stock) {
-            $inventory->location = $request->input('new_location');
+            $inventory->department = $newDepartment;
+            $inventory->status = 'Moved';
             $inventory->save();
 
             return response()->json([
                 'success' => true,
-                'message' => "Moved all {$moveQuantity} units to {$request->input('new_location')}",
+                'message' => "Moved all {$moveQuantity} units to {$newDepartment}",
             ]);
         }
 
         // Partial move: create a new inventory record for the moved quantity
         $newInventory = $inventory->replicate();
         $newInventory->stock = $moveQuantity;
-        $newInventory->location = $request->input('new_location');
         $newInventory->sku = $this->generateSku(); // ensure unique SKU for the split item
+        $newInventory->status = 'Moved';
+        $newInventory->department = $newDepartment;
         $newInventory->save();
 
         // Reduce original stock
@@ -317,7 +367,7 @@ class InventoryController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => "Moved {$moveQuantity} units to {$request->input('new_location')}",
+            'message' => "Moved {$moveQuantity} units to {$newDepartment}",
         ]);
     }
 
@@ -490,5 +540,38 @@ class InventoryController extends Controller
         ];
 
         return response()->json($stats);
+    }
+
+    /**
+     * Display inventory history with all items and search/filter functionality
+     */
+    public function history(Request $request)
+    {
+        $query = Inventory::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('sku', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('po_number', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('department', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('supplier', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Order by latest first
+        $inventories = $query->orderBy('updated_at', 'desc')->paginate(50);
+
+        // Get unique statuses for filter
+        $statuses = Inventory::distinct()->pluck('status')->filter();
+
+        return view('admin.warehousing.inventory-history', compact('inventories', 'statuses'));
     }
 }

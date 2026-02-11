@@ -79,130 +79,67 @@
                             <p class="text-gray-900 font-medium">{{ $outboundLogistic->shipment_id }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Order Number</label>
-                            <p class="text-gray-900 font-medium">{{ $outboundLogistic->order_number }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">SKU</label>
+                            <p class="text-gray-900 font-medium">{{ $outboundLogistic->sku ?? '-' }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Customer Name</label>
-                            <p class="text-gray-900">{{ $outboundLogistic->customer_name }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">PO Number</label>
+                            <p class="text-gray-900 font-medium">{{ $outboundLogistic->po_number ?? '-' }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Destination</label>
-                            <p class="text-gray-900">{{ $outboundLogistic->destination }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Department</label>
+                            <p class="text-gray-900">{{ $outboundLogistic->department ?? '-' }}</p>
                         </div>
-                        @if ($outboundLogistic->carrier)
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Carrier</label>
-                            <p class="text-gray-900">{{ $outboundLogistic->carrier }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Item Name</label>
+                            <p class="text-gray-900">{{ $outboundLogistic->item_name ?? '-' }}</p>
                         </div>
-                        @endif
-                        @if ($outboundLogistic->tracking_number)
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Tracking Number</label>
-                            <p class="text-gray-900 font-mono">{{ $outboundLogistic->tracking_number }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Stock</label>
+                            <p class="text-gray-900">{{ $outboundLogistic->total_units ?? '-' }}</p>
                         </div>
-                        @endif
-                        @if ($outboundLogistic->total_value)
                         <div>
-                            <label class="block text-sm font-medium text-gray-500 mb-1">Total Value</label>
-                            <p class="text-gray-900">₱{{ number_format($outboundLogistic->total_value, 2) }}</p>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Supplier</label>
+                            <p class="text-gray-900">{{ $outboundLogistic->supplier ?? '-' }}</p>
                         </div>
-                        @endif
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Address</label>
+                            <p class="text-gray-900">{{ $outboundLogistic->address ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Contact</label>
+                            <p class="text-gray-900">{{ $outboundLogistic->contact ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 mb-1">Status</label>
+                            @if ($outboundLogistic->status === 'Pending')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                    Pending
+                                </span>
+                            @elseif ($outboundLogistic->status === 'Processing')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Processing
+                                </span>
+                            @elseif ($outboundLogistic->status === 'Shipped')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    Shipped
+                                </span>
+                            @elseif ($outboundLogistic->status === 'Delivered')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Delivered
+                                </span>
+                            @else
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Cancelled
+                                </span>
+                            @endif
+                        </div>
                     </div>
                     
                     @if ($outboundLogistic->notes)
                     <div class="mt-6">
                         <label class="block text-sm font-medium text-gray-500 mb-1">Notes</label>
                         <p class="text-gray-900">{{ $outboundLogistic->notes }}</p>
-                    </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Status Information Card -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Status Information</h2>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900">{{ $outboundLogistic->total_units }}</div>
-                            <div class="text-sm text-gray-500 mt-1">Total Units</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-gray-900">{{ $outboundLogistic->shipped_units ?? 0 }}</div>
-                            <div class="text-sm text-gray-500 mt-1">Shipped Units</div>
-                        </div>
-                        <div class="text-center">
-                            @if ($outboundLogistic->status === 'Pending')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                    Pending
-                                </span>
-                            @elseif ($outboundLogistic->status === 'Processing')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    Processing
-                                </span>
-                            @elseif ($outboundLogistic->status === 'Shipped')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    Shipped
-                                </span>
-                            @elseif ($outboundLogistic->status === 'Delivered')
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Delivered
-                                </span>
-                            @else
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                    Cancelled
-                                </span>
-                            @endif
-                            <div class="text-sm text-gray-500 mt-1">Status</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Priority Indicator -->
-                    <div class="mt-6">
-                        <div class="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Priority Level</span>
-                            <span>{{ $outboundLogistic->priority }}</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            @if ($outboundLogistic->priority === 'Urgent')
-                                <div class="bg-red-500 h-3 rounded-full" style="width: 100%"></div>
-                            @elseif ($outboundLogistic->priority === 'High')
-                                <div class="bg-orange-500 h-3 rounded-full" style="width: 75%"></div>
-                            @elseif ($outboundLogistic->priority === 'Medium')
-                                <div class="bg-yellow-500 h-3 rounded-full" style="width: 50%"></div>
-                            @else
-                                <div class="bg-gray-500 h-3 rounded-full" style="width: 25%"></div>
-                            @endif
-                        </div>
-                        <div class="mt-2 text-xs text-gray-500">
-                            @if ($outboundLogistic->priority === 'Urgent')
-                                Urgent - Immediate attention required
-                            @elseif ($outboundLogistic->priority === 'High')
-                                High Priority - Process quickly
-                            @elseif ($outboundLogistic->priority === 'Medium')
-                                Medium Priority - Normal processing
-                            @else
-                                Low Priority - Standard processing
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Progress Indicator -->
-                    @if ($outboundLogistic->total_units > 0)
-                    <div class="mt-6">
-                        <div class="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Shipment Progress</span>
-                            <span>{{ $outboundLogistic->shipped_units ?? 0 }} / {{ $outboundLogistic->total_units }} units</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            <div class="bg-blue-500 h-3 rounded-full" style="width: {{ round((($outboundLogistic->shipped_units ?? 0) / $outboundLogistic->total_units) * 100) }}%"></div>
-                        </div>
-                        <div class="mt-2 text-xs text-gray-500">
-                            {{ round((($outboundLogistic->shipped_units ?? 0) / $outboundLogistic->total_units) * 100) }}% Complete
-                        </div>
                     </div>
                     @endif
                 </div>
@@ -280,18 +217,6 @@
                         </div>
                     </a>
                     @endif
-                    
-                    <form action="{{ route('outbound-logistics.destroy', $outboundLogistic->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this shipment? This action cannot be undone.')" class="w-full">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="w-full text-left px-4 py-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-trash text-red-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-red-900">Delete Shipment</p>
-                                <p class="text-sm text-red-600">Remove from system</p>
-                            </div>
-                        </button>
-                    </form>
                 </div>
             </div>
 

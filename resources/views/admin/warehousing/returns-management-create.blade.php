@@ -71,120 +71,98 @@
                 </div>
             @endif
 
-            <!-- Order Search -->
-            <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <h3 class="text-sm font-semibold text-gray-900 mb-3">Quick Fill from Order</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="order_search" class="block text-sm font-medium text-gray-700 mb-2">Search Order Number</label>
-                        <div class="relative">
-                            <input type="text" 
-                                   id="order_search" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   placeholder="Type order number..."
-                                   autocomplete="off">
-                            <div id="order_search_results" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
-                        </div>
-                        <p class="mt-1 text-sm text-gray-500">Start typing to search existing orders</p>
-                    </div>
-                    <div class="flex items-end">
-                        <button type="button" id="clear_order_selection" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors">
-                            Clear Selection
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Order Number -->
-                <div>
-                    <label for="order_number" class="block text-sm font-medium text-gray-700 mb-2">Order Number *</label>
-                    <input type="text" 
-                           id="order_number" 
-                           name="order_number" 
-                           value="{{ old('order_number') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., ORD-2024-001"
-                           required>
-                </div>
-
-                <!-- Customer Name -->
-                <div>
-                    <label for="customer_name" class="block text-sm font-medium text-gray-700 mb-2">Customer Name *</label>
-                    <input type="text" 
-                           id="customer_name" 
-                           name="customer_name" 
-                           value="{{ old('customer_name') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., John Smith"
-                           required>
-                </div>
-
-                <!-- Product Name -->
-                <div>
-                    <label for="product_name" class="block text-sm font-medium text-gray-700 mb-2">Product Name *</label>
-                    <input type="text" 
-                           id="product_name" 
-                           name="product_name" 
-                           value="{{ old('product_name') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Wireless Headphones"
-                           required>
-                </div>
-
-                <!-- SKU -->
+                <!-- SKU Dropdown -->
                 <div>
                     <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">SKU *</label>
-                    <input type="text" 
-                           id="sku" 
-                           name="sku" 
-                           value="{{ old('sku') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., WH-001-BLK"
-                           required>
-                </div>
-
-                <!-- Quantity -->
-                <div>
-                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
-                    <input type="number" 
-                           id="quantity" 
-                           name="quantity" 
-                           value="{{ old('quantity') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="1"
-                           min="1"
-                           required>
-                </div>
-
-                <!-- Refund Amount -->
-                <div>
-                    <label for="refund_amount" class="block text-sm font-medium text-gray-700 mb-2">Refund Amount *</label>
-                    <input type="number" 
-                           id="refund_amount" 
-                           name="refund_amount" 
-                           value="{{ old('refund_amount') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0"
-                           required>
-                </div>
-
-                <!-- Return Reason -->
-                <div>
-                    <label for="return_reason" class="block text-sm font-medium text-gray-700 mb-2">Return Reason *</label>
-                    <select id="return_reason" 
-                            name="return_reason" 
+                    <select id="sku" 
+                            name="sku" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
-                        <option value="">Select reason</option>
-                        <option value="Defective" {{ old('return_reason') === 'Defective' ? 'selected' : '' }}>Defective</option>
-                        <option value="Wrong Item" {{ old('return_reason') === 'Wrong Item' ? 'selected' : '' }}>Wrong Item</option>
-                        <option value="Damaged" {{ old('return_reason') === 'Damaged' ? 'selected' : '' }}>Damaged</option>
-                        <option value="Not Satisfied" {{ old('return_reason') === 'Not Satisfied' ? 'selected' : '' }}>Not Satisfied</option>
-                        <option value="Other" {{ old('return_reason') === 'Other' ? 'selected' : '' }}>Other</option>
+                        <option value="">Select SKU</option>
+                        @foreach ($returnedItems as $item)
+                            <option value="{{ $item->sku }}" 
+                                    data-po-number="{{ $item->po_number ?? '-' }}"
+                                    data-department="{{ $item->department ?? '-' }}"
+                                    data-item-name="{{ $item->item_name }}"
+                                    data-stock="{{ $item->stock }}"
+                                    data-supplier="{{ $item->supplier ?? '-' }}"
+                                    data-notes="{{ $item->notes ?? '' }}">
+                                {{ $item->sku }} - {{ $item->item_name }}
+                            </option>
+                        @endforeach
                     </select>
+                </div>
+
+                <!-- PO Number (Auto-filled) -->
+                <div>
+                    <label for="po_number" class="block text-sm font-medium text-gray-700 mb-2">PO Number</label>
+                    <input type="text" 
+                           id="po_number" 
+                           name="po_number" 
+                           value="{{ old('po_number') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                           placeholder="Auto-filled from SKU"
+                           readonly>
+                </div>
+
+                <!-- Department (Auto-filled) -->
+                <div>
+                    <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                    <input type="text" 
+                           id="department" 
+                           name="department" 
+                           value="{{ old('department') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                           placeholder="Auto-filled from SKU"
+                           readonly>
+                </div>
+
+                <!-- Item Name (Auto-filled) -->
+                <div>
+                    <label for="item_name" class="block text-sm font-medium text-gray-700 mb-2">Item Name</label>
+                    <input type="text" 
+                           id="item_name" 
+                           name="item_name" 
+                           value="{{ old('item_name') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                           placeholder="Auto-filled from SKU"
+                           readonly>
+                </div>
+
+                <!-- Stock (Auto-filled) -->
+                <div>
+                    <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock</label>
+                    <input type="text" 
+                           id="stock" 
+                           name="stock" 
+                           value="{{ old('stock') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                           placeholder="Auto-filled from SKU"
+                           readonly>
+                </div>
+
+                <!-- Supplier (Auto-filled) -->
+                <div>
+                    <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                    <input type="text" 
+                           id="supplier" 
+                           name="supplier" 
+                           value="{{ old('supplier') }}"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                           placeholder="Auto-filled from SKU"
+                           readonly>
+                </div>
+
+                <!-- Notes (Auto-filled) -->
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                    <textarea id="notes" 
+                              name="notes" 
+                              rows="4"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                              placeholder="Auto-filled from SKU"
+                              readonly></textarea>
                 </div>
 
                 <!-- Status -->
@@ -213,55 +191,6 @@
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            required>
                 </div>
-
-                <!-- Refund Date -->
-                <div>
-                    <label for="refund_date" class="block text-sm font-medium text-gray-700 mb-2">Refund Date</label>
-                    <input type="date" 
-                           id="refund_date" 
-                           name="refund_date" 
-                           value="{{ old('refund_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Date refund was processed</p>
-                </div>
-
-                <!-- Refund Method -->
-                <div>
-                    <label for="refund_method" class="block text-sm font-medium text-gray-700 mb-2">Refund Method</label>
-                    <select id="refund_method" 
-                            name="refund_method" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">Select method</option>
-                        <option value="Bank Transfer" {{ old('refund_method') === 'Bank Transfer' ? 'selected' : '' }}>Bank Transfer</option>
-                        <option value="Credit Card" {{ old('refund_method') === 'Credit Card' ? 'selected' : '' }}>Credit Card</option>
-                        <option value="Store Credit" {{ old('refund_method') === 'Store Credit' ? 'selected' : '' }}>Store Credit</option>
-                        <option value="Cash" {{ old('refund_method') === 'Cash' ? 'selected' : '' }}>Cash</option>
-                    </select>
-                    <p class="mt-1 text-sm text-gray-500">Optional: How the refund was processed</p>
-                </div>
-
-                <!-- Tracking Number -->
-                <div>
-                    <label for="tracking_number" class="block text-sm font-medium text-gray-700 mb-2">Tracking Number</label>
-                    <input type="text" 
-                           id="tracking_number" 
-                           name="tracking_number" 
-                           value="{{ old('tracking_number') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., 1234567890">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Return shipment tracking</p>
-                </div>
-            </div>
-
-            <!-- Notes -->
-            <div class="mt-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                <textarea id="notes" 
-                          name="notes" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter return notes...">{{ old('notes') }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Additional notes about the return</p>
             </div>
 
             <!-- Form Actions -->
@@ -277,93 +206,35 @@
         </form>
     </div>
 </div>
-
+    
 <script>
-let orderSearchTimeout;
-let selectedOrder = null;
-
-// Order search autocomplete
-document.getElementById('order_search').addEventListener('input', function(e) {
-    const query = e.target.value.trim();
-    const resultsDiv = document.getElementById('order_search_results');
+// Auto-fill fields when SKU is selected
+document.getElementById('sku').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
     
-    clearTimeout(orderSearchTimeout);
-    
-    if (query.length < 2) {
-        resultsDiv.classList.add('hidden');
-        return;
-    }
-    
-    orderSearchTimeout = setTimeout(() => {
-        // For demo: search outbound logistics by order_number
-        fetch(`/outbound-logistics/search?q=${encodeURIComponent(query)}`)
-            .then(response => response.json())
-            .then(data => {
-                resultsDiv.innerHTML = '';
-                if (data.length === 0) {
-                    resultsDiv.innerHTML = '<div class="p-3 text-gray-500 text-sm">No orders found</div>';
-                } else {
-                    data.forEach(order => {
-                        const div = document.createElement('div');
-                        div.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0';
-                        div.innerHTML = `
-                            <div class="font-medium text-sm">${order.order_number}</div>
-                            <div class="text-xs text-gray-500">Customer: ${order.customer_name} | Item: ${order.item_name} | Qty: ${order.total_units}</div>
-                        `;
-                        div.addEventListener('click', () => selectOrder(order));
-                        resultsDiv.appendChild(div);
-                    });
-                }
-                resultsDiv.classList.remove('hidden');
-            })
-            .catch(error => {
-                console.error('Search error:', error);
-                resultsDiv.innerHTML = '<div class="p-3 text-red-500 text-sm">Search failed</div>';
-                resultsDiv.classList.remove('hidden');
-            });
-    }, 300);
-});
-
-// Select order and populate form
-function selectOrder(order) {
-    selectedOrder = order;
-    document.getElementById('order_search').value = order.order_number;
-    document.getElementById('order_search_results').classList.add('hidden');
-    
-    // Auto-fill form fields
-    document.getElementById('order_number').value = order.order_number;
-    document.getElementById('customer_name').value = order.customer_name;
-    document.getElementById('product_name').value = order.item_name || '';
-    document.getElementById('sku').value = order.sku || '';
-    document.getElementById('quantity').value = order.total_units || 1;
-    
-    // Set default return date to today
-    document.getElementById('return_date').value = new Date().toISOString().split('T')[0];
-    
-    // Set default status to Pending
-    document.getElementById('status').value = 'Pending';
-}
-
-// Clear selection
-document.getElementById('clear_order_selection').addEventListener('click', function() {
-    selectedOrder = null;
-    document.getElementById('order_search').value = '';
-    document.getElementById('order_search_results').classList.add('hidden');
-    // Clear auto-filled fields
-    document.getElementById('order_number').value = '';
-    document.getElementById('customer_name').value = '';
-    document.getElementById('product_name').value = '';
-    document.getElementById('sku').value = '';
-    document.getElementById('quantity').value = '';
-    document.getElementById('return_date').value = '';
-    document.getElementById('status').value = '';
-});
-
-// Hide results when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('#order_search') && !e.target.closest('#order_search_results')) {
-        document.getElementById('order_search_results').classList.add('hidden');
+    if (selectedOption.value) {
+        // Auto-fill all fields with selected item data
+        document.getElementById('po_number').value = selectedOption.dataset.poNumber;
+        document.getElementById('department').value = selectedOption.dataset.department;
+        document.getElementById('item_name').value = selectedOption.dataset.itemName;
+        document.getElementById('stock').value = selectedOption.dataset.stock;
+        document.getElementById('supplier').value = selectedOption.dataset.supplier;
+        document.getElementById('notes').value = selectedOption.dataset.notes;
+    } else {
+        // Clear fields if no selection
+        document.getElementById('po_number').value = '';
+        document.getElementById('department').value = '';
+        document.getElementById('item_name').value = '';
+        document.getElementById('stock').value = '';
+        document.getElementById('supplier').value = '';
+        document.getElementById('notes').value = '';
     }
 });
+
+// Set default return date to today
+document.getElementById('return_date').value = new Date().toISOString().split('T')[0];
+
+// Set default status to Pending
+document.getElementById('status').value = 'Pending';
 </script>
 @endsection

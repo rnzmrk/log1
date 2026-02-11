@@ -19,6 +19,7 @@ class Inventory extends Model
         'supplier',
         'po_number',
         'last_updated',
+        'notes',
     ];
 
     protected $casts = [
@@ -32,6 +33,13 @@ class Inventory extends Model
         parent::boot();
 
         static::saving(function ($inventory) {
+            // Don't auto-update status if it's manually set to Moved or Returned
+            if (in_array($inventory->status, ['Moved', 'Returned'])) {
+                // Just update last_updated date
+                $inventory->last_updated = now();
+                return;
+            }
+
             // Auto-update status based on stock level
             if ($inventory->stock == 0) {
                 $inventory->status = 'Out of Stock';

@@ -36,10 +36,6 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Returns Management</h1>
         <div class="flex gap-3">
-            <a href="{{ route('returns-management.history') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-history text-xl'></i>
-                History
-            </a>
             <a href="{{ route('returns-management.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
                 <i class='bx bx-plus text-xl'></i>
                 New Return

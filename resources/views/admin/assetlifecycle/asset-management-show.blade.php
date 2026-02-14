@@ -36,7 +36,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Asset Details</h1>
         <div class="flex gap-3">
-            <a href="{{ route('asset-management.edit', $asset->id) }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+            <a href="{{ route('asset-management.edit', ['asset' => $asset->id]) }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-all duration-200 shadow-sm">
                 <i class='bx bx-edit text-xl'></i>
                 Edit Asset
             </a>
@@ -72,130 +72,50 @@
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <p class="text-sm text-gray-600">Asset Tag</p>
-                            <p class="font-semibold text-gray-900">{{ $asset->asset_tag }}</p>
-                        </div>
-                        <div>
                             <p class="text-sm text-gray-600">Asset Name</p>
-                            <p class="font-semibold text-gray-900">{{ $asset->asset_name }}</p>
+                            <p class="font-semibold text-gray-900">{{ $asset->item_name }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-600">Asset Type</p>
-                            <p class="font-semibold text-gray-900">{{ $asset->asset_type }}</p>
+                            <p class="text-sm text-gray-600">Quantity</p>
+                            <p class="font-semibold text-gray-900">{{ $asset->quantity ?? 1 }}</p>
                         </div>
                         <div>
-                            <p class="text-sm text-gray-600">Category</p>
-                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                {{ $asset->category }}
-                            </span>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Brand/Model</p>
-                            <p class="font-semibold text-gray-900">
-                                @if ($asset->brand && $asset->model)
-                                    {{ $asset->brand }} {{ $asset->model }}
-                                @elseif ($asset->brand)
-                                    {{ $asset->brand }}
-                                @elseif ($asset->model)
-                                    {{ $asset->model }}
-                                @else
-                                    Not specified
-                                @endif
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Serial Number</p>
-                            <p class="font-semibold text-gray-900">{{ $asset->serial_number ?: 'Not specified' }}</p>
+                            <p class="text-sm text-gray-600">Department</p>
+                            <p class="font-semibold text-gray-900">{{ $asset->department ?? 'Not specified' }}</p>
                         </div>
                         <div>
                             <p class="text-sm text-gray-600">Status</p>
                             @if ($asset->status === 'Available')
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                     Available
                                 </span>
                             @elseif ($asset->status === 'In Use')
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                     In Use
                                 </span>
                             @elseif ($asset->status === 'Under Maintenance')
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                     Under Maintenance
                                 </span>
-                            @elseif ($asset->status === 'Retired')
+                            @elseif ($asset->status === 'Disposed')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Disposed
+                                </span>
+                            @elseif ($asset->status === 'Requested')
+                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    Requested
+                                </span>
+                            @else
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                    Retired
-                                </span>
-                            @elseif ($asset->status === 'Lost')
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                    Lost
-                                </span>
-                            @else
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                    Damaged
+                                    {{ $asset->status }}
                                 </span>
                             @endif
                         </div>
                         <div>
-                            <p class="text-sm text-gray-600">Condition</p>
-                            @if ($asset->condition === 'Excellent')
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Excellent
-                                </span>
-                            @elseif ($asset->condition === 'Good')
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    Good
-                                </span>
-                            @elseif ($asset->condition === 'Fair')
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                    Fair
-                                </span>
-                            @else
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                    Poor
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Financial Information -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Financial Information</h2>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <p class="text-sm text-gray-600">Purchase Cost</p>
+                            <p class="text-sm text-gray-600">Date</p>
                             <p class="font-semibold text-gray-900">
-                                @if ($asset->purchase_cost)
-                                    ₱{{ number_format($asset->purchase_cost, 2) }}
-                                @else
-                                    Not specified
-                                @endif
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Purchase Date</p>
-                            <p class="font-semibold text-gray-900">
-                                @if ($asset->purchase_date)
-                                    {{ $asset->purchase_date->format('M d, Y') }}
-                                @else
-                                    Not specified
-                                @endif
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Warranty Expiry</p>
-                            <p class="font-semibold text-gray-900">
-                                @if ($asset->warranty_expiry)
-                                    {{ $asset->warranty_expiry->format('M d, Y') }}
-                                    @if ($asset->warranty_expiry->isPast())
-                                        <span class="text-red-600 text-xs">(Expired)</span>
-                                    @elseif ($asset->warranty_expiry->diffInDays(now()) <= 30)
-                                        <span class="text-orange-600 text-xs">(Expires Soon)</span>
-                                    @endif
+                                @if ($asset->date)
+                                    {{ $asset->date->format('M d, Y') }}
                                 @else
                                     Not specified
                                 @endif
@@ -205,49 +125,14 @@
                 </div>
             </div>
 
-            <!-- Assignment Information -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Assignment Information</h2>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <p class="text-sm text-gray-600">Assigned To</p>
-                            <p class="font-semibold text-gray-900">{{ $asset->assigned_to ?: 'Not assigned' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Department</p>
-                            <p class="font-semibold text-gray-900">{{ $asset->department ?: 'Not specified' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm text-gray-600">Location</p>
-                            <p class="font-semibold text-gray-900">{{ $asset->location ?: 'Not specified' }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Specifications -->
-            @if ($asset->specifications)
+            <!-- Details -->
+            @if ($asset->details)
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Asset Specifications</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">Details</h2>
                     </div>
                     <div class="p-6">
-                        <p class="text-gray-900 whitespace-pre-wrap">{{ $asset->specifications }}</p>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Additional Notes -->
-            @if ($asset->notes)
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Additional Notes</h2>
-                    </div>
-                    <div class="p-6">
-                        <p class="text-gray-900 whitespace-pre-wrap">{{ $asset->notes }}</p>
+                        <p class="text-gray-900 whitespace-pre-wrap">{{ $asset->details }}</p>
                     </div>
                 </div>
             @endif
@@ -402,18 +287,6 @@
                             </button>
                         </form>
                     @endif
-                    
-                    <form action="{{ route('asset-management.destroy', $asset->id) }}" method="POST" class="w-full" onsubmit="return confirm('Are you sure you want to delete this asset?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="w-full text-left px-4 py-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-trash text-red-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-red-900">Delete Asset</p>
-                                <p class="text-sm text-red-600">Remove permanently</p>
-                            </div>
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>

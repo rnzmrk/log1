@@ -75,53 +75,14 @@ class ProjectPlanningController extends Controller
             'priority' => 'required|in:Low,Medium,High,Critical',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'estimated_duration_days' => 'nullable|integer|min:0',
-            'estimated_duration_weeks' => 'nullable|integer|min:0',
-            'estimated_duration_months' => 'nullable|integer|min:0',
             'project_address' => 'required|string|max:255',
             'project_city' => 'required|string|max:255',
             'project_state' => 'required|string|max:255',
             'project_zipcode' => 'required|string|max:255',
-            'onsite_contact_person' => 'required|string|max:255',
-            'engineers_required' => 'nullable|integer|min:0',
-            'technicians_required' => 'nullable|integer|min:0',
-            'laborers_required' => 'nullable|integer|min:0',
-            'needs_cranes' => 'nullable|boolean',
-            'needs_power_tools' => 'nullable|boolean',
-            'needs_safety_equipment' => 'nullable|boolean',
-            'needs_measurement_tools' => 'nullable|boolean',
-            'materials_required' => 'nullable|string',
-            'estimated_budget' => 'required|numeric|min:0|max:999999999999.99',
-            'labor_cost' => 'nullable|numeric|min:0|max:999999999999.99',
-            'material_cost' => 'nullable|numeric|min:0|max:999999999999.99',
-            'equipment_rental_cost' => 'nullable|numeric|min:0|max:999999999999.99',
-            'other_expenses' => 'nullable|numeric|min:0|max:999999999999.99',
             'requested_by' => 'required|string|max:255',
             'department' => 'required|string|max:255',
             'notes' => 'nullable|string',
         ]);
-
-        // Set default values for checkboxes
-        $validated['needs_cranes'] = $request->has('needs_cranes');
-        $validated['needs_power_tools'] = $request->has('needs_power_tools');
-        $validated['needs_safety_equipment'] = $request->has('needs_safety_equipment');
-        $validated['needs_measurement_tools'] = $request->has('needs_measurement_tools');
-
-        // Set default values for duration
-        $validated['estimated_duration_days'] = $validated['estimated_duration_days'] ?? 0;
-        $validated['estimated_duration_weeks'] = $validated['estimated_duration_weeks'] ?? 0;
-        $validated['estimated_duration_months'] = $validated['estimated_duration_months'] ?? 0;
-
-        // Set default values for personnel
-        $validated['engineers_required'] = $validated['engineers_required'] ?? 0;
-        $validated['technicians_required'] = $validated['technicians_required'] ?? 0;
-        $validated['laborers_required'] = $validated['laborers_required'] ?? 0;
-
-        // Set default values for costs
-        $validated['labor_cost'] = $validated['labor_cost'] ?? 0;
-        $validated['material_cost'] = $validated['material_cost'] ?? 0;
-        $validated['equipment_rental_cost'] = $validated['equipment_rental_cost'] ?? 0;
-        $validated['other_expenses'] = $validated['other_expenses'] ?? 0;
 
         ProjectPlanning::create($validated);
 
@@ -162,50 +123,15 @@ class ProjectPlanningController extends Controller
             'status' => 'required|in:Draft,Submitted,Under Review,Approved,In Progress,On Hold,Completed,Cancelled',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'estimated_duration_days' => 'nullable|integer|min:0',
-            'estimated_duration_weeks' => 'nullable|integer|min:0',
-            'estimated_duration_months' => 'nullable|integer|min:0',
             'project_address' => 'required|string|max:255',
             'project_city' => 'required|string|max:255',
             'project_state' => 'required|string|max:255',
             'project_zipcode' => 'required|string|max:255',
-            'onsite_contact_person' => 'required|string|max:255',
-            'engineers_required' => 'nullable|integer|min:0',
-            'technicians_required' => 'nullable|integer|min:0',
-            'laborers_required' => 'nullable|integer|min:0',
-            'needs_cranes' => 'nullable|boolean',
-            'needs_power_tools' => 'nullable|boolean',
-            'needs_safety_equipment' => 'nullable|boolean',
-            'needs_measurement_tools' => 'nullable|boolean',
-            'materials_required' => 'nullable|string',
-            'estimated_budget' => 'required|numeric|min:0|max:999999999999.99',
-            'labor_cost' => 'nullable|numeric|min:0|max:999999999999.99',
-            'material_cost' => 'nullable|numeric|min:0|max:999999999999.99',
-            'equipment_rental_cost' => 'nullable|numeric|min:0|max:999999999999.99',
-            'other_expenses' => 'nullable|numeric|min:0|max:999999999999.99',
             'requested_by' => 'required|string|max:255',
             'department' => 'required|string|max:255',
             'approved_by' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
-
-        // Set checkbox values
-        $validated['needs_cranes'] = $request->has('needs_cranes');
-        $validated['needs_power_tools'] = $request->has('needs_power_tools');
-        $validated['needs_safety_equipment'] = $request->has('needs_safety_equipment');
-        $validated['needs_measurement_tools'] = $request->has('needs_measurement_tools');
-
-        // Set default values
-        $validated['estimated_duration_days'] = $validated['estimated_duration_days'] ?? 0;
-        $validated['estimated_duration_weeks'] = $validated['estimated_duration_weeks'] ?? 0;
-        $validated['estimated_duration_months'] = $validated['estimated_duration_months'] ?? 0;
-        $validated['engineers_required'] = $validated['engineers_required'] ?? 0;
-        $validated['technicians_required'] = $validated['technicians_required'] ?? 0;
-        $validated['laborers_required'] = $validated['laborers_required'] ?? 0;
-        $validated['labor_cost'] = $validated['labor_cost'] ?? 0;
-        $validated['material_cost'] = $validated['material_cost'] ?? 0;
-        $validated['equipment_rental_cost'] = $validated['equipment_rental_cost'] ?? 0;
-        $validated['other_expenses'] = $validated['other_expenses'] ?? 0;
 
         $project->update($validated);
 
@@ -221,7 +147,53 @@ class ProjectPlanningController extends Controller
         $project = ProjectPlanning::findOrFail($id);
         $project->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Project planning request deleted successfully.']);
+        }
+
         return redirect()->route('project-planning.index')
             ->with('success', 'Project planning request deleted successfully.');
+    }
+
+    /**
+     * Approve the specified project.
+     */
+    public function approve(string $id)
+    {
+        $project = ProjectPlanning::findOrFail($id);
+        
+        // Check if project can be approved
+        if (!in_array($project->status, ['Draft', 'Submitted', 'Under Review', 'In Progress'])) {
+            return redirect()->route('project-planning.index')
+                ->with('error', 'This project cannot be approved in its current status.');
+        }
+
+        $project->status = 'Approved';
+        $project->approved_by = auth()->user()->name ?? 'System';
+        $project->approved_date = now();
+        $project->save();
+
+        return redirect()->route('project-planning.index')
+            ->with('success', 'Project approved successfully.');
+    }
+
+    /**
+     * Reject the specified project.
+     */
+    public function reject(string $id)
+    {
+        $project = ProjectPlanning::findOrFail($id);
+        
+        // Check if project can be rejected
+        if (!in_array($project->status, ['Draft', 'Submitted', 'Under Review', 'In Progress', 'Approved'])) {
+            return redirect()->route('project-planning.index')
+                ->with('error', 'This project cannot be rejected in its current status.');
+        }
+
+        $project->status = 'Cancelled';
+        $project->save();
+
+        return redirect()->route('project-planning.index')
+            ->with('success', 'Project rejected successfully.');
     }
 }

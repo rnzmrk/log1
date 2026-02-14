@@ -177,13 +177,6 @@ class SupplyRequestController extends Controller
     {
         $supplyRequest = SupplyRequest::findOrFail($id);
         $supplyRequest->status = 'Rejected';
-        $supplyRequest->rejected_by = auth()->user()->name;
-        $supplyRequest->rejected_at = now();
-        
-        if ($request->has('rejection_reason')) {
-            $supplyRequest->rejection_reason = $request->rejection_reason;
-        }
-        
         $supplyRequest->save();
 
         return redirect()->route('supply-requests.index')

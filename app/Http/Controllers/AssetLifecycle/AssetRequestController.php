@@ -67,29 +67,20 @@ class AssetRequestController extends Controller
     {
         $validated = $request->validate([
             'asset_name' => 'required|string|max:255',
-            'asset_type' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'brand' => 'nullable|string|max:255',
-            'model' => 'nullable|string|max:255',
-            'serial_number' => 'nullable|string|max:255',
             'priority' => 'required|in:Low,Medium,High,Urgent',
             'status' => 'required|in:Pending,Approved,Rejected,Processing,Completed,Cancelled',
             'request_type' => 'required|in:New,Replacement,Upgrade,Repair,Other',
-            'estimated_cost' => 'nullable|numeric|min:0|max:999999999999.99',
             'request_date' => 'required|date',
-            'required_date' => 'nullable|date|after:request_date',
-            'approved_date' => 'nullable|date',
-            'completed_date' => 'nullable|date',
-            'justification' => 'nullable|string',
-            'specifications' => 'nullable|string',
-            'notes' => 'nullable|string',
             'requested_by' => 'required|string|max:255',
             'department' => 'required|string|max:255',
-            'approved_by' => 'nullable|string|max:255',
         ]);
 
         // Auto-generate request number
         $validated['request_number'] = 'AR-' . date('Y') . '-' . str_pad(AssetRequest::count() + 1, 4, '0', STR_PAD_LEFT);
+        
+        // Add default values for required fields that were removed from the form
+        $validated['asset_type'] = 'General';
+        $validated['category'] = 'Other';
 
         AssetRequest::create($validated);
 
@@ -162,5 +153,31 @@ class AssetRequestController extends Controller
 
         return redirect()->route('asset-requests.index')
             ->with('success', 'Asset request deleted successfully.');
+    }
+
+    /**
+     * Approve the asset request.
+     */
+    public function approve(string $id)
+    {
+        $assetRequest = AssetRequest::findOrFail($id);
+        $assetRequest->status = 'Approved';
+        $assetRequest->save();
+
+        return redirect()->route('asset-requests.index')
+            ->with('success', 'Asset request approved successfully.');
+    }
+
+    /**
+     * Reject the asset request.
+     */
+    public function reject(string $id)
+    {
+        $assetRequest = AssetRequest::findOrFail($id);
+        $assetRequest->status = 'Rejected';
+        $assetRequest->save();
+
+        return redirect()->route('asset-requests.index')
+            ->with('success', 'Asset request rejected successfully.');
     }
 }

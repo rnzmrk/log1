@@ -39,10 +39,6 @@
             <p class="text-gray-600 mt-1">{{ $supplyRequest->item_name }}</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('supply-requests.edit', $supplyRequest->id) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-edit text-xl'></i>
-                Edit
-            </a>
             <a href="{{ route('admin.procurement.request-supplies') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
                 <i class='bx bx-arrow-back text-xl'></i>
                 Back to Requests
@@ -268,77 +264,7 @@
         <!-- Actions Sidebar -->
         <div class="space-y-6">
             <!-- Quick Actions -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Quick Actions</h2>
-                </div>
-                <div class="p-6 space-y-3">
-                    <a href="{{ route('supply-requests.edit', $supplyRequest->id) }}" class="w-full text-left px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-3">
-                        <i class='bx bx-edit text-blue-600 text-xl'></i>
-                        <div>
-                            <p class="font-medium text-gray-900">Edit Request</p>
-                            <p class="text-sm text-gray-600">Update request details</p>
-                        </div>
-                    </a>
-                    
-                    @if ($supplyRequest->status === 'Pending')
-                    <form action="{{ route('supply-requests.update', $supplyRequest->id) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="status" value="Approved">
-                        <button type="submit" class="w-full text-left px-4 py-3 border border-green-200 rounded-lg hover:bg-green-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-check text-green-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-green-900">Approve Request</p>
-                                <p class="text-sm text-green-600">Mark as approved</p>
-                            </div>
-                        </button>
-                    </form>
-                    @endif
-                    
-                    @if ($supplyRequest->status === 'Approved')
-                    <form action="{{ route('supply-requests.update', $supplyRequest->id) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="status" value="Ordered">
-                        <button type="submit" class="w-full text-left px-4 py-3 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-shopping-bag text-purple-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-purple-900">Mark as Ordered</p>
-                                <p class="text-sm text-purple-600">Update status to ordered</p>
-                            </div>
-                        </button>
-                    </form>
-                    @endif
-                    
-                    @if ($supplyRequest->status === 'Ordered')
-                    <form action="{{ route('supply-requests.update', $supplyRequest->id) }}" method="POST" class="w-full">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="status" value="Received">
-                        <button type="submit" class="w-full text-left px-4 py-3 border border-green-200 rounded-lg hover:bg-green-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-check-double text-green-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-green-900">Mark as Received</p>
-                                <p class="text-sm text-green-600">Complete this request</p>
-                            </div>
-                        </button>
-                    </form>
-                    @endif
-                    
-                    <form action="{{ route('supply-requests.destroy', $supplyRequest->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this request? This action cannot be undone.')" class="w-full">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="w-full text-left px-4 py-3 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-3">
-                            <i class='bx bx-trash text-red-600 text-xl'></i>
-                            <div>
-                                <p class="font-medium text-red-900">Delete Request</p>
-                                <p class="text-sm text-red-600">Remove from system</p>
-                            </div>
-                        </button>
-                    </form>
-                </div>
-            </div>
+           
 
             <!-- System Information -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">

@@ -172,7 +172,7 @@ Route::get('/admin/procurement/vendors', [VendorController::class, 'index'])->na
 // Vendor Management Routes
 Route::resource('vendors', VendorController::class)->except(['index']);
 Route::post('vendors/{vendor}/approve', [VendorController::class, 'approve'])->name('vendors.approve');
-Route::get('vendors/export', [VendorController::class, 'export'])->name('vendors.export');
+Route::get('/admin/procurement/vendors/export', [VendorController::class, 'export'])->name('vendors.export');
 
 // Contract Management Routes
 Route::get('/contracts/create', [ContractController::class, 'create'])->name('contracts.create');
@@ -240,11 +240,17 @@ Route::resource('asset-requests', AssetRequestController::class)->names([
     'destroy' => 'asset-requests.destroy',
 ]);
 
+Route::post('/asset-requests/{assetRequest}/approve', [AssetRequestController::class, 'approve'])->name('asset-requests.approve');
+Route::post('/asset-requests/{assetRequest}/reject', [AssetRequestController::class, 'reject'])->name('asset-requests.reject');
+
 Route::get('/admin/assetlifecycle/asset-management', [AssetManagementController::class, 'index'])->name('admin.assetlifecycle.asset-management');
 
 Route::get('/asset-management/search', [AssetManagementController::class, 'search'])->name('asset-management.search');
 Route::get('/asset-management/export', [AssetManagementController::class, 'export'])->name('asset-management.export');
-Route::resource('asset-management', AssetManagementController::class)->except(['destroy'])->names([
+Route::resource('asset-management', AssetManagementController::class)
+    ->parameters(['asset-management' => 'asset'])
+    ->except(['destroy'])
+    ->names([
     'index' => 'asset-management.index',
     'create' => 'asset-management.create',
     'store' => 'asset-management.store',
@@ -254,12 +260,27 @@ Route::resource('asset-management', AssetManagementController::class)->except(['
 ]);
 
 // Asset Management Actions
+Route::patch('/asset-management/{asset}/maintenance', [AssetManagementController::class, 'setMaintenance'])->name('asset-management.maintenance');
+Route::get('/asset-management/maintenance-list', [AssetManagementController::class, 'maintenanceList'])->name('asset-management.maintenance-list');
+Route::get('/asset-management/{asset}/maintenance', function() {
+    return redirect()->back()->with('error', 'Please use the maintenance button to set asset maintenance.');
+});
+
+Route::get('/asset-management/{asset}/dispose', function() {
+    return redirect()->back()->with('error', 'Please use the disposal button to submit an asset disposal request.');
+});
 Route::post('/asset-management/{asset}/dispose', [AssetManagementController::class, 'disposeAsset'])->name('asset-management.dispose');
 Route::post('/asset-management/request-asset', [AssetManagementController::class, 'requestAsset'])->name('asset-management.request-asset');
 Route::get('/asset-management/available', [AssetManagementController::class, 'getAvailableAssets'])->name('asset-management.available');
 Route::get('/asset-management/disposal-candidates', [AssetManagementController::class, 'getAssetsForDisposal'])->name('asset-management.disposal-candidates');
 
 Route::get('/admin/assetlifecycle/asset-maintenance', [AssetMaintenanceController::class, 'index'])->name('admin.assetlifecycle.asset-maintenance');
+Route::patch('/asset-maintenance/{asset_maintenance}/update-status', [AssetMaintenanceController::class, 'updateStatus'])->name('asset-maintenance.update-status');
+Route::get('/asset-maintenance/export', [AssetMaintenanceController::class, 'export'])->name('asset-maintenance.export');
+
+Route::get('/admin/assetlifecycle/asset-disposal', function () {
+    return view('admin.assetlifecycle.asset-disposal');
+})->name('admin.assetlifecycle.asset-disposal');
 
 Route::resource('asset-maintenance', AssetMaintenanceController::class)->names([
     'index' => 'asset-maintenance.index',
@@ -272,7 +293,6 @@ Route::resource('asset-maintenance', AssetMaintenanceController::class)->names([
 ]);
 
 // Asset Maintenance Additional Routes
-Route::get('/asset-maintenance/export', [AssetMaintenanceController::class, 'export'])->name('asset-maintenance.export');
 Route::get('/asset-maintenance/asset-details/{assetId}', [AssetMaintenanceController::class, 'getAssetDetails'])->name('asset-maintenance.asset-details');
 Route::post('/asset-maintenance/bulk-action', [AssetMaintenanceController::class, 'bulkAction'])->name('asset-maintenance.bulk-action');
 
@@ -305,6 +325,9 @@ Route::resource('project-planning', ProjectPlanningController::class)->names([
     'destroy' => 'project-planning.destroy',
 ]);
 
+Route::put('/project-planning/{id}/approve', [ProjectPlanningController::class, 'approve'])->name('project-planning.approve');
+Route::put('/project-planning/{id}/reject', [ProjectPlanningController::class, 'reject'])->name('project-planning.reject');
+
 Route::get('/admin/logistictracking/reports', [LogisticsReportController::class, 'index'])->name('admin.logistictracking.reports');
 
 Route::resource('logistics-reports', LogisticsReportController::class)->names([
@@ -333,6 +356,16 @@ Route::resource('document-requests', DocumentRequestController::class)->names([
 Route::get('/admin/documenttracking/list-document-request', [DocumentRequestController::class, 'listRequests'])->name('admin.documenttracking.list-document-request');
 
 Route::get('/admin/documenttracking/upload-document-tracking', [UploadedDocumentController::class, 'index'])->name('admin.documenttracking.upload-document-tracking');
+Route::get('/admin/documenttracking/create-contract', [UploadedDocumentController::class, 'createContract'])->name('admin.documenttracking.create-contract');
+Route::get('/admin/documenttracking/create-document-reports', [UploadedDocumentController::class, 'createDocumentReports'])->name('admin.documenttracking.create-document-reports');
+Route::get('/admin/documenttracking/contract/{id}', [UploadedDocumentController::class, 'showContract'])->name('admin.documenttracking.show-contract');
+Route::get('/admin/documenttracking/export-contracts', [UploadedDocumentController::class, 'exportContracts'])->name('admin.documenttracking.export-contracts');
+Route::get('/admin/documenttracking/validation', [UploadedDocumentController::class, 'validation'])->name('admin.documenttracking.validation');
+Route::get('/admin/documenttracking/validation/{id}', [UploadedDocumentController::class, 'showValidation'])->name('admin.documenttracking.show-validation');
+Route::get('/admin/documenttracking/export-validation', [UploadedDocumentController::class, 'exportValidation'])->name('admin.documenttracking.export-validation');
+Route::get('/admin/documenttracking/verification', [UploadedDocumentController::class, 'verification'])->name('admin.documenttracking.verification');
+Route::get('/admin/documenttracking/verification/{id}', [UploadedDocumentController::class, 'showVerification'])->name('admin.documenttracking.show-verification');
+Route::get('/admin/documenttracking/export-verification', [UploadedDocumentController::class, 'exportVerification'])->name('admin.documenttracking.export-verification');
 Route::resource('uploaded-documents', UploadedDocumentController::class)->names([
     'index' => 'uploaded-documents.index',
     'create' => 'uploaded-documents.create',
@@ -438,4 +471,14 @@ Route::prefix('suppliers')->name('website.suppliers.')->group(function () {
 
 // Website home route (can be customized)
 Route::get('/vendor', [App\Http\Controllers\Website\SupplierController::class, 'home'])->name('website.home');
+
+// Logistic Tracking - List of Vehicle
+Route::get('/admin/logistictracking/list-vehicle', function() {
+    return view('admin.logistictracking.list-vehicle');
+})->name('admin.logistictracking.list-vehicle');
+
+// Logistic Tracking - Maintenance
+Route::get('/admin/logistictracking/maintenance', function() {
+    return view('admin.logistictracking.maintenance');
+})->name('admin.logistictracking.maintenance');
 

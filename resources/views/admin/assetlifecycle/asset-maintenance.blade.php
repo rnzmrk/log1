@@ -39,14 +39,25 @@
             <p class="text-gray-600 mt-1">Manage maintenance schedules and track asset repairs</p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('asset-maintenance.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-plus text-xl'></i>
-                New Maintenance
-            </a>
-            <a href="{{ route('asset-maintenance.export') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-download text-xl'></i>
-                Export
-            </a>
+            <form method="GET" action="{{ route('asset-maintenance.export') }}" class="inline">
+                @csrf
+                @if(request('search'))
+                    <input type="hidden" name="search" value="{{ request('search') }}">
+                @endif
+                @if(request('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
+                @if(request('month'))
+                    <input type="hidden" name="month" value="{{ request('month') }}">
+                @endif
+                @if(request('year'))
+                    <input type="hidden" name="year" value="{{ request('year') }}">
+                @endif
+                <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+                    <i class='bx bx-download text-xl'></i>
+                    Export CSV
+                </button>
+            </form>
         </div>
     </div>
 
@@ -130,8 +141,8 @@
 
     <!-- Filter Section -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <form method="GET" action="{{ route('asset-maintenance.index') }}">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <form method="GET" action="{{ route('admin.assetlifecycle.asset-maintenance') }}">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Search -->
                 <div class="lg:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Search Maintenance</label>
@@ -139,7 +150,7 @@
                         <input type="text" 
                                name="search"
                                value="{{ request('search') }}"
-                               placeholder="Maintenance #, Asset Tag, Asset Name, or Technician..." 
+                               placeholder="Maintenance ID, Asset Name, or Description..." 
                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <i class='bx bx-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl'></i>
                     </div>
@@ -150,55 +161,43 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                     <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         <option value="">All Status</option>
-                        <option value="Scheduled" {{ request('status') === 'Scheduled' ? 'selected' : '' }}>Scheduled</option>
-                        <option value="In Progress" {{ request('status') === 'In Progress' ? 'selected' : '' }}>In Progress</option>
-                        <option value="Completed" {{ request('status') === 'Completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="On Hold" {{ request('status') === 'On Hold' ? 'selected' : '' }}>On Hold</option>
+                        <option value="Scheduled" {{ request('status') === 'Scheduled' ? 'selected' : '' }}>pending</option>
+                        <option value="In Progress" {{ request('status') === 'In Progress' ? 'selected' : '' }}>ongoing</option>
+                        <option value="Completed" {{ request('status') === 'Completed' ? 'selected' : '' }}>done</option>
+                        <option value="On Hold" {{ request('status') === 'On Hold' ? 'selected' : '' }}>reject</option>
                         <option value="Cancelled" {{ request('status') === 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </div>
 
-                <!-- Maintenance Type -->
+                <!-- Month -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Maintenance Type</label>
-                    <select name="maintenance_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">All Types</option>
-                        <option value="Preventive" {{ request('maintenance_type') === 'Preventive' ? 'selected' : '' }}>Preventive</option>
-                        <option value="Corrective" {{ request('maintenance_type') === 'Corrective' ? 'selected' : '' }}>Corrective</option>
-                        <option value="Emergency" {{ request('maintenance_type') === 'Emergency' ? 'selected' : '' }}>Emergency</option>
-                        <option value="Predictive" {{ request('maintenance_type') === 'Predictive' ? 'selected' : '' }}>Predictive</option>
-                        <option value="Calibration" {{ request('maintenance_type') === 'Calibration' ? 'selected' : '' }}>Calibration</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Month</label>
+                    <select name="month" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Months</option>
+                        <option value="1" {{ request('month') == '1' ? 'selected' : '' }}>January</option>
+                        <option value="2" {{ request('month') == '2' ? 'selected' : '' }}>February</option>
+                        <option value="3" {{ request('month') == '3' ? 'selected' : '' }}>March</option>
+                        <option value="4" {{ request('month') == '4' ? 'selected' : '' }}>April</option>
+                        <option value="5" {{ request('month') == '5' ? 'selected' : '' }}>May</option>
+                        <option value="6" {{ request('month') == '6' ? 'selected' : '' }}>June</option>
+                        <option value="7" {{ request('month') == '7' ? 'selected' : '' }}>July</option>
+                        <option value="8" {{ request('month') == '8' ? 'selected' : '' }}>August</option>
+                        <option value="9" {{ request('month') == '9' ? 'selected' : '' }}>September</option>
+                        <option value="10" {{ request('month') == '10' ? 'selected' : '' }}>October</option>
+                        <option value="11" {{ request('month') == '11' ? 'selected' : '' }}>November</option>
+                        <option value="12" {{ request('month') == '12' ? 'selected' : '' }}>December</option>
                     </select>
                 </div>
 
-                <!-- Priority -->
+                <!-- Year -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Priority</label>
-                    <select name="priority" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">All Priority</option>
-                        <option value="Urgent" {{ request('priority') === 'Urgent' ? 'selected' : '' }}>Urgent</option>
-                        <option value="High" {{ request('priority') === 'High' ? 'selected' : '' }}>High</option>
-                        <option value="Medium" {{ request('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
-                        <option value="Low" {{ request('priority') === 'Low' ? 'selected' : '' }}>Low</option>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Year</label>
+                    <select name="year" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Years</option>
+                        @for($year = date('Y'); $year >= date('Y') - 5; $year--)
+                            <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
+                        @endfor
                     </select>
-                </div>
-
-                <!-- Date Range -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Date From</label>
-                    <input type="date" 
-                           name="date_from"
-                           value="{{ request('date_from') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-
-                <!-- Date To -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Date To</label>
-                    <input type="date" 
-                           name="date_to"
-                           value="{{ request('date_to') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
             </div>
 
@@ -208,7 +207,7 @@
                     <i class='bx bx-filter-alt mr-2'></i>
                     Apply Filters
                 </button>
-                <a href="{{ route('asset-maintenance.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
+                <a href="{{ route('admin.assetlifecycle.asset-maintenance') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors">
                     <i class='bx bx-x mr-2'></i>
                     Clear
                 </a>
@@ -273,15 +272,11 @@
                         <th class="bulk-select-header hidden px-6 py-3 text-left">
                             <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()" class="rounded border-gray-300">
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Maintenance #</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Maintenance Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Technician</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Maintenance ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Maintenance Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schedule Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
@@ -293,52 +288,12 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $maintenance->maintenance_number }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $maintenance->asset_tag }}</div>
-                                    <div class="text-sm text-gray-500">{{ $maintenance->asset_name }}</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $maintenance->asset_name }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-900 max-w-xs" title="{{ $maintenance->problem_description }}">
+                                    {{ Str::limit($maintenance->problem_description, 100) }}
                                 </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($maintenance->maintenance_type === 'Preventive')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        Preventive
-                                    </span>
-                                @elseif ($maintenance->maintenance_type === 'Corrective')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                        Corrective
-                                    </span>
-                                @elseif ($maintenance->maintenance_type === 'Emergency')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        Emergency
-                                    </span>
-                                @elseif ($maintenance->maintenance_type === 'Predictive')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                                        Predictive
-                                    </span>
-                                @else
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Calibration
-                                    </span>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if ($maintenance->priority === 'Urgent')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                        Urgent
-                                    </span>
-                                @elseif ($maintenance->priority === 'High')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                        High
-                                    </span>
-                                @elseif ($maintenance->priority === 'Medium')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        Medium
-                                    </span>
-                                @else
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Low
-                                    </span>
-                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                 @if ($maintenance->scheduled_date)
@@ -347,54 +302,61 @@
                                     -
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $maintenance->technician_name ?: '-' }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if ($maintenance->status === 'Scheduled')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
-                                        Scheduled
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        pending
                                     </span>
                                 @elseif ($maintenance->status === 'In Progress')
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        In Progress
+                                        ongoing
                                     </span>
                                 @elseif ($maintenance->status === 'Completed')
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Completed
+                                        done
                                     </span>
                                 @elseif ($maintenance->status === 'On Hold')
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        On Hold
+                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        reject
                                     </span>
                                 @else
                                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                        Cancelled
+                                        {{ $maintenance->status }}
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                ₱{{ number_format($maintenance->total_cost, 2) }}
-                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
+                                    @if($maintenance->status === 'Scheduled')
+                                        <form action="{{ route('asset-maintenance.update-status', $maintenance->id) }}" method="POST" class="inline" onsubmit="return confirm('Approve this maintenance request?')">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="In Progress">
+                                            <button type="submit" class="text-green-600 hover:text-green-900" title="Approve">
+                                                <i class='bx bx-check-circle text-lg'></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('asset-maintenance.update-status', $maintenance->id) }}" method="POST" class="inline" onsubmit="return confirm('Reject this maintenance request?')">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="On Hold">
+                                            <button type="submit" class="text-red-600 hover:text-red-900" title="Reject">
+                                                <i class='bx bx-x-circle text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                     <a href="{{ route('asset-maintenance.show', $maintenance->id) }}" class="text-blue-600 hover:text-blue-900" title="View">
                                         <i class='bx bx-show text-lg'></i>
                                     </a>
                                     <a href="{{ route('asset-maintenance.edit', $maintenance->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
                                         <i class='bx bx-edit text-lg'></i>
                                     </a>
-                                    <form action="{{ route('asset-maintenance.destroy', $maintenance->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this maintenance record?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <i class='bx bx-wrench text-4xl text-gray-300 mb-3'></i>
                                     <p class="text-lg font-medium">No maintenance records found</p>

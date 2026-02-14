@@ -138,13 +138,11 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Number</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Date</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested By</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -154,12 +152,7 @@
                         <tr class="hover:bg-gray-50">
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $assetRequest->request_number }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $assetRequest->asset_name }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $assetRequest->asset_type }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    {{ $assetRequest->category }}
-                                </span>
-                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">1</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
                                     {{ $assetRequest->request_type }}
@@ -212,37 +205,39 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $assetRequest->request_date->format('M d, Y') }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $assetRequest->requested_by }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $assetRequest->department }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
                                     <a href="{{ route('asset-requests.show', $assetRequest->id) }}" class="text-blue-600 hover:text-blue-900" title="View">
                                         <i class='bx bx-show text-lg'></i>
                                     </a>
-                                    <a href="{{ route('asset-requests.edit', $assetRequest->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
-                                        <i class='bx bx-edit text-lg'></i>
-                                    </a>
-                                    <form action="{{ route('asset-requests.destroy', $assetRequest->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this asset request?')" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
-                                            <i class='bx bx-trash text-lg'></i>
-                                        </button>
-                                    </form>
+                                    @if ($assetRequest->status === 'Pending')
+                                        <form method="POST" action="{{ route('asset-requests.reject', $assetRequest->id) }}" 
+                                              onsubmit="return confirm('Are you sure you want to reject Asset Request #{{ $assetRequest->id }}?');"
+                                              class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-red-600 hover:text-red-900" title="Reject">
+                                                <i class='bx bx-x-circle text-lg'></i>
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('asset-requests.approve', $assetRequest->id) }}" 
+                                              onsubmit="return confirm('Are you sure you want to approve Asset Request #{{ $assetRequest->id }}?');"
+                                              class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-green-600 hover:text-green-900" title="Approve">
+                                                <i class='bx bx-check-circle text-lg'></i>
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="11" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="9" class="px-6 py-8 text-center text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <i class='bx bx-package text-4xl text-gray-300 mb-3'></i>
                                     <p class="text-lg font-medium">No asset requests found</p>
-                                    <p class="text-sm mt-1">Get started by creating your first asset request.</p>
-                                    <a href="{{ route('asset-requests.create') }}" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors">
-                                        <i class='bx bx-plus'></i>
-                                        Create First Request
-                                    </a>
                                 </div>
                             </td>
                         </tr>

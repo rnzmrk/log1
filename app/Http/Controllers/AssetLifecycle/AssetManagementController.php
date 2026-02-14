@@ -4,6 +4,8 @@ namespace App\Http\Controllers\AssetLifecycle;
 
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
+use App\Models\AssetDisposal;
+use App\Models\AssetMaintenance;
 use App\Models\AssetRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,19 +19,15 @@ class AssetManagementController extends Controller
     {
         $query = Asset::query();
 
-        // Search functionality
+        // Hide assets tagged for disposal from inventory list
+        $query->where('status', '!=', 'Disposal');
+
+        // Search functionality - simplified to match our fields
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
-                $q->where('item_number', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('item_code', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('item_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('asset_type', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('category', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('brand', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('model', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('serial_number', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('assigned_to', 'like', '%' . $searchTerm . '%');
+                $q->where('item_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('department', 'like', '%' . $searchTerm . '%');
             });
         }
 
@@ -38,27 +36,16 @@ class AssetManagementController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter by condition
-        if ($request->filled('condition')) {
-            $query->where('condition', $request->condition);
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('date', '>=', $request->date_from);
+        }
+        
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->date_to);
         }
 
-        // Filter by category
-        if ($request->filled('category')) {
-            $query->where('category', 'like', '%' . $request->category . '%');
-        }
-
-        // Filter by department
-        if ($request->filled('department')) {
-            $query->where('department', 'like', '%' . $request->department . '%');
-        }
-
-        // Filter by asset type
-        if ($request->filled('asset_type')) {
-            $query->where('asset_type', $request->asset_type);
-        }
-
-        $assets = $query->orderBy('created_at', 'desc')->paginate(10);
+        $assets = $query->orderBy('created_at', 'desc')->paginate(5);
         
         return view('admin.assetlifecycle.asset-management', compact('assets'));
     }
@@ -77,38 +64,22 @@ class AssetManagementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'item_number' => 'required|string|unique:assets,item_number',
-            'item_code' => 'required|string|unique:assets,item_code',
-            'item_name' => 'required|string',
-            'asset_type' => 'required|string',
-            'category' => 'required|string',
-            'brand' => 'nullable|string',
-            'model' => 'nullable|string',
-            'serial_number' => 'nullable|string',
-            'status' => 'required|string',
-            'condition' => 'required|string',
+            'item_name' => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1',
+            'department' => 'required|string|max:255',
             'date' => 'required|date',
-            'purchase_cost' => 'nullable|numeric|min:0',
-            'purchase_date' => 'nullable|date',
-            'warranty_expiry' => 'nullable|date',
-            'assigned_to' => 'nullable|string',
-            'department' => 'nullable|string',
-            'location' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'specifications' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'details' => 'nullable|string|max:1000',
         ]);
 
-        $data = $request->except('image');
+        $data = $request->only(['item_name', 'quantity', 'department', 'date', 'details']);
+        
+        // Add default values for required database fields
+        $data['item_number'] = 'ITEM-' . strtoupper(uniqid());
+        $data['item_code'] = 'CODE-' . strtoupper(uniqid());
+        $data['asset_type'] = 'General';
+        $data['category'] = 'General';
+        $data['status'] = 'Available';
         $data['created_by'] = 'System';
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->storeAs('assets', $imageName, 'public');
-            $data['image'] = $imageName;
-        }
 
         Asset::create($data);
 
@@ -138,47 +109,84 @@ class AssetManagementController extends Controller
     public function update(Request $request, Asset $asset)
     {
         $request->validate([
-            'item_number' => 'required|string|unique:assets,item_number,' . $asset->id,
-            'item_code' => 'required|string|unique:assets,item_code,' . $asset->id,
-            'item_name' => 'required|string',
-            'asset_type' => 'required|string',
-            'category' => 'required|string',
-            'brand' => 'nullable|string',
-            'model' => 'nullable|string',
-            'serial_number' => 'nullable|string',
+            'item_name' => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1',
+            'department' => 'required|string|max:255',
             'status' => 'required|string',
-            'condition' => 'required|string',
             'date' => 'required|date',
-            'purchase_cost' => 'nullable|numeric|min:0',
-            'purchase_date' => 'nullable|date',
-            'warranty_expiry' => 'nullable|date',
-            'assigned_to' => 'nullable|string',
-            'department' => 'nullable|string',
-            'location' => 'nullable|string',
-            'notes' => 'nullable|string',
-            'specifications' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'details' => 'nullable|string|max:1000',
         ]);
 
-        $data = $request->except('image');
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($asset->image) {
-                Storage::disk('public')->delete('assets/' . $asset->image);
-            }
-
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->storeAs('assets', $imageName, 'public');
-            $data['image'] = $imageName;
-        }
+        $data = $request->only(['item_name', 'quantity', 'department', 'status', 'date', 'details']);
+        
+        // Keep existing values for fields not in the form
+        $data['item_number'] = $asset->item_number;
+        $data['item_code'] = $asset->item_code;
+        $data['asset_type'] = $asset->asset_type;
+        $data['category'] = $asset->category;
+        $data['condition'] = $asset->condition;
 
         $asset->update($data);
 
         return redirect()->route('admin.assetlifecycle.asset-management')
             ->with('success', 'Asset updated successfully.');
+    }
+
+    /**
+     * Set asset status to under maintenance
+     */
+    public function setMaintenance(Request $request, Asset $asset)
+    {
+        $request->validate([
+            'maintenance_description' => 'required|string|max:1000',
+            'maintenance_date' => 'required|date|after_or_equal:today',
+        ]);
+
+        // Update asset status to under maintenance
+        $asset->status = 'Under Maintenance';
+        $asset->save();
+
+        // Generate maintenance number
+        $maintenanceNumber = 'MAINT-' . date('Y') . '-' . str_pad(AssetMaintenance::count() + 1, 4, '0', STR_PAD_LEFT);
+
+        // Create maintenance record
+        AssetMaintenance::create([
+            'maintenance_number' => $maintenanceNumber,
+            'asset_id' => $asset->id,
+            'asset_tag' => $asset->item_code,
+            'asset_name' => $asset->item_name,
+            'maintenance_type' => 'Corrective',
+            'status' => 'Scheduled',
+            'priority' => 'Medium',
+            'scheduled_date' => $request->maintenance_date,
+            'start_time' => now(),
+            'problem_description' => $request->maintenance_description,
+            'work_performed' => '',
+            'notes' => '',
+            'parts_cost' => 0.00,
+            'labor_cost' => 0.00,
+            'total_cost' => 0.00,
+            'technician_name' => '',
+            'technician_email' => '',
+            'technician_phone' => '',
+            'next_maintenance_notes' => '',
+            'next_maintenance_date' => null,
+            'performed_by' => auth()->user()->name ?? 'System',
+            'approved_by' => '',
+        ]);
+
+        return redirect()->route('admin.assetlifecycle.asset-management')
+            ->with('success', 'Asset set to maintenance successfully.');
+    }
+
+    /**
+     * Display maintenance records list
+     */
+    public function maintenanceList()
+    {
+        $maintenances = AssetMaintenance::with('asset')->orderBy('created_at', 'desc')->get();
+        
+        return view('admin.assetlifecycle.asset-maintenance-list', compact('maintenances'));
     }
 
     /**
@@ -198,24 +206,31 @@ class AssetManagementController extends Controller
             'disposal_reason' => 'required|string',
         ]);
 
-        if ($asset->status === 'Disposed') {
+        if (in_array($asset->status, ['Disposal', 'Disposed'], true)) {
             return redirect()->back()
-                ->with('error', 'Asset is already disposed.');
+                ->with('error', 'Asset is already tagged for disposal.');
         }
 
-        if (!$asset->canBeDisposed()) {
-            return redirect()->back()
-                ->with('error', 'Asset cannot be disposed. It must be in Poor/Damaged condition or have expired warranty.');
-        }
-
-        $asset->status = 'Disposed';
-        $asset->disposal_reason = $request->disposal_reason;
-        $asset->disposal_date = now();
-        $asset->disposed_by = 'System';
+        $asset->status = 'Disposal';
         $asset->save();
 
+        $disposalNumber = 'DISP-' . date('Y') . '-' . str_pad(AssetDisposal::count() + 1, 4, '0', STR_PAD_LEFT);
+
+        AssetDisposal::create([
+            'disposal_number' => $disposalNumber,
+            'asset_id' => $asset->id,
+            'asset_name' => $asset->item_name,
+            'details' => $request->disposal_reason,
+            'date' => now()->toDateString(),
+            'duration' => null,
+            'department' => $asset->department,
+            'quantity' => $asset->quantity ?? 1,
+            'status' => 'pending',
+            'created_by' => auth()->user()->name ?? 'System',
+        ]);
+
         return redirect()->back()
-            ->with('success', 'Asset disposed successfully.');
+            ->with('success', 'Asset marked for disposal successfully.');
     }
 
     /**
@@ -317,25 +332,29 @@ class AssetManagementController extends Controller
     {
         $query = Asset::query();
 
-        // Apply filters if present
+        // Apply filters if present - same as index method
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
-                $q->where('asset_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('asset_tag', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('serial_number', 'like', '%' . $searchTerm . '%');
+                $q->where('item_name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('department', 'like', '%' . $searchTerm . '%');
             });
-        }
-
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
         }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $assets = $query->orderBy('asset_name')->get();
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('date', '>=', $request->date_from);
+        }
+        
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->date_to);
+        }
+
+        $assets = $query->orderBy('item_name')->get();
 
         $filename = 'assets_export_' . date('Y-m-d_H-i-s') . '.csv';
         
@@ -347,35 +366,25 @@ class AssetManagementController extends Controller
         $callback = function() use ($assets) {
             $file = fopen('php://output', 'w');
             
-            // CSV header
+            // CSV header - only simplified fields
             fputcsv($file, [
                 'Asset Name',
-                'Asset Tag',
-                'Serial Number',
-                'Category',
+                'Quantity',
+                'Department',
                 'Status',
-                'Location',
-                'Assigned To',
-                'Purchase Date',
-                'Warranty Expiry',
-                'Condition',
-                'Notes'
+                'Date',
+                'Details'
             ]);
 
-            // CSV rows
+            // CSV rows - only simplified fields
             foreach ($assets as $asset) {
                 fputcsv($file, [
-                    $asset->asset_name,
-                    $asset->asset_tag,
-                    $asset->serial_number,
-                    $asset->category,
+                    $asset->item_name,
+                    $asset->quantity ?? 1,
+                    $asset->department ?? '',
                     $asset->status,
-                    $asset->location ?? '',
-                    $asset->assigned_to ?? '',
-                    $asset->purchase_date ? $asset->purchase_date->format('Y-m-d') : '',
-                    $asset->warranty_expiry ? $asset->warranty_expiry->format('Y-m-d') : '',
-                    $asset->condition,
-                    $asset->notes ?? ''
+                    $asset->date ? $asset->date->format('Y-m-d') : '',
+                    $asset->details ?? ''
                 ]);
             }
 

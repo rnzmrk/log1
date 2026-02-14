@@ -23,9 +23,7 @@ class AssetMaintenanceController extends Controller
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('maintenance_number', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('asset_tag', 'like', '%' . $searchTerm . '%')
                   ->orWhere('asset_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('technician_name', 'like', '%' . $searchTerm . '%')
                   ->orWhere('problem_description', 'like', '%' . $searchTerm . '%');
             });
         }
@@ -35,22 +33,14 @@ class AssetMaintenanceController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter by maintenance type
-        if ($request->filled('maintenance_type')) {
-            $query->where('maintenance_type', $request->maintenance_type);
+        // Filter by month
+        if ($request->filled('month')) {
+            $query->whereMonth('scheduled_date', $request->month);
         }
 
-        // Filter by priority
-        if ($request->filled('priority')) {
-            $query->where('priority', $request->priority);
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->whereDate('scheduled_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('scheduled_date', '<=', $request->date_to);
+        // Filter by year
+        if ($request->filled('year')) {
+            $query->whereYear('scheduled_date', $request->year);
         }
 
         $maintenances = $query->orderBy('created_at', 'desc')->paginate(10);
@@ -154,14 +144,14 @@ class AssetMaintenanceController extends Controller
         $maintenance = AssetMaintenance::findOrFail($id);
 
         $validated = $request->validate([
-            'asset_id' => 'required|exists:assets,id',
-            'maintenance_type' => 'required|in:Preventive,Corrective,Emergency,Predictive,Calibration',
             'status' => 'required|in:Scheduled,In Progress,Completed,On Hold,Cancelled',
-            'priority' => 'required|in:Low,Medium,High,Urgent',
             'scheduled_date' => 'required|date',
+            'problem_description' => 'nullable|string',
+            'asset_id' => 'nullable|exists:assets,id',
+            'maintenance_type' => 'nullable|in:Preventive,Corrective,Emergency,Predictive,Calibration',
+            'priority' => 'nullable|in:Low,Medium,High,Urgent',
             'start_time' => 'nullable|datetime',
             'end_time' => 'nullable|datetime',
-            'problem_description' => 'nullable|string',
             'work_performed' => 'nullable|string',
             'notes' => 'nullable|string',
             'parts_cost' => 'nullable|numeric|min:0|max:999999999999.99',
@@ -175,15 +165,46 @@ class AssetMaintenanceController extends Controller
             'approved_by' => 'nullable|string|max:255',
         ]);
 
-        // Get asset information
-        $asset = Asset::findOrFail($validated['asset_id']);
-        $validated['asset_tag'] = $asset->asset_tag ?? $asset->item_code;
-        $validated['asset_name'] = $asset->item_name;
+        // Only update asset information if asset_id is provided
+        if (isset($validated['asset_id'])) {
+            $asset = Asset::findOrFail($validated['asset_id']);
+            $validated['asset_tag'] = $asset->asset_tag ?? $asset->item_code;
+            $validated['asset_name'] = $asset->item_name;
+        } else {
+            // Remove asset_id from validation if not provided
+            unset($validated['asset_id']);
+        }
 
         $maintenance->update($validated);
 
         return redirect()->route('asset-maintenance.index')
             ->with('success', 'Maintenance record updated successfully.');
+    }
+
+    /**
+     * Update maintenance status (approve/reject)
+     */
+    public function updateStatus(Request $request, string $id)
+    {
+        $maintenance = AssetMaintenance::findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:Scheduled,In Progress,Completed,On Hold,Cancelled',
+        ]);
+
+        $maintenance->update($validated);
+
+        $statusMessage = match($validated['status']) {
+            'In Progress' => 'approved',
+            'On Hold' => 'rejected',
+            'Completed' => 'marked as done',
+            'Scheduled' => 'reset to pending',
+            'Cancelled' => 'cancelled',
+            default => 'updated'
+        };
+
+        return redirect()->route('admin.assetlifecycle.asset-maintenance')
+            ->with('success', "Maintenance request {$statusMessage} successfully.");
     }
 
     /**
@@ -199,20 +220,18 @@ class AssetMaintenanceController extends Controller
     }
 
     /**
-     * Export maintenance records to Excel
+     * Export maintenance records to CSV
      */
     public function export(Request $request)
     {
-        $query = AssetMaintenance::with('asset');
+        $query = AssetMaintenance::query();
 
         // Apply same filters as index
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
                 $q->where('maintenance_number', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('asset_tag', 'like', '%' . $searchTerm . '%')
                   ->orWhere('asset_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('technician_name', 'like', '%' . $searchTerm . '%')
                   ->orWhere('problem_description', 'like', '%' . $searchTerm . '%');
             });
         }
@@ -221,76 +240,50 @@ class AssetMaintenanceController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('maintenance_type')) {
-            $query->where('maintenance_type', $request->maintenance_type);
+        if ($request->filled('month')) {
+            $query->whereMonth('scheduled_date', $request->month);
         }
 
-        if ($request->filled('date_from')) {
-            $query->whereDate('scheduled_date', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('scheduled_date', '<=', $request->date_to);
+        if ($request->filled('year')) {
+            $query->whereYear('scheduled_date', $request->year);
         }
 
         $maintenances = $query->orderBy('created_at', 'desc')->get();
 
-        // Create CSV export
+        // Create CSV content
+        $csvContent = '';
+        
+        // CSV Header
+        $csvContent .= "Maintenance ID,Asset Name,Maintenance Description,Schedule Date,Status\n";
+
+        // CSV Data
+        foreach ($maintenances as $maintenance) {
+            // Convert status to custom labels
+            $statusLabel = match($maintenance->status) {
+                'Scheduled' => 'pending',
+                'In Progress' => 'ongoing',
+                'Completed' => 'done',
+                'On Hold' => 'reject',
+                default => $maintenance->status
+            };
+
+            $csvContent .= '"' . $maintenance->maintenance_number . '",';
+            $csvContent .= '"' . $maintenance->asset_name . '",';
+            $csvContent .= '"' . ($maintenance->problem_description ?? '') . '",';
+            $csvContent .= '"' . ($maintenance->scheduled_date ? $maintenance->scheduled_date->format('M d, Y') : '') . '",';
+            $csvContent .= '"' . $statusLabel . '"' . "\n";
+        }
+
+        // Create filename
         $filename = 'maintenance-records-' . date('Y-m-d') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
 
-        $callback = function() use ($maintenances) {
-            $file = fopen('php://output', 'w');
-            
-            // CSV Header
-            fputcsv($file, [
-                'Maintenance Number',
-                'Asset Tag',
-                'Asset Name',
-                'Maintenance Type',
-                'Status',
-                'Priority',
-                'Scheduled Date',
-                'Start Time',
-                'End Time',
-                'Problem Description',
-                'Work Performed',
-                'Technician Name',
-                'Parts Cost',
-                'Labor Cost',
-                'Total Cost',
-                'Notes'
-            ]);
-
-            // CSV Data
-            foreach ($maintenances as $maintenance) {
-                fputcsv($file, [
-                    $maintenance->maintenance_number,
-                    $maintenance->asset_tag,
-                    $maintenance->asset_name,
-                    $maintenance->maintenance_type,
-                    $maintenance->status,
-                    $maintenance->priority,
-                    $maintenance->scheduled_date->format('Y-m-d'),
-                    $maintenance->start_time ? $maintenance->start_time->format('Y-m-d H:i:s') : '',
-                    $maintenance->end_time ? $maintenance->end_time->format('Y-m-d H:i:s') : '',
-                    $maintenance->problem_description,
-                    $maintenance->work_performed,
-                    $maintenance->technician_name,
-                    $maintenance->parts_cost,
-                    $maintenance->labor_cost,
-                    $maintenance->total_cost,
-                    $maintenance->notes
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        // Return download response
+        return response($csvContent)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
+            ->header('Cache-Control', 'no-cache, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     /**

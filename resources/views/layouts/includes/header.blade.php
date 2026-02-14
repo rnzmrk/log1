@@ -3,7 +3,7 @@
     <div class="px-6 py-4">
         <div class="flex items-center justify-between w-full">
             {{-- Mobile menu button --}}
-            <button id="sidebarOpen" class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none">
+            <button id="sidebarOpen" data-mobile-toggle class="md:hidden text-gray-600 hover:text-gray-900 focus:outline-none">
                 <i class='bx bx-menu text-2xl'></i>
             </button>
 

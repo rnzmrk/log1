@@ -84,72 +84,17 @@
                            required>
                 </div>
 
-                <!-- Asset Type -->
+                <!-- Quantity -->
                 <div>
-                    <label for="asset_type" class="block text-sm font-medium text-gray-700 mb-2">Asset Type *</label>
-                    <input type="text" 
-                           id="asset_type" 
-                           name="asset_type" 
-                           value="{{ old('asset_type') }}"
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                    <input type="number" 
+                           id="quantity" 
+                           name="quantity" 
+                           value="{{ old('quantity', '1') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Laptop, Desktop, Monitor"
+                           placeholder="Enter quantity"
+                           min="1"
                            required>
-                </div>
-
-                <!-- Category -->
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                    <select id="category" 
-                            name="category" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select category</option>
-                        <option value="Laptop" {{ old('category') === 'Laptop' ? 'selected' : '' }}>Laptop</option>
-                        <option value="Desktop" {{ old('category') === 'Desktop' ? 'selected' : '' }}>Desktop</option>
-                        <option value="Monitor" {{ old('category') === 'Monitor' ? 'selected' : '' }}>Monitor</option>
-                        <option value="Phone" {{ old('category') === 'Phone' ? 'selected' : '' }}>Phone</option>
-                        <option value="Tablet" {{ old('category') === 'Tablet' ? 'selected' : '' }}>Tablet</option>
-                        <option value="Printer" {{ old('category') === 'Printer' ? 'selected' : '' }}>Printer</option>
-                        <option value="Server" {{ old('category') === 'Server' ? 'selected' : '' }}>Server</option>
-                        <option value="Network Equipment" {{ old('category') === 'Network Equipment' ? 'selected' : '' }}>Network Equipment</option>
-                        <option value="Other" {{ old('category') === 'Other' ? 'selected' : '' }}>Other</option>
-                    </select>
-                </div>
-
-                <!-- Brand -->
-                <div>
-                    <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
-                    <input type="text" 
-                           id="brand" 
-                           name="brand" 
-                           value="{{ old('brand') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Dell, HP, Apple">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Brand preference</p>
-                </div>
-
-                <!-- Model -->
-                <div>
-                    <label for="model" class="block text-sm font-medium text-gray-700 mb-2">Model</label>
-                    <input type="text" 
-                           id="model" 
-                           name="model" 
-                           value="{{ old('model') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., XPS 15, EliteDesk">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Specific model</p>
-                </div>
-
-                <!-- Serial Number -->
-                <div>
-                    <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-2">Serial Number</label>
-                    <input type="text" 
-                           id="serial_number" 
-                           name="serial_number" 
-                           value="{{ old('serial_number') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., SN123456789">
-                    <p class="mt-1 text-sm text-gray-500">Optional: For replacement/repair requests</p>
                 </div>
 
                 <!-- Request Type -->
@@ -159,7 +104,7 @@
                             name="request_type" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
-                        <option value="">Select request type</option>
+                        <option value="">Select request type...</option>
                         <option value="New" {{ old('request_type') === 'New' ? 'selected' : '' }}>New</option>
                         <option value="Replacement" {{ old('request_type') === 'Replacement' ? 'selected' : '' }}>Replacement</option>
                         <option value="Upgrade" {{ old('request_type') === 'Upgrade' ? 'selected' : '' }}>Upgrade</option>
@@ -175,7 +120,7 @@
                             name="priority" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required>
-                        <option value="">Select priority</option>
+                        <option value="">Select priority...</option>
                         <option value="Low" {{ old('priority') === 'Low' ? 'selected' : '' }}>Low</option>
                         <option value="Medium" {{ old('priority') === 'Medium' ? 'selected' : '' }}>Medium</option>
                         <option value="High" {{ old('priority') === 'High' ? 'selected' : '' }}>High</option>
@@ -183,127 +128,22 @@
                     </select>
                 </div>
 
-                <!-- Status -->
-                <div>
-                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                    <select id="status" 
-                            name="status" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            required>
-                        <option value="">Select status</option>
-                        <option value="Pending" {{ old('status') === 'Pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="Approved" {{ old('status') === 'Approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="Rejected" {{ old('status') === 'Rejected' ? 'selected' : '' }}>Rejected</option>
-                        <option value="Processing" {{ old('status') === 'Processing' ? 'selected' : '' }}>Processing</option>
-                        <option value="Completed" {{ old('status') === 'Completed' ? 'selected' : '' }}>Completed</option>
-                        <option value="Cancelled" {{ old('status') === 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                    </select>
-                </div>
-
-                <!-- Estimated Cost -->
-                <div>
-                    <label for="estimated_cost" class="block text-sm font-medium text-gray-700 mb-2">Estimated Cost</label>
-                    <input type="number" 
-                           id="estimated_cost" 
-                           name="estimated_cost" 
-                           value="{{ old('estimated_cost') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="0.00"
-                           step="0.01"
-                           min="0">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Estimated cost in PHP</p>
-                </div>
-
-                <!-- Request Date -->
-                <div>
-                    <label for="request_date" class="block text-sm font-medium text-gray-700 mb-2">Request Date *</label>
-                    <input type="date" 
-                           id="request_date" 
-                           name="request_date" 
-                           value="{{ old('request_date', now()->format('Y-m-d')) }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           required>
-                </div>
-
-                <!-- Required Date -->
-                <div>
-                    <label for="required_date" class="block text-sm font-medium text-gray-700 mb-2">Required Date</label>
-                    <input type="date" 
-                           id="required_date" 
-                           name="required_date" 
-                           value="{{ old('required_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="mt-1 text-sm text-gray-500">Optional: When the asset is needed</p>
-                </div>
-
-                <!-- Requested By -->
-                <div>
-                    <label for="requested_by" class="block text-sm font-medium text-gray-700 mb-2">Requested By *</label>
-                    <input type="text" 
-                           id="requested_by" 
-                           name="requested_by" 
-                           value="{{ old('requested_by') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., John Smith"
-                           required>
-                </div>
-
                 <!-- Department -->
-                <div>
+                <div class="md:col-span-2">
                     <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department *</label>
                     <input type="text" 
                            id="department" 
                            name="department" 
                            value="{{ old('department') }}"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., IT Department"
+                           placeholder="e.g., IT Department, Human Resources"
                            required>
                 </div>
 
-                <!-- Approved By -->
-                <div>
-                    <label for="approved_by" class="block text-sm font-medium text-gray-700 mb-2">Approved By</label>
-                    <input type="text" 
-                           id="approved_by" 
-                           name="approved_by" 
-                           value="{{ old('approved_by') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                           placeholder="e.g., Jane Manager">
-                    <p class="mt-1 text-sm text-gray-500">Optional: Name of approving manager</p>
-                </div>
-            </div>
-
-            <!-- Justification -->
-            <div class="mt-6">
-                <label for="justification" class="block text-sm font-medium text-gray-700 mb-2">Business Justification</label>
-                <textarea id="justification" 
-                          name="justification" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Explain why this asset is needed for your work...">{{ old('justification') }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Business justification for the request</p>
-            </div>
-
-            <!-- Specifications -->
-            <div class="mt-6">
-                <label for="specifications" class="block text-sm font-medium text-gray-700 mb-2">Asset Specifications</label>
-                <textarea id="specifications" 
-                          name="specifications" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter detailed specifications...">{{ old('specifications') }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Technical specifications, requirements, or configuration details</p>
-            </div>
-
-            <!-- Notes -->
-            <div class="mt-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
-                <textarea id="notes" 
-                          name="notes" 
-                          rows="4"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter additional notes...">{{ old('notes') }}</textarea>
-                <p class="mt-1 text-sm text-gray-500">Optional: Any additional information or special requirements</p>
+                <!-- Hidden fields for system values -->
+                <input type="hidden" name="status" value="Pending">
+                <input type="hidden" name="request_date" value="{{ now()->format('Y-m-d') }}">
+                <input type="hidden" name="requested_by" value="{{ auth()->user()->name }}">
             </div>
 
             <!-- Form Actions -->

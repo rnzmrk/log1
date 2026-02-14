@@ -157,39 +157,6 @@
                             </div>
                         </div>
 
-                        <!-- Estimated Duration -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Estimated Duration</label>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <input type="number" 
-                                           id="estimated_duration_days"
-                                           name="estimated_duration_days"
-                                           value="{{ old('estimated_duration_days') }}"
-                                           placeholder="Days" 
-                                           min="0"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                </div>
-                                <div>
-                                    <input type="number" 
-                                           id="estimated_duration_weeks"
-                                           name="estimated_duration_weeks"
-                                           value="{{ old('estimated_duration_weeks') }}"
-                                           placeholder="Weeks" 
-                                           min="0"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                </div>
-                                <div>
-                                    <input type="number" 
-                                           id="estimated_duration_months"
-                                           name="estimated_duration_months"
-                                           value="{{ old('estimated_duration_months') }}"
-                                           placeholder="Months" 
-                                           min="0"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Location Information -->
@@ -242,176 +209,9 @@
                             </div>
                         </div>
 
-                        <!-- Contact Person -->
-                        <div>
-                            <label for="onsite_contact_person" class="block text-sm font-medium text-gray-700 mb-2">On-site Contact Person *</label>
-                            <input type="text" 
-                                   id="onsite_contact_person"
-                                   name="onsite_contact_person"
-                                   value="{{ old('onsite_contact_person') }}"
-                                   placeholder="Name and phone number" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   required>
-                        </div>
                     </div>
 
-                    <!-- Resource Requirements -->
-                    <div class="space-y-4">
-                        <h3 class="text-md font-semibold text-gray-900">Resource Requirements</h3>
-                        
-                        <!-- Personnel -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Personnel Required</label>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Engineers</label>
-                                    <input type="number" 
-                                           id="engineers_required"
-                                           name="engineers_required"
-                                           value="{{ old('engineers_required') }}"
-                                           min="0"
-                                           placeholder="0"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Technicians</label>
-                                    <input type="number" 
-                                           id="technicians_required"
-                                           name="technicians_required"
-                                           value="{{ old('technicians_required') }}"
-                                           min="0"
-                                           placeholder="0"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Laborers</label>
-                                    <input type="number" 
-                                           id="laborers_required"
-                                           name="laborers_required"
-                                           value="{{ old('laborers_required') }}"
-                                           min="0"
-                                           placeholder="0"
-                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Equipment -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Equipment Needed</label>
-                            <div class="space-y-2">
-                                <label class="flex items-center">
-                                    <input type="checkbox" 
-                                           name="needs_cranes"
-                                           value="1"
-                                           {{ old('needs_cranes') ? 'checked' : '' }}
-                                           class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm text-gray-700">Cranes & Heavy Machinery</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" 
-                                           name="needs_power_tools"
-                                           value="1"
-                                           {{ old('needs_power_tools') ? 'checked' : '' }}
-                                           class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm text-gray-700">Power Tools & Equipment</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" 
-                                           name="needs_safety_equipment"
-                                           value="1"
-                                           {{ old('needs_safety_equipment') ? 'checked' : '' }}
-                                           class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm text-gray-700">Safety Equipment</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" 
-                                           name="needs_measurement_tools"
-                                           value="1"
-                                           {{ old('needs_measurement_tools') ? 'checked' : '' }}
-                                           class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="text-sm text-gray-700">Measurement Tools</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Materials -->
-                        <div>
-                            <label for="materials_required" class="block text-sm font-medium text-gray-700 mb-2">Materials Required</label>
-                            <textarea id="materials_required"
-                                      name="materials_required" 
-                                      rows="3"
-                                      placeholder="List materials needed for the project..." 
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">{{ old('materials_required') }}</textarea>
-                        </div>
-                    </div>
-
-                    <!-- Budget Information -->
-                    <div class="space-y-4">
-                        <h3 class="text-md font-semibold text-gray-900">Budget Information</h3>
-                        
-                        <!-- Estimated Budget -->
-                        <div>
-                            <label for="estimated_budget" class="block text-sm font-medium text-gray-700 mb-2">Estimated Budget *</label>
-                            <input type="number" 
-                                   id="estimated_budget"
-                                   name="estimated_budget"
-                                   value="{{ old('estimated_budget') }}"
-                                   placeholder="Enter estimated amount" 
-                                   min="0"
-                                   step="0.01"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   required>
-                        </div>
-
-                        <!-- Cost Breakdown -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="labor_cost" class="block text-sm font-medium text-gray-700 mb-2">Labor Cost</label>
-                                <input type="number" 
-                                       id="labor_cost"
-                                       name="labor_cost"
-                                       value="{{ old('labor_cost') }}"
-                                       placeholder="0.00" 
-                                       min="0"
-                                       step="0.01"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                            <div>
-                                <label for="material_cost" class="block text-sm font-medium text-gray-700 mb-2">Material Cost</label>
-                                <input type="number" 
-                                       id="material_cost"
-                                       name="material_cost"
-                                       value="{{ old('material_cost') }}"
-                                       placeholder="0.00" 
-                                       min="0"
-                                       step="0.01"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                            <div>
-                                <label for="equipment_rental_cost" class="block text-sm font-medium text-gray-700 mb-2">Equipment Rental</label>
-                                <input type="number" 
-                                       id="equipment_rental_cost"
-                                       name="equipment_rental_cost"
-                                       value="{{ old('equipment_rental_cost') }}"
-                                       placeholder="0.00" 
-                                       min="0"
-                                       step="0.01"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                            <div>
-                                <label for="other_expenses" class="block text-sm font-medium text-gray-700 mb-2">Other Expenses</label>
-                                <input type="number" 
-                                       id="other_expenses"
-                                       name="other_expenses"
-                                       value="{{ old('other_expenses') }}"
-                                       placeholder="0.00" 
-                                       min="0"
-                                       step="0.01"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Requester Information -->
                     <div class="space-y-4">
@@ -566,4 +366,286 @@
         </div>
     </div>
 </div>
+    <!-- Data Table Section -->
+    <div class="mt-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-gray-900">Existing Project Requests</h2>
+                <div class="flex items-center gap-3">
+                    <!-- Search -->
+                    <div class="relative">
+                        <input type="text" 
+                               id="searchInput" 
+                               placeholder="Search projects..." 
+                               class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <i class='bx bx-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400'></i>
+                    </div>
+                    <!-- Filters -->
+                    <select id="statusFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Status</option>
+                        <option value="Draft">Draft</option>
+                        <option value="Submitted">Submitted</option>
+                        <option value="Under Review">Under Review</option>
+                        <option value="Approved">Approved</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="On Hold">On Hold</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <select id="priorityFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">All Priority</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                        <option value="Critical">Critical</option>
+                    </select>
+                    <button onclick="refreshTable()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                        <i class='bx bx-refresh text-xl'></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-700">
+                    Showing <span id="showingFrom">0</span> to <span id="showingTo">0</span> of <span id="totalRecords">0</span> results
+                </div>
+                <div class="flex gap-2" id="paginationLinks">
+                    <!-- Pagination will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
+
+@push('styles')
+<style>
+.status-badge {
+    @apply px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full;
+}
+.status-draft { @apply bg-gray-100 text-gray-800; }
+.status-submitted { @apply bg-blue-100 text-blue-800; }
+.status-under-review { @apply bg-orange-100 text-orange-800; }
+.status-approved { @apply bg-green-100 text-green-800; }
+.status-in-progress { @apply bg-purple-100 text-purple-800; }
+.status-on-hold { @apply bg-yellow-100 text-yellow-800; }
+.status-completed { @apply bg-teal-100 text-teal-800; }
+.status-cancelled { @apply bg-red-100 text-red-800; }
+
+.priority-low { @apply bg-gray-100 text-gray-800; }
+.priority-medium { @apply bg-blue-100 text-blue-800; }
+.priority-high { @apply bg-orange-100 text-orange-800; }
+.priority-critical { @apply bg-red-100 text-red-800; }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+let currentPage = 1;
+let searchTimeout;
+
+// Load initial data
+document.addEventListener('DOMContentLoaded', function() {
+    loadProjects();
+});
+
+// Search input
+document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        currentPage = 1;
+        loadProjects();
+    }, 500);
+});
+
+// Filter changes
+document.getElementById('statusFilter').addEventListener('change', function() {
+    currentPage = 1;
+    loadProjects();
+});
+
+document.getElementById('priorityFilter').addEventListener('change', function() {
+    currentPage = 1;
+    loadProjects();
+});
+
+function loadProjects() {
+    const search = document.getElementById('searchInput').value;
+    const status = document.getElementById('statusFilter').value;
+    const priority = document.getElementById('priorityFilter').value;
+    
+    const params = new URLSearchParams({
+        page: currentPage,
+        search: search,
+        status: status,
+        priority: priority
+    });
+    
+    fetch(`/api/project-planning?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            renderTable(data.data);
+            renderPagination(data);
+            updateShowingInfo(data);
+        })
+        .catch(error => {
+            console.error('Error loading projects:', error);
+            document.getElementById('projectTableBody').innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">Error loading data</td></tr>';
+        });
+}
+
+function renderTable(projects) {
+    const tbody = document.getElementById('projectTableBody');
+    
+    if (projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">No projects found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = projects.map(project => `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${project.project_number || '#' + project.id}</td>
+            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate" title="${project.project_name || 'N/A'}">
+                ${project.project_name || 'N/A'}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${project.project_type || 'N/A'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="status-badge priority-${(project.priority || '').toLowerCase()}">
+                    ${project.priority || 'N/A'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(project.start_date)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${formatDate(project.end_date)}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${project.requested_by || 'N/A'}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="status-badge status-${(project.status || '').toLowerCase().replace(' ', '-')}" style="text-transform: capitalize;">
+                    ${project.status || 'N/A'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div class="flex space-x-2">
+                    <a href="/project-planning/${project.id}" class="text-blue-600 hover:text-blue-900" title="View">
+                        <i class='bx bx-show text-lg'></i>
+                    </a>
+                    <a href="/project-planning/${project.id}/edit" class="text-green-600 hover:text-green-900" title="Edit">
+                        <i class='bx bx-edit text-lg'></i>
+                    </a>
+                    <button onclick="deleteProject(${project.id})" class="text-red-600 hover:text-red-900" title="Delete">
+                        <i class='bx bx-trash text-lg'></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderPagination(data) {
+    const pagination = document.getElementById('paginationLinks');
+    const { current_page, last_page, prev_page_url, next_page_url } = data;
+    
+    let html = '';
+    
+    // Previous button
+    if (prev_page_url) {
+        html += `<button onclick="changePage(${current_page - 1})" class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-sm">Previous</button>`;
+    }
+    
+    // Page numbers
+    for (let i = 1; i <= last_page; i++) {
+        if (i === current_page) {
+            html += `<button class="px-3 py-1 bg-blue-600 text-white rounded-md text-sm">${i}</button>`;
+        } else {
+            html += `<button onclick="changePage(${i})" class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-sm">${i}</button>`;
+        }
+    }
+    
+    // Next button
+    if (next_page_url) {
+        html += `<button onclick="changePage(${current_page + 1})" class="px-3 py-1 border border-gray-300 rounded-md hover:bg-gray-50 text-sm">Next</button>`;
+    }
+    
+    pagination.innerHTML = html;
+}
+
+function changePage(page) {
+    currentPage = page;
+    loadProjects();
+}
+
+function updateShowingInfo(data) {
+    const from = (data.current_page - 1) * data.per_page + 1;
+    const to = Math.min(data.current_page * data.per_page, data.total);
+    
+    document.getElementById('showingFrom').textContent = from;
+    document.getElementById('showingTo').textContent = to;
+    document.getElementById('totalRecords').textContent = data.total;
+}
+
+function refreshTable() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('priorityFilter').value = '';
+    currentPage = 1;
+    loadProjects();
+}
+
+function deleteProject(id) {
+    if (confirm('Are you sure you want to delete this project?')) {
+        fetch(`/project-planning/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                loadProjects();
+            } else {
+                alert('Error deleting project');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting project');
+        });
+    }
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+</script>
+@endpush

@@ -90,9 +90,9 @@ use App\Models\Asset;
             </button>
         </div>
         <form method="GET" action="{{ route('admin.assetlifecycle.asset-management') }}">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Search -->
-                <div class="lg:col-span-2">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Search Assets</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -101,7 +101,7 @@ use App\Models\Asset;
                         <input type="text" 
                                name="search"
                                value="{{ request('search') }}"
-                               placeholder="Search by item number, code, name, or type..." 
+                               placeholder="Search by asset name..." 
                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
                     </div>
                 </div>
@@ -119,28 +119,21 @@ use App\Models\Asset;
                     </select>
                 </div>
                 
-                <!-- Asset Type Filter -->
+                <!-- Date Filter -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Asset Type</label>
-                    <select name="asset_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">All Types</option>
-                        <option value="Computer" {{ request('asset_type') == 'Computer' ? 'selected' : '' }}>Computer</option>
-                        <option value="Vehicle" {{ request('asset_type') == 'Vehicle' ? 'selected' : '' }}>Vehicle</option>
-                        <option value="Equipment" {{ request('asset_type') == 'Equipment' ? 'selected' : '' }}>Equipment</option>
-                        <option value="Furniture" {{ request('asset_type') == 'Furniture' ? 'selected' : '' }}>Furniture</option>
-                    </select>
-                </div>
-                
-                <!-- Department Filter -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                    <select name="department" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <option value="">All Departments</option>
-                        <option value="IT" {{ request('department') == 'IT' ? 'selected' : '' }}>IT</option>
-                        <option value="HR" {{ request('department') == 'HR' ? 'selected' : '' }}>HR</option>
-                        <option value="Finance" {{ request('department') == 'Finance' ? 'selected' : '' }}>Finance</option>
-                        <option value="Operations" {{ request('department') == 'Operations' ? 'selected' : '' }}>Operations</option>
-                    </select>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Date Range</label>
+                    <div class="flex gap-2">
+                        <input type="date" 
+                               name="date_from" 
+                               value="{{ request('date_from') }}"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="From date">
+                        <input type="date" 
+                               name="date_to" 
+                               value="{{ request('date_to') }}"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="To date">
+                    </div>
                 </div>
             </div>
             
@@ -172,35 +165,36 @@ use App\Models\Asset;
             <table class="w-full">
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Code</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asset Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($assets as $asset)
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @if($asset->image)
-                                    <img src="{{ asset('storage/assets/' . $asset->image) }}" alt="{{ $asset->item_name }}" class="h-14 w-14 rounded-xl object-cover shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer" onclick="viewImage('{{ asset('storage/assets/' . $asset->image) }}')">
-                                @else
-                                    <div class="h-14 w-14 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-sm">
-                                        <i class='bx bx-image text-gray-400 text-2xl'></i>
-                                    </div>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    {{ $asset->item_code }}
-                                </span>
-                            </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $asset->item_name }}</div>
-                                <div class="text-xs text-gray-500">{{ $asset->asset_type }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-600 max-w-xs truncate" title="{{ $asset->details ?? 'No details' }}">
+                                    {{ $asset->details ?? 'No details' }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ $asset->quantity ?? 1 }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    {{ $asset->department ?? 'Unassigned' }}
+                                </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full shadow-sm
@@ -220,29 +214,68 @@ use App\Models\Asset;
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm">
+                                    @if ($asset->date)
+                                        @php
+                                            $now = \Carbon\Carbon::now();
+                                            $assetDate = \Carbon\Carbon::parse($asset->date)->startOfDay();
+                                            $nowDate = $now->copy()->startOfDay();
+                                            $diffInDays = (int) $assetDate->diffInDays($nowDate);
+                                            $diffInMonths = (int) $assetDate->diffInMonths($nowDate);
+                                            $diffInYears = (int) $assetDate->diffInYears($nowDate);
+                                        @endphp
+                                        @if ($diffInYears >= 1)
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                {{ $diffInYears }} {{ $diffInYears == 1 ? 'year' : 'years' }}
+                                            </span>
+                                        @elseif ($diffInMonths >= 6)
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">
+                                                {{ $diffInMonths }} {{ $diffInMonths == 1 ? 'month' : 'months' }}
+                                            </span>
+                                        @elseif ($diffInMonths >= 1)
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                {{ $diffInMonths }} {{ $diffInMonths == 1 ? 'month' : 'months' }}
+                                            </span>
+                                        @elseif ($diffInDays >= 30)
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                {{ $diffInDays }} {{ $diffInDays == 1 ? 'day' : 'days' }}
+                                            </span>
+                                        @else
+                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                {{ $diffInDays }} {{ $diffInDays == 1 ? 'day' : 'days' }}
+                                            </span>
+                                        @endif
+                                    @else
+                                        <span class="text-gray-400">-</span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center space-x-2">
-                                    <a href="{{ route('asset-management.show', $asset->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-200" title="View Details">
-                                        <i class='bx bx-show text-sm'></i>
+                                    <a href="{{ route('asset-management.show', $asset->id) }}" class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-600 hover:bg-blue-200 text-sm font-medium rounded-lg transition-colors duration-200" title="View Details">
+                                        <i class='bx bx-show mr-1'></i>
+                                        View
                                     </a>
-                                    <a href="{{ route('asset-management.edit', $asset->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition-colors duration-200" title="Edit Asset">
-                                        <i class='bx bx-edit text-sm'></i>
+                                    <a href="{{ route('asset-management.edit', $asset->id) }}" class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-600 hover:bg-green-200 text-sm font-medium rounded-lg transition-colors duration-200" title="Edit Asset">
+                                        <i class='bx bx-edit mr-1'></i>
+                                        Edit
                                     </a>
-                                    @if($asset->status == 'Available')
-                                        <button onclick="openRequestModal({{ $asset->id }}, '{{ $asset->item_name }}', '{{ $asset->item_code }}')" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors duration-200" title="Request Asset">
-                                            <i class='bx bx-send text-sm'></i>
+                                    @if($asset->status != 'Under Maintenance')
+                                        <button onclick="openMaintenanceModal({{ $asset->id }}, '{{ $asset->item_name }}')" class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-600 hover:bg-yellow-200 text-sm font-medium rounded-lg transition-colors duration-200" title="Set Maintenance">
+                                            <i class='bx bx-wrench mr-1'></i>
+                                            Maintenance
                                         </button>
                                     @endif
-                                    @if($asset->canBeDisposed())
-                                        <button onclick="openDisposalModal({{ $asset->id }}, '{{ $asset->item_name }}')" class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors duration-200" title="Dispose Asset">
-                                            <i class='bx bx-trash text-sm'></i>
-                                        </button>
-                                    @endif
+                                    <button onclick="openDisposalModal({{ $asset->id }}, '{{ $asset->item_name }}')" class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-600 hover:bg-red-200 text-sm font-medium rounded-lg transition-colors duration-200" title="Dispose">
+                                        <i class='bx bx-trash mr-1'></i>
+                                        Disposal
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="8" class="px-6 py-8 text-center text-gray-500">
                                 <div class="flex flex-col items-center">
                                     <i class='bx bx-package text-4xl text-gray-300 mb-3'></i>
                                     <p class="text-lg font-medium">No assets found</p>
@@ -397,17 +430,55 @@ use App\Models\Asset;
     </div>
 </div>
 
-<!-- Image Viewer Modal -->
-<div id="imageViewer" class="fixed inset-0 bg-gray-900 bg-opacity-90 overflow-y-auto h-full w-full hidden z-50" onclick="closeImageViewer()">
-    <div class="flex items-center justify-center h-full p-4">
-        <div class="relative max-w-4xl max-h-full">
-            <button onclick="closeImageViewer()" class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors">
-                <i class='bx bx-x text-3xl'></i>
+<!-- Enhanced Asset Maintenance Modal -->
+<div id="maintenanceModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <div class="bg-yellow-100 rounded-lg p-2">
+                    <i class='bx bx-wrench text-yellow-600 text-xl'></i>
+                </div>
+                Set Asset Maintenance
+            </h3>
+            <button type="button" onclick="closeMaintenanceModal()" class="text-gray-400 hover:text-gray-600">
+                <i class='bx bx-x text-xl'></i>
             </button>
-            <img id="viewerImage" src="" alt="Asset Image" class="max-w-full max-h-full rounded-lg shadow-2xl">
         </div>
+        
+        <form id="maintenanceForm" method="POST" action="" onsubmit="return true;">
+            @csrf
+            @method('PATCH')
+            
+            <input type="hidden" id="maintenanceAssetId" name="asset_id" value="">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Asset Name</label>
+                <input type="text" id="maintenanceAssetName" readonly class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700">
+            </div>
+            
+            <div class="mb-4">
+                <label for="maintenance_description" class="block text-sm font-medium text-gray-700 mb-2">Maintenance Description *</label>
+                <textarea id="maintenance_description" name="maintenance_description" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="Describe the maintenance work needed..." required></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <label for="maintenance_date" class="block text-sm font-medium text-gray-700 mb-2">Maintenance Date *</label>
+                <input type="date" id="maintenance_date" name="maintenance_date" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button type="button" onclick="closeMaintenanceModal()" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-200 font-medium shadow-lg">
+                    <i class='bx bx-wrench mr-2'></i>Set Maintenance
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+
 
 <script>
 function openRequestModal(assetId, assetName, assetCode) {
@@ -436,23 +507,28 @@ function closeDisposalModal() {
     document.body.style.overflow = 'auto';
 }
 
-function viewImage(imageSrc) {
-    document.getElementById('viewerImage').src = imageSrc;
-    document.getElementById('imageViewer').classList.remove('hidden');
+function openMaintenanceModal(assetId, assetName) {
+    document.getElementById('maintenanceAssetId').value = assetId;
+    document.getElementById('maintenanceAssetName').value = assetName;
+    document.getElementById('maintenanceForm').action = '/asset-management/' + assetId + '/maintenance';
+    document.getElementById('maintenanceModal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
 
-function closeImageViewer() {
-    document.getElementById('imageViewer').classList.add('hidden');
+function closeMaintenanceModal() {
+    document.getElementById('maintenanceModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
+    // Reset form
+    document.getElementById('maintenanceForm').reset();
 }
+
 
 // Close modals on ESC key
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         closeRequestModal();
         closeDisposalModal();
-        closeImageViewer();
+        closeMaintenanceModal();
     }
 });
 </script>

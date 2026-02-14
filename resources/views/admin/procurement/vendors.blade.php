@@ -43,9 +43,9 @@
                 <i class='bx bx-plus text-xl'></i>
                 Add Supplier
             </a>
-            <a href="{{ route('vendors.export') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
+            <a href="{{ route('vendors.export', request()->query()) }}" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
                 <i class='bx bx-download text-xl'></i>
-                Export
+                Export CSV
             </a>
         </div>
     </div>
@@ -205,7 +205,7 @@
                     <a href="{{ route('procurement.vendors') }}" class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-200 transition-colors" title="Refresh">
                         <i class='bx bx-refresh text-xl'></i>
                     </a>
-                    <a href="{{ route('vendors.export') }}" class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-200 transition-colors" title="Export">
+                    <a href="{{ route('vendors.export', request()->query()) }}" class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-200 transition-colors" title="Export">
                         <i class='bx bx-download text-xl'></i>
                     </a>
                 </div>

@@ -36,14 +36,7 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-gray-900">Request Supplies</h1>
         <div class="flex gap-3">
-            <a href="{{ route('supply-requests.history') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-history text-xl'></i>
-                History
-            </a>
-            <a href="{{ route('supply-requests.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center gap-2 transition-colors">
-                <i class='bx bx-plus text-xl'></i>
-                New Request
-            </a>
+            <!-- Add any additional buttons here if needed -->
         </div>
     </div>
 
@@ -218,9 +211,14 @@
                                         <i class='bx bx-show text-lg'></i>
                                     </a>
                                     @if ($request->status === 'Pending')
-                                        <a href="{{ route('supply-requests.edit', $request->id) }}" class="text-green-600 hover:text-green-900" title="Edit">
-                                            <i class='bx bx-edit text-lg'></i>
-                                        </a>
+                                        <form method="POST" action="{{ route('supply-requests.reject', $request->id) }}" 
+                                              onsubmit="return confirm('Are you sure you want to reject Supply Request #{{ $request->id }}?');"
+                                              class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-red-600 hover:text-red-900" title="Reject">
+                                                <i class='bx bx-x-circle text-lg'></i>
+                                            </button>
+                                        </form>
                                         <form method="POST" action="{{ route('supply-requests.approve', $request->id) }}" 
                                               onsubmit="return confirm('Are you sure you want to approve Supply Request #{{ $request->id }}?');"
                                               class="inline">
@@ -246,11 +244,6 @@
                                 <div class="flex flex-col items-center">
                                     <i class='bx bx-shopping-bag text-4xl text-gray-300 mb-3'></i>
                                     <p class="text-lg font-medium">No supply requests found</p>
-                                    <p class="text-sm mt-1">Get started by creating your first supply request.</p>
-                                    <a href="{{ route('supply-requests.create') }}" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg inline-flex items-center gap-2 transition-colors">
-                                        <i class='bx bx-plus'></i>
-                                        Create First Request
-                                    </a>
                                 </div>
                             </td>
                         </tr>

@@ -153,69 +153,43 @@ class VendorController extends Controller
         $query->filter($filters);
         $suppliers = $query->orderBy('name')->get();
 
-        // Generate CSV
-        $filename = 'suppliers-' . now()->format('Y-m-d-H-i-s') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
+        // Generate CSV content with UTF-8 BOM
+        $csvContent = "\xEF\xBB\xBF"; // UTF-8 BOM for Excel compatibility
+        
+        // CSV Header
+        $csvContent .= "Vendor Code,Name,Contact Person,Email,Phone,Address,City,State,Postal Code,Country,Category,Services,Tax ID,Payment Terms,Bank Name,Bank Account,Status,Rating,Notes,Created At\n";
 
-        $callback = function() use ($suppliers) {
-            $file = fopen('php://output', 'w');
-            
-            // CSV Header
-            fputcsv($file, [
-                'Vendor Code',
-                'Name',
-                'Contact Person',
-                'Email',
-                'Phone',
-                'Address',
-                'City',
-                'State',
-                'Postal Code',
-                'Country',
-                'Category',
-                'Services',
-                'Tax ID',
-                'Payment Terms',
-                'Bank Name',
-                'Bank Account',
-                'Status',
-                'Rating',
-                'Notes',
-                'Created At'
-            ]);
+        // CSV Data
+        foreach ($suppliers as $supplier) {
+            $csvContent .= '"' . ($supplier->vendor_code ?? '') . '",';
+            $csvContent .= '"' . $supplier->name . '",';
+            $csvContent .= '"' . ($supplier->contact_person ?? '') . '",';
+            $csvContent .= '"' . ($supplier->email ?? '') . '",';
+            $csvContent .= '"' . ($supplier->phone ?? '') . '",';
+            $csvContent .= '"' . ($supplier->address ?? '') . '",';
+            $csvContent .= '"' . ($supplier->city ?? '') . '",';
+            $csvContent .= '"' . ($supplier->state ?? '') . '",';
+            $csvContent .= '"' . ($supplier->postal_code ?? '') . '",';
+            $csvContent .= '"' . ($supplier->country ?? '') . '",';
+            $csvContent .= '"' . ($supplier->category ?? '') . '",';
+            $csvContent .= '"' . (is_array($supplier->services) ? implode(', ', $supplier->services) : ($supplier->services ?? '')) . '",';
+            $csvContent .= '"' . ($supplier->tax_id ?? '') . '",';
+            $csvContent .= '"' . ($supplier->payment_terms ?? '') . '",';
+            $csvContent .= '"' . ($supplier->bank_name ?? '') . '",';
+            $csvContent .= '"' . ($supplier->bank_account ?? '') . '",';
+            $csvContent .= '"' . $supplier->status . '",';
+            $csvContent .= '"' . ($supplier->rating ?? '') . '",';
+            $csvContent .= '"' . str_replace('"', '""', $supplier->notes ?? '') . '",';
+            $csvContent .= '"' . $supplier->created_at->format('Y-m-d H:i:s') . '"';
+            $csvContent .= "\n";
+        }
 
-            // CSV Data
-            foreach ($suppliers as $supplier) {
-                fputcsv($file, [
-                    $supplier->vendor_code,
-                    $supplier->name,
-                    $supplier->contact_person,
-                    $supplier->email,
-                    $supplier->phone,
-                    $supplier->address,
-                    $supplier->city,
-                    $supplier->state,
-                    $supplier->postal_code,
-                    $supplier->country,
-                    $supplier->category,
-                    is_array($supplier->services) ? implode(', ', $supplier->services) : $supplier->services,
-                    $supplier->tax_id,
-                    $supplier->payment_terms,
-                    $supplier->bank_name,
-                    $supplier->bank_account,
-                    $supplier->status,
-                    $supplier->rating,
-                    $supplier->notes,
-                    $supplier->created_at->format('Y-m-d H:i:s'),
-                ]);
-            }
+        // Generate filename with timestamp
+        $filename = 'suppliers_' . date('Y-m-d_H-i-s') . '.csv';
 
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        // Return CSV download
+        return response($csvContent)
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 }

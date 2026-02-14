@@ -30,6 +30,7 @@ class Asset extends Model
         'location',
         'notes',
         'specifications',
+        'details',
         'created_by',
         'disposal_reason',
         'disposal_date',

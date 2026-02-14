@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PurchaseOrderController;
 use App\Http\Controllers\Api\GrnController;
 use App\Http\Controllers\Api\RequestSupplyController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\AssetController;
 use App\Http\Controllers\VehicleRequestController;
 use App\Models\AssetDisposal;
 
@@ -219,3 +220,7 @@ Route::post('/logistictracking/test', function() {
 
 // Project Planning API Routes
 Route::apiResource('projects', ProjectController::class);
+
+// Asset Management API Routes
+Route::apiResource('assets', AssetController::class);
+Route::get('assets/statistics', [AssetController::class, 'statistics']);

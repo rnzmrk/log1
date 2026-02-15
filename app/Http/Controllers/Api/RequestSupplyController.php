@@ -13,13 +13,7 @@ class RequestSupplyController extends Controller
      */
     public function index()
     {
-        $supplyRequests = SupplyRequest::orderBy('created_at', 'desc')->get();
-        
-        return response()->json([
-            'success' => true,
-            'data' => $supplyRequests,
-            'message' => 'Supply requests retrieved successfully'
-        ]);
+        return response()->json(SupplyRequest::all());
     }
 
     /**

@@ -16,59 +16,7 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-        $query = ProjectPlanning::query();
-
-        // Search functionality
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('project_number', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('project_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('project_description', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('requested_by', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('project_address', 'like', '%' . $searchTerm . '%');
-            });
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by project type
-        if ($request->filled('project_type')) {
-            $query->where('project_type', $request->project_type);
-        }
-
-        // Filter by priority
-        if ($request->filled('priority')) {
-            $query->where('priority', $request->priority);
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->whereDate('start_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('start_date', '<=', $request->date_to);
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 15);
-        $projects = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-        return response()->json([
-            'success' => true,
-            'data' => $projects->items(),
-            'pagination' => [
-                'current_page' => $projects->currentPage(),
-                'last_page' => $projects->lastPage(),
-                'per_page' => $projects->perPage(),
-                'total' => $projects->total(),
-                'from' => $projects->firstItem(),
-                'to' => $projects->lastItem(),
-            ]
-        ]);
+        return response()->json(ProjectPlanning::all());
     }
 
     /**

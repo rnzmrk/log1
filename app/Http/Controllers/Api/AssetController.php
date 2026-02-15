@@ -5,83 +5,18 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Asset;
-use Illuminate\Support\Facades\DB;
 
 class AssetController extends Controller
 {
     /**
      * Display a listing of assets.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+
+    public function index()
     {
-        $query = Asset::query();
-
-        // Search functionality
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('item_name', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('brand', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('model', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('serial_number', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('department', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('location', 'like', '%' . $searchTerm . '%');
-            });
-        }
-
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filter by category
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
-
-        // Filter by department
-        if ($request->filled('department')) {
-            $query->where('department', $request->department);
-        }
-
-        // Filter by condition
-        if ($request->filled('condition')) {
-            $query->where('condition', $request->condition);
-        }
-
-        // Filter by date range (purchase date)
-        if ($request->filled('date_from')) {
-            $query->whereDate('purchase_date', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('purchase_date', '<=', $request->date_to);
-        }
-
-        // Exclude assets with certain statuses if needed
-        if ($request->filled('exclude_status')) {
-            $excludeStatuses = explode(',', $request->exclude_status);
-            $query->whereNotIn('status', $excludeStatuses);
-        }
-
-        // Pagination
-        $perPage = $request->get('per_page', 15);
-        $assets = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
-        return response()->json([
-            'success' => true,
-            'data' => $assets->items(),
-            'pagination' => [
-                'current_page' => $assets->currentPage(),
-                'last_page' => $assets->lastPage(),
-                'per_page' => $assets->perPage(),
-                'total' => $assets->total(),
-                'from' => $assets->firstItem(),
-                'to' => $assets->lastItem(),
-            ]
-        ]);
+        return response()->json(Asset::all());
     }
 
     /**
